@@ -1,6 +1,6 @@
 #################################################################
 # FILE : hello_turtle.py
-# WRITER : Nimrod Mallis , mallis , 316598747
+# WRITER : Nimrod M.
 # EXERCISE : intro2cs1 ex1 2023
 # DESCRIPTION: A simple program that...
 # STUDENTS I DISCUSSED THE EXERCISE WITH: N/A
@@ -58,6 +58,7 @@ def draw_ship():
     # Reset turtle orientation back to the original
     turtle.right(30)
 
+# Accomplishes part 4 of the task
 def draw_fleet():
     """
     Draws a fleet of ships using the turtle module.
