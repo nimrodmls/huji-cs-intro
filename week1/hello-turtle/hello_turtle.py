@@ -39,6 +39,8 @@ def draw_ship():
     """
     Draw a single ship using the turtle module.
     """
+    # Fix orientation to start
+    turtle.right(90)
     # Draws the sails and board of the ship
     for iter in range(3):
         turtle.forward(50)
@@ -53,8 +55,37 @@ def draw_ship():
     # Draws the "back" of the ship
     turtle.right(60)
     turtle.forward(20)
-    # Reset turtle orientation
-    turtle.right(120)
+    # Reset turtle orientation back to the original
+    turtle.right(30)
+
+def draw_fleet():
+    """
+    Draws a fleet of ships using the turtle module.
+    """
+    # Change orientation according to the requirements, as we start pointing directly right
+    turtle.left(90)
+
+    draw_ship()
+
+    # Change position for the next ship
+    turtle.up()
+    turtle.left(90)
+    turtle.forward(300)
+    turtle.right(90)
+    turtle.down()
+
+    draw_ship()
+
+    # Change position back to the original position
+    turtle.up()
+    turtle.right(90)
+    turtle.forward(300)
+    turtle.left(90)
+    turtle.down()
+
+    # Change orientation back to the original
+    turtle.right(90)
 
 if __name__ == "__main__" :
-    draw_ship()
+    draw_fleet()
+    turtle.done()
