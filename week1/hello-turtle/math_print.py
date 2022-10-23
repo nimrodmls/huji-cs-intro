@@ -30,13 +30,13 @@ def hypotenuse():
 
 def pi():
     """
-    Prints the pi number
+    Prints the pi constant
     """
     print(math.pi)
 
 def e():
     """
-    Prints Euler's number 
+    Prints Euler's constant 
     """
     print(math.e)
 
