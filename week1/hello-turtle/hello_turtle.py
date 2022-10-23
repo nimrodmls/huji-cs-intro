@@ -63,7 +63,7 @@ def draw_fleet():
     """
     Draws a fleet of ships using the turtle module.
     """
-    # Change orientation according to the requirements, as we start pointing directly right
+    # Change orientation as draw_ship expects a specific orientation
     turtle.left(90)
 
     draw_ship()
@@ -77,15 +77,11 @@ def draw_fleet():
 
     draw_ship()
 
-    # Change position back to the original position
+    # Change position back to the original position and orientation
     turtle.up()
     turtle.right(90)
     turtle.forward(300)
-    turtle.left(90)
     turtle.down()
-
-    # Change orientation back to the original
-    turtle.right(90)
 
 if __name__ == "__main__" :
     draw_fleet()
