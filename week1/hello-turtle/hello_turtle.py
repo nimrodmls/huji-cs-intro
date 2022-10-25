@@ -2,7 +2,7 @@
 # FILE : hello_turtle.py
 # WRITER : Nimrod M.
 # EXERCISE : intro2cs1 ex1 2023
-# DESCRIPTION: A simple program that...
+# DESCRIPTION: Painting a fleet of ships using the turtle module
 # STUDENTS I DISCUSSED THE EXERCISE WITH: N/A
 # WEB PAGES I USED: N/A
 # NOTES: N/A

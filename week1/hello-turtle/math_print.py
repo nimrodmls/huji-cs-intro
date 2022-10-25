@@ -2,9 +2,9 @@
 # FILE : math_print.py
 # WRITER : Nimrod M.
 # EXERCISE : intro2cs1 ex1 2023
-# DESCRIPTION: A simple program that...
+# DESCRIPTION: Simple mathematical functions using the builtin maths module
 # STUDENTS I DISCUSSED THE EXERCISE WITH: N/A
-# WEB PAGES I USED: N/A
+# WEB PAGES I USED: https://docs.python.org/3/library/math.html
 # NOTES: N/A
 #################################################################
 
