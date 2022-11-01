@@ -30,7 +30,7 @@ def quadratic_equation_user_input():
     """
     Solving a quadratic equation receiving from the user
     """
-    user_input = input("Insert coefficients for a, b and c: ")
+    user_input = input("Insert coefficients a, b and c: ")
     user_input = user_input.split()
     if '0' == user_input[0]:
         print("The parameter 'a' may not equal 0")

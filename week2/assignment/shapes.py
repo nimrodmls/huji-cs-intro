@@ -10,7 +10,7 @@
 
 import math
 
-def shapes_area():
+def shape_area():
     """
     Calculating the area of different geometric shapes
     """
