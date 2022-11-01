@@ -1,7 +1,7 @@
 #################################################################
 # FILE : calculate_mathematical_expression.py
 # WRITER : Nimrod M.
-# EXERCISE : intro2cs1 ex1 2023
+# EXERCISE : intro2cs1 ex2 2023
 # DESCRIPTION: Exporting maths utility functions
 # STUDENTS I DISCUSSED THE EXERCISE WITH: N/A
 # WEB PAGES I USED: N/A

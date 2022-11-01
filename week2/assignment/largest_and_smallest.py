@@ -1,7 +1,7 @@
 #################################################################
 # FILE : largest_and_smallest.py
 # WRITER : Nimrod M.
-# EXERCISE : intro2cs1 ex1 2023
+# EXERCISE : intro2cs1 ex2 2023
 # DESCRIPTION: Minimum/Maximum utilities
 # STUDENTS I DISCUSSED THE EXERCISE WITH: N/A
 # WEB PAGES I USED: N/A
