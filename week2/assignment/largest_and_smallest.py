@@ -26,6 +26,9 @@ def largest_and_smallest(num1, num2, num3):
     return max_num, min_num
 
 def check_largest_and_smallest():
+    """
+    Testing the largest_and_smallest function with a matrix of different edge cases
+    """
     test_matrix = (((17, 1, 6), (17, 1)), 
                    ((1, 17, 6), (17, 1)), 
                    ((1, 1, 2), (2, 1)),

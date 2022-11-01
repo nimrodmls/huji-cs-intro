@@ -11,6 +11,9 @@
 import math
 
 def shapes_area():
+    """
+    Calculating the area of different geometric shapes
+    """
     choice = input("Choose shapes (1=circle, 2=rectangle, 3=triangle): ")
     if choice not in ["1", "2", "3"]: # Invalid input
         return None
