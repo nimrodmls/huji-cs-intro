@@ -45,5 +45,3 @@ def quadratic_equation_user_input():
         print("The equation has 1 solution: {sol1}".format(sol1=solution1))
     else: # 2 real solutions
         print("The equation has 2 solutions: {sol1} and {sol2}".format(sol1=solution1, sol2=solution2))
-
-quadratic_equation_user_input()
