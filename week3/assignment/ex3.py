@@ -1,8 +1,8 @@
 #################################################################
-# FILE : hello_turtle.py
+# FILE : ex3.py
 # WRITER : Nimrod M.
-# EXERCISE : intro2cs1 ex1 2023
-# DESCRIPTION: Painting a fleet of ships using the turtle module
+# EXERCISE : intro2cs1 ex3 2023
+# DESCRIPTION: Implementing exercise 3
 # STUDENTS I DISCUSSED THE EXERCISE WITH: N/A
 # WEB PAGES I USED: N/A
 # NOTES: N/A
