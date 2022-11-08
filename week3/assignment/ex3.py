@@ -14,6 +14,7 @@ def input_list():
     Input is terminated when the user enters an empty string.
     All numbers given by the user are then returned in the same order in a list.
     Including the summation of all numbers as last element of the list.
+    * This function implements Task 1 of the Exercise
     """
     num_list = []
     num_sum = 0
@@ -32,3 +33,18 @@ def input_list():
     # Appending the summation as the last element
     num_list.append(num_sum)
     return num_list
+
+def inner_product(vec1, vec2):
+    """
+    """
+    product = 0
+    # Vectors should be of the same length
+    if len(vec1) != len(vec2):
+        return None
+    # Since we checked the lists are of the same length, 
+    # we can use zip to iterate over both vectors at the same instant
+    for num1, num2 in zip(vec1, vec2):
+        product += num1 * num2
+    return product
+
+print(inner_product([1], []))
