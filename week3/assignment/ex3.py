@@ -49,9 +49,12 @@ def inner_product(vec1, vec2):
 
 def sequence_monotonicity(sequence):
     """
+    This function receives a list (sequence) of possibly-infinite real numbers,
+    and returns whether the sequence is (strictly) increasing or (strictly) decreasing.
+    The list returned by this function is of 4 elements, signifying the monotonicity state:
+    Index 0 is 'Increasing', Index 1 is 'Strictly Increasing, Index 2 is 'Decreasing' 
+    and Index 3 is 'Strictly Decreasing'.
     """
-    # The monotonicity state - Index 0 is 'Increasing', Index 1 is 'Strictly Increasing,
-    # Index 2 is 'Decreasing' and Index 3 is 'Strictly Decreasing'.
     monotonicity = [True, True, True, True]
     current_max = sequence[0]
     current_min = sequence[0]
@@ -81,6 +84,28 @@ def sequence_monotonicity(sequence):
             monotonicity[1] = False
     return monotonicity
         
-print(sequence_monotonicity([1,1, 2,3, 0, 4]))
+def monotonicity_inverse(def_bool):
+    """
+    """
+    monotonicity_cases = {
+        '[False, False, False, False]': [1, 0, 1, 0],
+        '[True, False, False, False]': [1, 1, 0, 0],
+        '[True, True, False, False]': [1, 2, 3, 4],
+        '[False, False, True, False]': [0, 0, 1, 1],
+        '[False, False, True, True]': [4, 3, 2, 1],
+    }
+    # We make sure that increasing/decreasing values are exclusive
+    if not ((def_bool[0] or def_bool[1]) ^ (def_bool[2] or def_bool[3])):
+        # If they are not, we have to make sure that either it's all false
+        # or they are really not exclusive (e.g. [True, True, False, True])
+        if [False, False, False, False] == def_bool:
+            return [1, 0, 1, 0]
+        else:
+            return None
+    # Strictly increasing/decreasing monotonicity cannot appear without 
+    # "regular" increasing/decreasing monotonicity 
+    elif (def_bool[1] and not def_bool[0]) or (def_bool[3] and not def_bool[2]):
+        return None
+    
 
-
+    
