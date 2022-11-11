@@ -105,3 +105,32 @@ def monotonicity_inverse(def_bool):
         return None
     else:
         return MONOTONICITY_CASES[str(def_bool)]
+
+def convolve(mat):
+    """
+    This function implements the convolution operator.
+    The function receives a matrix (list) of at least 3x3, with rows as list elements, and within
+    the list elements the columns, so each element in the given list should be of the same length.
+    The function returns another matrix with each row containing summation of all the 3x3 combinations.
+    """
+    if len(mat) == 0:
+        return None
+    
+    convolution_matrix = []
+    # We iterate over all the rows, row_index signifies the *last* row in the current 3x3 matrix iteration
+    for row_index in range(2, len(mat)):
+        convolution_row = []
+        # We iterate over all the columns, column_index points to the *last* row in the current 3x3 matrix
+        for column_index in range(2, len(mat[row_index])):
+            # The length of every row is the same, we can rely on that
+            matrix_sum = 0
+            # We iterate over every row in the current 3x3 matrix and calculating its sum,
+            # adding it to the total summation of the 3x3 matrix.
+            for current_row in mat[row_index-2:row_index+1]:
+                matrix_sum += sum(current_row[column_index-2:column_index+1])
+            # 3x3 matrix sum is done, next!
+            convolution_row.append(matrix_sum)
+        # All combinations of the 3x3 matrices in the current 3 rows are done, next!
+        convolution_matrix.append(convolution_row)
+    return convolution_matrix
+
