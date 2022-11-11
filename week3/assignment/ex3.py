@@ -59,14 +59,14 @@ def sequence_monotonicity(sequence):
     If the list returned has 4 elements of False, it means the sequence is neither of the options.
     """
     monotonicity = [True, True, True, True]
+    if len(sequence) < 2:
+        return monotonicity
+
     current_max = sequence[0]
     current_min = sequence[0]
     for num in sequence[1:]:
-        # Sequence is not increasing nor decreasing
-        if (num < current_max) and (num > current_min):
-            return [False, False, False, False]
         # Sequence is increasing
-        elif num > current_max:
+        if num > current_max:
             current_max = num
             # Possibly an increasing sequence, all decreasing values are set to False
             monotonicity[2] = False
@@ -77,8 +77,16 @@ def sequence_monotonicity(sequence):
             # Possibly a decreasing sequence, all increasing values are set to False
             monotonicity[0] = False
             monotonicity[1] = False
+        elif (num < current_max) and monotonicity[0]:
+            # Sequence was marked as increasing, but infact we found a smaller number, 
+            # so it has no monotonicty
+            return [False, False, False, False]
+        elif (num > current_min) and monotonicity[2]:
+            # Sequence was marked as decreasing, but infact we found a greater number, 
+            # so it has no monotonicty
+            return [False, False, False, False]
         else:
-            # Sequence experienced the same number twice, 
+            # Sequence has the same number twice consecutively, 
             # henceforth it's not strictly increasing/decreasing
             monotonicity[3] = False
             monotonicity[1] = False
@@ -97,7 +105,7 @@ def monotonicity_inverse(def_bool):
         '[False, False, False, False]': [1, 0, 1, 0],
         '[True, False, False, False]': [0, 0, 1, 1],
         '[True, True, False, False]': [1, 2, 3, 4],
-        '[False, False, True, False]': [0, 0, 1, 1],
+        '[False, False, True, False]': [1, 1, 0, 0],
         '[False, False, True, True]': [4, 3, 2, 1],
     }
 
