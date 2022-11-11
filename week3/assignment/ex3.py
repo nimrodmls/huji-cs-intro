@@ -113,7 +113,7 @@ def convolve(mat):
     the list elements the columns, so each element in the given list should be of the same length.
     The function returns another matrix with each row containing summation of all the 3x3 combinations.
     """
-    if len(mat) == 0:
+    if 0 == len(mat):
         return None
     
     convolution_matrix = []
@@ -134,3 +134,19 @@ def convolve(mat):
         convolution_matrix.append(convolution_row)
     return convolution_matrix
 
+def sum_of_vectors(vec_list):
+    """
+    The function returns the sum of vectors.
+    The function receives a list of vectors (lists of the same lengths).
+    The value returned is at the length of each vector, and each element is the sum of each index.
+    If the list received is empty, None is returned.
+    If the lists within the vector list are empty, an empty list is returned.
+    """
+    if 0 == len(vec_list):
+        return None
+
+    summation = []
+    # Build and iterate over combinations of single elements in the vector list
+    for vector_comb in zip(*vec_list):
+        summation.append(sum(vector_comb))
+    return summation
