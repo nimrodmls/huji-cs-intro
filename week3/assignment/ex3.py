@@ -150,3 +150,18 @@ def sum_of_vectors(vec_list):
     for vector_comb in zip(*vec_list):
         summation.append(sum(vector_comb))
     return summation
+
+def num_of_orthogonal(vectors):
+    """
+    The function returns the number of orthogonal vectors in the given vector list.
+    The function receives a list of vectors (lists).
+    The returned value is an integer.
+    """
+    orthogonal_count = 0
+    limit = 1
+    for vector in vectors:
+        for sub_vector in vectors[limit:]:
+            if 0 == inner_product(vector, sub_vector):
+                orthogonal_count += 1
+        limit += 1
+    return orthogonal_count
