@@ -36,6 +36,8 @@ def input_list():
 
 def inner_product(vec1, vec2):
     """
+    The function returns the product of two vectors (list) of the same length.
+    Giving vectors of varied lengths will return None.
     """
     product = 0
     # Vectors should be of the same length
@@ -54,6 +56,7 @@ def sequence_monotonicity(sequence):
     The list returned by this function is of 4 elements, signifying the monotonicity state:
     Index 0 is 'Increasing', Index 1 is 'Strictly Increasing, Index 2 is 'Decreasing' 
     and Index 3 is 'Strictly Decreasing'.
+    If the list returned has 4 elements of False, it means the sequence is neither of the options.
     """
     monotonicity = [True, True, True, True]
     current_max = sequence[0]
@@ -63,49 +66,42 @@ def sequence_monotonicity(sequence):
         if (num < current_max) and (num > current_min):
             return [False, False, False, False]
         # Sequence is increasing
-        elif num >= current_max:
-            if num > current_max:
-                current_max = num
-            else:
-                # Sequence is not strictly increasing, we had the same maximal value
-                monotonicity[1] = False
+        elif num > current_max:
+            current_max = num
             # Possibly an increasing sequence, all decreasing values are set to False
             monotonicity[2] = False
             monotonicity[3] = False
         # Sequence is decreasing
-        elif num <= current_min:
-            if num < current_min:
-                current_min = num
-            else:
-                # Sequence is not strictly decreasing, we had the same minimal value
-                monotonicity[3] = False
+        elif num < current_min:
+            current_min = num
             # Possibly a decreasing sequence, all increasing values are set to False
             monotonicity[0] = False
+            monotonicity[1] = False
+        else:
+            # Sequence experienced the same number twice, 
+            # henceforth it's not strictly increasing/decreasing
+            monotonicity[3] = False
             monotonicity[1] = False
     return monotonicity
         
 def monotonicity_inverse(def_bool):
     """
+    This function receives a list of 4 boolean elements, signifying the monotonicity state:
+    Index 0 is 'Increasing', Index 1 is 'Strictly Increasing, Index 2 is 'Decreasing' 
+    and Index 3 is 'Strictly Decreasing'.
+    According to the input, the function returns a sequence (list) of 4 real numbers made
+    as example to the state given in the booleans list.
+    Warning: Giving a bad combination of booleans (e.g. Increasing & Decreasing) returns None.
     """
-    monotonicity_cases = {
+    MONOTONICITY_CASES = {
         '[False, False, False, False]': [1, 0, 1, 0],
-        '[True, False, False, False]': [1, 1, 0, 0],
+        '[True, False, False, False]': [0, 0, 1, 1],
         '[True, True, False, False]': [1, 2, 3, 4],
         '[False, False, True, False]': [0, 0, 1, 1],
         '[False, False, True, True]': [4, 3, 2, 1],
     }
-    # We make sure that increasing/decreasing values are exclusive
-    if not ((def_bool[0] or def_bool[1]) ^ (def_bool[2] or def_bool[3])):
-        # If they are not, we have to make sure that either it's all false
-        # or they are really not exclusive (e.g. [True, True, False, True])
-        if [False, False, False, False] == def_bool:
-            return [1, 0, 1, 0]
-        else:
-            return None
-    # Strictly increasing/decreasing monotonicity cannot appear without 
-    # "regular" increasing/decreasing monotonicity 
-    elif (def_bool[1] and not def_bool[0]) or (def_bool[3] and not def_bool[2]):
-        return None
-    
 
-    
+    if str(def_bool) not in MONOTONICITY_CASES.keys():
+        return None
+    else:
+        return MONOTONICITY_CASES[str(def_bool)]
