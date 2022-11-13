@@ -107,6 +107,7 @@ def monotonicity_inverse(def_bool):
         '[True, True, False, False]': [1, 2, 3, 4],
         '[False, False, True, False]': [1, 1, 0, 0],
         '[False, False, True, True]': [4, 3, 2, 1],
+        '[True, False, True, False]': [0, 0, 0, 0]
     }
 
     if str(def_bool) not in MONOTONICITY_CASES.keys():
