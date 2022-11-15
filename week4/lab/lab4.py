@@ -127,4 +127,5 @@ def run_game():
     print("Player {username} has won!".format(username=players[current_player]))
 
 # Starting the game
-run_game()
+if __name__ == "__main__":
+    run_game()
