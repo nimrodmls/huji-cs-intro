@@ -62,12 +62,12 @@ board = init_board(5)
 print_board(board)
 get_input("mallis", board)
 
-def update_board(row, index):
+def update_board(board, row, index):
     """
     """
-    pass
+    del(board[row][index])
 
-def get_next_player():
+def get_next_player(username, board):
     """
     """
     print_board()
@@ -78,5 +78,6 @@ def run_game():
     """
     """
     play_board = init_board(5)
+    players = ["mallis1", "mallis2"]
     while not get_next_player():
         
