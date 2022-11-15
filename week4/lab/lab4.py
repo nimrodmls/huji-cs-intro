@@ -1,9 +1,9 @@
 import random
 
-def init_board(rows):
+def init_board(rows, max_matches):
     """
     """
-    return [["|" for matches in range(random.randint(1, 5))] for index in range(rows)]
+    return [["|" for matches in range(random.randint(1, max_matches))] for index in range(rows)]
 
 def print_board(board):
     """
@@ -14,7 +14,7 @@ def print_board(board):
 def is_in_range(iterable, index):
     """
     """
-    return (index > 0) and (index < len(iterable))
+    return (index >= 0) and (index < len(iterable))
 
 def get_input(username, board):
     """
@@ -58,26 +58,40 @@ def get_input(username, board):
     
     return row_input, index_input
 
-board = init_board(5)
-print_board(board)
-get_input("mallis", board)
+def is_board_empty(board):
+    """
+    """
+    return 0 == len(board)
 
 def update_board(board, row, index):
     """
     """
-    del(board[row][index])
+    for match in range(index+1):
+        del(board[row][match])
+    if 0 == len(board[row]):
+        del(board[row])
 
 def get_next_player(username, board):
     """
     """
-    print_board()
-    get_input()
-    update_board()
+    print_board(board)
+    row, index = get_input(username, board)
+    update_board(board, row, index)
+    # The board is empty, the player has won!
+    return is_board_empty(board)
 
 def run_game():
     """
     """
-    play_board = init_board(5)
+    # We generate a board of 10 rows max, and max of 8 matches in each row
+    play_board = init_board(random.randint(1,10), random.randint(2,8))
     players = ["mallis1", "mallis2"]
-    while not get_next_player():
-        
+    current_player = 0
+    while not get_next_player(players[current_player], play_board):
+        # Reset the current player index, or increment it
+        if len(players)-1 == current_player:
+            current_player = 0
+        else:
+            current_player += 1
+
+run_game()
