@@ -16,6 +16,8 @@ def init_board(rows, columns):
     return [[helper.WATER for column in range(columns)] for row in range(rows)]
 
 def cell_loc(name):
+    """
+    """
     column = name[:1]
     row = name[1:]
 
@@ -32,21 +34,73 @@ def cell_loc(name):
 
     return row, column
 
-
 def valid_ship(board, size, loc):
-    pass
+    """
+    """
+    requested_row = loc[0]
+    requested_column = loc[1]
 
+    # Validating input
+    if (requested_row + (size-1) >= len(board)) or (requested_row < 0):
+        return False
+    if (requested_column >= len(board[requested_row]) or (requested_column < 0)):
+        return False
+
+    # Making sure there are no other ships in the requested cells
+    for index in range(size):
+        if helper.WATER != board[requested_row + index][requested_column]:
+            return False
+
+    return True
+
+def get_user_coordinate(board, ship_size):
+    """
+    """
+    loc = None
+    while loc is None:
+        helper.print_board(board)
+        user_input = helper.get_input(
+            "Enter top coordinate for ship of size {ship_size}: ".format(ship_size=ship_size))
+        loc = cell_loc(user_input)
+        if loc is None:
+            print("Invalid input - Try again in format [A-Z][1-99]")
+        elif not valid_ship(board, ship_size, loc):
+            print("Invalid location {location}".format(location=user_input))
+            loc = None
+
+    return loc
+
+def place_ship(board, ship_size, row, column):
+    """
+    """
+    for row_index in range(ship_size):
+        board[row + row_index][column] = helper.SHIP
 
 def create_player_board(rows, columns, ship_sizes):
-    pass
+    """
+    """
+    play_board = init_board(rows, columns)
+
+    for ship_size in ship_sizes:
+        row, column = get_user_coordinate(play_board, ship_size)
+        place_ship(play_board, ship_size, row, column)
+    
+    return play_board
 
 
 def fire_torpedo(board, loc):
-    pass
+    """
+    """
+    requested_cell = board[loc[0]][loc[1]]
+    if helper.SHIP == requested_cell:
+        requested_cell = helper.HIT_SHIP
+    elif helper.WATER == requested_cell:
+        requested_cell == helper.HIT_WATER
 
+    return board
 
 def main():
-    print(cell_loc('Z53'))
+    create_player_board(5, 5, helper.SHIP_SIZES)
 
 
 if __name__ == "__main__":
