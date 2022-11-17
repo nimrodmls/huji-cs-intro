@@ -28,7 +28,7 @@ def cell_loc(name):
     column = ord(column) - ord('A')
     
     # Row index is not a decimal, this is wrong
-    if not row.isdecimal():
+    if not helper.is_int(row):
         return None
     row = int(row)-1 # This is safe, we decrement 1 so it would identify as list index
 
@@ -76,6 +76,27 @@ def place_ship(board, ship_size, row, column):
     for row_index in range(ship_size):
         board[row + row_index][column] = helper.SHIP
 
+def find_available_cells(board, ship_size):
+    """
+    """
+    available_cells = []
+    for row_index in range(len(board)):
+        for column_index in range(len(board[row_index])):
+            if valid_ship(board, ship_size, (row_index, column_index)):
+                available_cells.append((row_index, column_index))
+    return available_cells
+
+def create_cpu_board(rows, columns, ship_sizes):
+    """
+    """
+    cpu_board = init_board(rows, columns)
+
+    for ship_size in ship_sizes:
+        row, column = helper.choose_ship_location(cpu_board, ship_size, find_available_cells(cpu_board, ship_size))
+        place_ship(cpu_board, ship_size, row, column)
+
+    return cpu_board
+
 def create_player_board(rows, columns, ship_sizes):
     """
     """
@@ -99,8 +120,20 @@ def fire_torpedo(board, loc):
 
     return board
 
+def start_game():
+    """
+    """
+    cpu_board = create_cpu_board(helper.NUM_ROWS, helper.NUM_COLUMNS, helper.SHIP_SIZES)
+    player_board = create_player_board(helper.NUM_ROWS, helper.NUM_COLUMNS, helper.SHIP_SIZES)
+
+    print("All set, the game is starting!")
+
+
+
 def main():
-    create_player_board(5, 5, helper.SHIP_SIZES)
+    """
+    """
+    start_game()
 
 
 if __name__ == "__main__":
