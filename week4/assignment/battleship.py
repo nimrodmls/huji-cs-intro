@@ -19,7 +19,7 @@ def init_board(rows, columns):
 def cell_loc(name):
     """
     """
-    column = name[:1]
+    column = name[:1].upper()
     row = name[1:]
 
     # Column index is not from the alphabet or it is not capital
@@ -171,23 +171,51 @@ def start_game():
     """
     """
     cpu_board = create_cpu_board(helper.NUM_ROWS, helper.NUM_COLUMNS, helper.SHIP_SIZES)
-    player_board = create_cpu_board(helper.NUM_ROWS, helper.NUM_COLUMNS, helper.SHIP_SIZES)# create_player_board(helper.NUM_ROWS, helper.NUM_COLUMNS, helper.SHIP_SIZES)
+    player_board = create_player_board(helper.NUM_ROWS, helper.NUM_COLUMNS, helper.SHIP_SIZES)
 
     print("All set, the game is starting!")
 
-    while (not is_fleet_destroyed(player_board)) and (not is_fleet_destroyed(cpu_board)):
-        helper.print_board(player_board, hide_ships(cpu_board))
-        fire_torpedo(cpu_board, get_user_torpedo_target(cpu_board)) # Fire the user's torpedo at the CPU
+    player_won = False
+    cpu_won = False
+    while (not player_won) and (not cpu_won):
 
-        print("Computer is making its move...")
-        cpu_target = helper.choose_torpedo_target(player_board, get_potential_targets(player_board))
-        fire_torpedo(player_board, cpu_target)
+        helper.print_board(player_board, hide_ships(cpu_board))
+        # Do the player's turn
+        fire_torpedo(cpu_board, get_user_torpedo_target(cpu_board))
+        player_won = is_fleet_destroyed(cpu_board)
+
+        # Let CPU do its turn if the player didn't win this round
+        if not player_won:
+            print("Computer is making its move...")
+            # We pass an hidden board of the player (the CPU's opponent), along with the possible target locations.
+            cpu_target = helper.choose_torpedo_target(hide_ships(player_board), get_potential_targets(player_board))
+            fire_torpedo(player_board, cpu_target)
+            cpu_won = is_fleet_destroyed(player_board)
+
+    if player_won:
+        print("You are the winner!")
+    else:
+        print("You lost...")
+
+    helper.print_board(player_board, cpu_board)
 
 def main():
     """
     """
-    start_game()
+    continue_game = True
+    while continue_game:
+        start_game()
 
+        user_input = None
+        while user_input is None:
+            user_input = helper.get_input("Do you wish to start another round? (Y/N): ")
+            if ("Y" == user_input) or ("N" == user_input):
+                continue_game = ("Y" == user_input)
+            else:
+                print("Invalid input - Choose Y to continue or N to quit")
+                user_input = None
+    
+    print("Fleet returns to homebase, Admiral.")
 
 if __name__ == "__main__":
     main()
