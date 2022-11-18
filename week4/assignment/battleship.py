@@ -102,16 +102,17 @@ def place_ship(board, ship_size, row, column):
     for row_index in range(ship_size):
         board[row + row_index][column] = helper.SHIP
 
-def find_available_cells(board, ship_size):
+def find_available_ship_cells(board, ship_size):
     """
     """
-    return [(row_index, column_index) for row_index in range(len(board)) 
+    return {(row_index, column_index) for row_index in range(len(board)) 
         for column_index in range(len(board[row_index])) 
-            if valid_ship(board, ship_size, (row_index, column_index))]
+            if valid_ship(board, ship_size, (row_index, column_index))}
 
 def get_potential_targets(board):
-    return [(row_index, column_index) for row_index in range(len(board)) 
-        for column_index in range(len(board[row_index])) if board[row_index][column_index] in (helper.WATER, helper.SHIP)]
+    return {(row_index, column_index) for row_index in range(len(board)) 
+        for column_index in range(len(board[row_index])) 
+            if board[row_index][column_index] in (helper.WATER, helper.SHIP)}
 
 def create_cpu_board(rows, columns, ship_sizes):
     """
@@ -119,7 +120,8 @@ def create_cpu_board(rows, columns, ship_sizes):
     cpu_board = init_board(rows, columns)
 
     for ship_size in ship_sizes:
-        row, column = helper.choose_ship_location(cpu_board, ship_size, find_available_cells(cpu_board, ship_size))
+        row, column = helper.choose_ship_location(cpu_board, ship_size, 
+            find_available_ship_cells(cpu_board, ship_size))
         place_ship(cpu_board, ship_size, row, column)
 
     return cpu_board
@@ -170,32 +172,25 @@ def is_fleet_destroyed(board):
 def start_game():
     """
     """
-    cpu_board = create_cpu_board(helper.NUM_ROWS, helper.NUM_COLUMNS, helper.SHIP_SIZES)
-    player_board = create_player_board(helper.NUM_ROWS, helper.NUM_COLUMNS, helper.SHIP_SIZES)
+    player_board = create_player_board(
+        helper.NUM_ROWS, helper.NUM_COLUMNS, helper.SHIP_SIZES)
+    cpu_board = create_cpu_board(
+        helper.NUM_ROWS, helper.NUM_COLUMNS, helper.SHIP_SIZES)
 
-    print("All set, the game is starting!")
+    #print("All set, the game is starting!")
 
-    player_won = False
-    cpu_won = False
-    while (not player_won) and (not cpu_won):
+    while (not is_fleet_destroyed(cpu_board)) and (not is_fleet_destroyed(player_board)):
 
         helper.print_board(player_board, hide_ships(cpu_board))
         # Do the player's turn
         fire_torpedo(cpu_board, get_user_torpedo_target(cpu_board))
-        player_won = is_fleet_destroyed(cpu_board)
 
-        # Let CPU do its turn if the player didn't win this round
-        if not player_won:
-            print("Computer is making its move...")
-            # We pass an hidden board of the player (the CPU's opponent), along with the possible target locations.
-            cpu_target = helper.choose_torpedo_target(hide_ships(player_board), get_potential_targets(player_board))
-            fire_torpedo(player_board, cpu_target)
-            cpu_won = is_fleet_destroyed(player_board)
-
-    if player_won:
-        print("You are the winner!")
-    else:
-        print("You lost...")
+        #  if the player didn't win this round
+        # Let CPU do its turn, we pass an hidden board of the player (the CPU's opponent), 
+        # along with the possible target locations.
+        cpu_target = helper.choose_torpedo_target(
+            hide_ships(player_board), get_potential_targets(player_board))
+        fire_torpedo(player_board, cpu_target)
 
     helper.print_board(player_board, cpu_board)
 
@@ -215,7 +210,5 @@ def main():
                 print("Invalid input - Choose Y to continue or N to quit")
                 user_input = None
     
-    print("Fleet returns to homebase, Admiral.")
-
 if __name__ == "__main__":
     main()
