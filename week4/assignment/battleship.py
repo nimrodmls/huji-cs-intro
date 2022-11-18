@@ -261,15 +261,12 @@ def start_game():
     cpu_board = create_cpu_board(
         helper.NUM_ROWS, helper.NUM_COLUMNS, helper.SHIP_SIZES)
 
-    #print("All set, the game is starting!")
-
     while (not is_fleet_destroyed(cpu_board)) and (not is_fleet_destroyed(player_board)):
 
         helper.print_board(player_board, hide_ships(cpu_board))
         # Do the player's turn
         fire_torpedo(cpu_board, get_user_torpedo_target(cpu_board))
 
-        #  if the player didn't win this round
         # Let CPU do its turn, we pass an hidden board of the player (the CPU's opponent), 
         # along with the possible target locations.
         cpu_target = helper.choose_torpedo_target(
