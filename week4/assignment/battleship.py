@@ -9,6 +9,7 @@
 #################################################################
 
 import helper
+import copy
 
 def init_board(rows, columns):
     """
@@ -34,6 +35,15 @@ def cell_loc(name):
 
     return row, column
 
+def is_out_of_bounds(board, row, column, ship_size=0):
+    """
+    """
+    if (row + ship_size >= len(board)) or (row < 0):
+        return True
+    if (column >= len(board[row]) or (column < 0)):
+        return True
+    return False
+
 def valid_ship(board, size, loc):
     """
     """
@@ -41,9 +51,7 @@ def valid_ship(board, size, loc):
     requested_column = loc[1]
 
     # Validating input
-    if (requested_row + (size-1) >= len(board)) or (requested_row < 0):
-        return False
-    if (requested_column >= len(board[requested_row]) or (requested_column < 0)):
+    if is_out_of_bounds(board, requested_row, requested_column, ship_size=(size-1)):
         return False
 
     # Making sure there are no other ships in the requested cells
@@ -53,7 +61,7 @@ def valid_ship(board, size, loc):
 
     return True
 
-def get_user_coordinate(board, ship_size):
+def get_user_ship_coordinate(board, ship_size):
     """
     """
     loc = None
@@ -70,6 +78,24 @@ def get_user_coordinate(board, ship_size):
 
     return loc
 
+def get_user_torpedo_target(board):
+    """
+    """
+    loc = None
+    while loc is None:
+        user_input = helper.get_input("Enter coordinate for torpedo target: ")
+        loc = cell_loc(user_input)
+        if loc is None:
+            print("Invalid input - Try again in format [A-Z][1-99]")
+        elif is_out_of_bounds(board, loc[0], loc[1]):
+            print("Invalid location {location}".format(location=user_input))
+            loc = None
+        elif board[loc[0]][loc[1]] in (helper.HIT_SHIP, helper.HIT_WATER):
+            print("Location was already fired upon, try another location")
+            loc = None
+
+    return loc
+
 def place_ship(board, ship_size, row, column):
     """
     """
@@ -79,12 +105,13 @@ def place_ship(board, ship_size, row, column):
 def find_available_cells(board, ship_size):
     """
     """
-    available_cells = []
-    for row_index in range(len(board)):
-        for column_index in range(len(board[row_index])):
-            if valid_ship(board, ship_size, (row_index, column_index)):
-                available_cells.append((row_index, column_index))
-    return available_cells
+    return [(row_index, column_index) for row_index in range(len(board)) 
+        for column_index in range(len(board[row_index])) 
+            if valid_ship(board, ship_size, (row_index, column_index))]
+
+def get_potential_targets(board):
+    return [(row_index, column_index) for row_index in range(len(board)) 
+        for column_index in range(len(board[row_index])) if board[row_index][column_index] in (helper.WATER, helper.SHIP)]
 
 def create_cpu_board(rows, columns, ship_sizes):
     """
@@ -103,32 +130,58 @@ def create_player_board(rows, columns, ship_sizes):
     play_board = init_board(rows, columns)
 
     for ship_size in ship_sizes:
-        row, column = get_user_coordinate(play_board, ship_size)
+        row, column = get_user_ship_coordinate(play_board, ship_size)
         place_ship(play_board, ship_size, row, column)
     
     return play_board
 
+def hide_ships(board):
+    """
+    """
+    # Creating a copy so we won't alter the original
+    hidden_board = copy.deepcopy(board)
+
+    for row in range(len(hidden_board)):
+        for cell in range(len(hidden_board[row])):
+            if helper.SHIP == hidden_board[row][cell]:
+                hidden_board[row][cell] = helper.WATER
+
+    return hidden_board
 
 def fire_torpedo(board, loc):
     """
     """
-    requested_cell = board[loc[0]][loc[1]]
-    if helper.SHIP == requested_cell:
-        requested_cell = helper.HIT_SHIP
-    elif helper.WATER == requested_cell:
-        requested_cell == helper.HIT_WATER
+    if helper.SHIP == board[loc[0]][loc[1]]:
+        board[loc[0]][loc[1]] = helper.HIT_SHIP
+    elif helper.WATER == board[loc[0]][loc[1]]:
+        board[loc[0]][loc[1]] = helper.HIT_WATER
 
     return board
+
+def is_fleet_destroyed(board):
+    """
+    """
+    for row in board:
+        for cell in row:
+            if helper.SHIP == cell:
+                return False
+    return True
 
 def start_game():
     """
     """
     cpu_board = create_cpu_board(helper.NUM_ROWS, helper.NUM_COLUMNS, helper.SHIP_SIZES)
-    player_board = create_player_board(helper.NUM_ROWS, helper.NUM_COLUMNS, helper.SHIP_SIZES)
+    player_board = create_cpu_board(helper.NUM_ROWS, helper.NUM_COLUMNS, helper.SHIP_SIZES)# create_player_board(helper.NUM_ROWS, helper.NUM_COLUMNS, helper.SHIP_SIZES)
 
     print("All set, the game is starting!")
 
+    while (not is_fleet_destroyed(player_board)) and (not is_fleet_destroyed(cpu_board)):
+        helper.print_board(player_board, hide_ships(cpu_board))
+        fire_torpedo(cpu_board, get_user_torpedo_target(cpu_board)) # Fire the user's torpedo at the CPU
 
+        print("Computer is making its move...")
+        cpu_target = helper.choose_torpedo_target(player_board, get_potential_targets(player_board))
+        fire_torpedo(player_board, cpu_target)
 
 def main():
     """
