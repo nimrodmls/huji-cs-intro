@@ -18,27 +18,51 @@ from typing import Optional
 #                                  Functions                                 #
 ##############################################################################
 
-def get_channel(image):
-    """
-    """
-    for row 
+RED_CHANNEL_INDEX = 0
+BLUE_CHANNEL_INDEX = 1
+GREEN_CHANNEL_INDEX = 2
+
+test_rgb_image = [[[1, 2, 3], [1, 2, 3], [1, 2, 3]],
+                  [[1, 2, 3], [1, 2, 3], [1, 2, 3]],
+                  [[1, 2, 3], [1, 2, 3], [1, 2, 3]],
+                  [[1, 2, 3], [1, 2, 3], [1, 2, 3]]]
 
 def separate_channels(image: ColoredImage) -> List[SingleChannelImage]:
     """
     """
-    red_channel = []
-    blue_channel = []
-    green_channel = []
+    channel_list = [[], [], []]
     for row in image:
+        red_row = []
+        blue_row = []
+        green_row = []
+        
         for pixel in row:
-            red_channel
+            red_row.append(pixel[RED_CHANNEL_INDEX])
+            blue_row.append(pixel[BLUE_CHANNEL_INDEX])
+            green_row.append(pixel[GREEN_CHANNEL_INDEX])
 
-    return [[[] for pixel in row] for row in image]
-            
+        channel_list[RED_CHANNEL_INDEX].append(red_row)
+        channel_list[BLUE_CHANNEL_INDEX].append(blue_row)
+        channel_list[GREEN_CHANNEL_INDEX].append(green_row)
+
+    return channel_list
 
 def combine_channels(channels: List[SingleChannelImage]) -> ColoredImage:
-    pass
+    """
+    """
+    image = []
+    for row in \
+        zip(channels[RED_CHANNEL_INDEX], 
+            channels[BLUE_CHANNEL_INDEX], 
+            channels[GREEN_CHANNEL_INDEX]):
+        current_row = []
+        for pixel in zip(*row):
+            current_row.append(list(pixel))
+        image.append(current_row)
 
+    return image
+
+print(combine_channels(separate_channels(test_rgb_image)))
 
 def RGB2grayscale(colored_image: ColoredImage) -> SingleChannelImage:
     pass
@@ -65,7 +89,7 @@ def rotate_90(image: Image, direction: str) -> Image:
 
 
 def get_edges(image: SingleChannelImage, blur_size: int, block_size: int, c: float) -> SingleChannelImage:
-    ...pass
+    pass
 
 
 def quantize(image: SingleChannelImage, N: int) -> SingleChannelImage:
