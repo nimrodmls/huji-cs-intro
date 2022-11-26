@@ -15,12 +15,23 @@ from ex5_helper import *
 from typing import Optional
 
 ##############################################################################
+#                                  Constants                                 #
+##############################################################################
+
+# Indices of each channel in an RGB Pixel
+RED_CHANNEL_INDEX = 0
+GREEN_CHANNEL_INDEX = 1
+BLUE_CHANNEL_INDEX = 2
+
+# Values for the grayscale summation of RGB Pixel
+RED_GRAYSCALE_VALUE = 0.299
+GREEN_GRAYSCALE_VALUE = 0.587
+BLUE_GRAYSCALE_VALUE = 0.144
+
+##############################################################################
 #                                  Functions                                 #
 ##############################################################################
 
-RED_CHANNEL_INDEX = 0
-BLUE_CHANNEL_INDEX = 1
-GREEN_CHANNEL_INDEX = 2
 
 test_rgb_image = [[[1, 2, 3], [1, 2, 3], [1, 2, 3]],
                   [[1, 2, 3], [1, 2, 3], [1, 2, 3]],
@@ -32,18 +43,10 @@ def separate_channels(image: ColoredImage) -> List[SingleChannelImage]:
     """
     channel_list = [[], [], []]
     for row in image:
-        red_row = []
-        blue_row = []
-        green_row = []
-        
-        for pixel in row:
-            red_row.append(pixel[RED_CHANNEL_INDEX])
-            blue_row.append(pixel[BLUE_CHANNEL_INDEX])
-            green_row.append(pixel[GREEN_CHANNEL_INDEX])
-
-        channel_list[RED_CHANNEL_INDEX].append(red_row)
-        channel_list[BLUE_CHANNEL_INDEX].append(blue_row)
-        channel_list[GREEN_CHANNEL_INDEX].append(green_row)
+        red_row, green_row, blue_row = zip(*row)
+        channel_list[RED_CHANNEL_INDEX].append(list(red_row))
+        channel_list[GREEN_CHANNEL_INDEX].append(list(green_row))
+        channel_list[BLUE_CHANNEL_INDEX].append(list(blue_row))
 
     return channel_list
 
@@ -51,10 +54,7 @@ def combine_channels(channels: List[SingleChannelImage]) -> ColoredImage:
     """
     """
     image = []
-    for row in \
-        zip(channels[RED_CHANNEL_INDEX], 
-            channels[BLUE_CHANNEL_INDEX], 
-            channels[GREEN_CHANNEL_INDEX]):
+    for row in zip(*channels):
         current_row = []
         for pixel in zip(*row):
             current_row.append(list(pixel))
@@ -62,18 +62,35 @@ def combine_channels(channels: List[SingleChannelImage]) -> ColoredImage:
 
     return image
 
-print(combine_channels(separate_channels(test_rgb_image)))
+img = load_image(r"C:\users\nimrod\downloads\test2.jpg")
+#show_image(img)
+#show_image(combine_channels(separate_channels(img)))
+
+def calc_grayscale_sum(rgb_pixel):
+    """
+    """
+    return (rgb_pixel[RED_CHANNEL_INDEX] * RED_GRAYSCALE_VALUE) + \
+           (rgb_pixel[GREEN_CHANNEL_INDEX] * GREEN_GRAYSCALE_VALUE) + \
+           (rgb_pixel[BLUE_CHANNEL_INDEX] * BLUE_GRAYSCALE_VALUE)
 
 def RGB2grayscale(colored_image: ColoredImage) -> SingleChannelImage:
-    pass
+    """
+    """
+    return [[round(calc_grayscale_sum(pixel)) for pixel in row] for row in colored_image]
 
+#show_image(RGB2grayscale(img))
 
 def blur_kernel(size: int) -> Kernel:
-    pass
+    """
+    """
+    return [[1/(size**2) for pixel in range(size)] for row in range(size)]
 
+print(blur_kernel(3))
 
 def apply_kernel(image: SingleChannelImage, kernel: Kernel) -> SingleChannelImage:
-    pass
+    """
+    """
+    
 
 
 def bilinear_interpolation(image: SingleChannelImage, y: float, x: float) -> int:
