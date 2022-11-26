@@ -87,11 +87,76 @@ def blur_kernel(size: int) -> Kernel:
 
 print(blur_kernel(3))
 
+def apply_kernel_to_matrix(matrix, kernel):
+    """
+    same size
+    """
+    matrix_sum = 0
+    for row in zip(matrix, kernel):
+        for pixel, kernel_cell in zip(*row):
+            matrix_sum += (pixel * kernel_cell)
+    return matrix_sum
+
+print(apply_kernel_to_matrix([[1,2,0], [2,2,0], [1,2,1]], [[0,0,0], [1,-1,0], [1,1,-1]]))
+
+def is_padding_needed(image, size, row_index, pixel_index):
+    """
+    """
+    horizontal_index = None
+    if 0 > (pixel_index - size):
+        horizontal_index = 0
+
+    elif (len(image[row_index])-1) < (pixel_index + size):
+        horizontal_index = pixel_index
+
+    vertical_index = None
+    if 0 > row_index-size:
+        pass
+    elif len(image)-1 == row_index:
+        pass
+
+    return horizontal_index, vertical_index
+
+def get_padded_image(image, value, size):
+    """
+    """
+    padded_image = list(image)
+    for row_pads in range(size):
+        row_pad = [value for row_len in range(len(image[0]))]
+        padded_image.insert(0, row_pad) # Insert "above"
+        padded_image.append(row_pad) # Insert "below"
+    
+    for row_index in range(len(image)):
+        for column_pads in range(size):
+            padded_image[row_index].insert(0, value) # Insert "left"
+            padded_image[row_index].append(value) # Insert "right"
+
+    return padded_image
+
+print(get_padded_image(test_rgb_image, 5, 1))
+
 def apply_kernel(image: SingleChannelImage, kernel: Kernel) -> SingleChannelImage:
     """
     """
-    
+    padded_image = list(image)
+    for row_index in range(len(image)):
 
+        padded_image
+
+        for pixel_index in range(len(image[row_index])):
+
+            current_pixel = image[row_index][pixel_index]
+
+            horizontal_index, vertical_index = is_padding_needed(image, round(len(kernel)/2)-1, row_index, pixel_index)
+
+            if None != horizontal_index:
+                for times in range(abs(pixel_index-len(kernel))):
+                    padded_image[row_index].insert(0, current_pixel)
+
+
+
+
+            cell = image[row_index][column_index]
 
 def bilinear_interpolation(image: SingleChannelImage, y: float, x: float) -> int:
     pass
