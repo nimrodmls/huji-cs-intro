@@ -40,7 +40,7 @@ test_rgb_image = [[[1, 2, 3], [1, 2, 3], [1, 2, 3]],
                   [[1, 2, 3], [1, 2, 3], [1, 2, 3]],
                   [[1, 2, 3], [1, 2, 3], [1, 2, 3]]]
 
-img = load_image(r"C:\users\nimro\downloads\temp2.jpg")
+img = load_image(r"C:\users\nimrod\downloads\temp.jpg")
 
 def separate_channels(image: ColoredImage) -> List[SingleChannelImage]:
     """
@@ -230,12 +230,18 @@ def get_edges(image: SingleChannelImage, blur_size: int, block_size: int, c: flo
     return edges_image
 
 def quantize(image: SingleChannelImage, N: int) -> SingleChannelImage:
-    pass
+    """
+    """
+    return [[round(math.floor(pixel*(N/256))*(255/(N-1))) for pixel in row] for row in image]
 
 
 def quantize_colored_image(image: ColoredImage, N: int) -> ColoredImage:
-    pass
-
+    """
+    """
+    all_channels = separate_channels(image)
+    return combine_channels([quantize(all_channels[RED_CHANNEL_INDEX], N),
+                            quantize(all_channels[GREEN_CHANNEL_INDEX], N),
+                            quantize(all_channels[BLUE_CHANNEL_INDEX], N)])
 
 if __name__ == '__main__':
     pass
