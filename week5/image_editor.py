@@ -39,7 +39,7 @@ test_rgb_image = [[[1, 2, 3], [1, 2, 3], [1, 2, 3]],
                   [[1, 2, 3], [1, 2, 3], [1, 2, 3]],
                   [[1, 2, 3], [1, 2, 3], [1, 2, 3]]]
 
-img = load_image(r"C:\users\nimrod\downloads\images.jpg")
+img = load_image(r"C:\users\nimro\downloads\temp.png")
 
 def separate_channels(image: ColoredImage) -> List[SingleChannelImage]:
     """
@@ -93,6 +93,13 @@ def apply_kernel_to_matrix(matrix, kernel):
         for pixel, kernel_cell in zip(*row):
             matrix_sum += (matrix[kernel_center][kernel_center] if pixel is None else pixel) * kernel_cell
 
+    matrix_sum = round(matrix_sum)
+    # Checkng if the sum is going out of bounds
+    if 0 > matrix_sum:
+        matrix_sum = 0
+    elif 255 < matrix_sum:
+        matrix_sum = 255
+
     return matrix_sum
 
 def get_padded_image(image, size):
@@ -134,13 +141,36 @@ def apply_kernel(image: SingleChannelImage, kernel: Kernel) -> SingleChannelImag
 
     return manipulated_image
 
-nimg = combine_channels([apply_kernel(separate_channels(img)[0], blur_kernel(3)),
-apply_kernel(separate_channels(img)[1], blur_kernel(3)),
-apply_kernel(separate_channels(img)[2], blur_kernel(3))])
-show_image(nimg)
+#nimg = combine_channels([apply_kernel(separate_channels(img)[0], blur_kernel(3)),
+#apply_kernel(separate_channels(img)[1], blur_kernel(3)),
+#apply_kernel(separate_channels(img)[2], blur_kernel(3))])
+#show_image(nimg)
 
 def bilinear_interpolation(image: SingleChannelImage, y: float, x: float) -> int:
-    pass
+    """
+    """
+    origin_pixel_y = round(y)
+    origin_pixel_x = round(x)
+    
+    a = 0
+    b = 0
+    c = 0
+    d = image[origin_pixel_y][origin_pixel_x]
+
+    # The pixel is not on the edge of the image from the "left" side
+    if 0 != x:
+        b = image[origin_pixel_y][origin_pixel_x-1]
+    # The pixel is not on the edge of the image from the "up" side
+    if 0 != y:
+        c = image[origin_pixel_y-1][origin_pixel_x]
+    # The pixel is not on any edge of from the "left" or "up"
+    if (0 != y) and (0 != x):
+        a = image[origin_pixel_y-1][origin_pixel_x-1]
+
+    # Calculating with the magic formula
+    return round((a*(1-x)*(1-y)) + (b*y*(1-x)) + (c*x*(1-y)) + (d*x*y))
+
+print(bilinear_interpolation([[0, 64], [128, 255]], 0.5, 1))
 
 
 def resize(image: SingleChannelImage, new_height: int, new_width: int) -> SingleChannelImage:
