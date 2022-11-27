@@ -15,6 +15,7 @@ from ex5_helper import *
 from typing import Optional
 import copy
 import math
+import sys
 
 ##############################################################################
 #                                  Constants                                 #
@@ -28,19 +29,14 @@ BLUE_CHANNEL_INDEX = 2
 # Values for the grayscale summation of RGB Pixel
 RED_GRAYSCALE_VALUE = 0.299
 GREEN_GRAYSCALE_VALUE = 0.587
-BLUE_GRAYSCALE_VALUE = 0.144
+BLUE_GRAYSCALE_VALUE = 0.114
+
+# Commands
+QUIT_COMMAND_VALUE = 8
 
 ##############################################################################
 #                                  Functions                                 #
 ##############################################################################
-
-
-test_rgb_image = [[[1, 2, 3], [1, 2, 3], [1, 2, 3]],
-                  [[1, 2, 3], [1, 2, 3], [1, 2, 3]],
-                  [[1, 2, 3], [1, 2, 3], [1, 2, 3]],
-                  [[1, 2, 3], [1, 2, 3], [1, 2, 3]]]
-
-img = load_image(r"C:\users\nimrod\downloads\temp.jpg")
 
 def separate_channels(image: ColoredImage) -> List[SingleChannelImage]:
     """
@@ -190,11 +186,6 @@ def resize(image: SingleChannelImage, new_height: int, new_width: int) -> Single
 
     return new_image
 
-#gray_img = RGB2grayscale(img)
-#show_image(gray_img)
-#new_img = resize(gray_img, 500, 500)
-#show_image(new_img)
-
 def rotate_90(image: Image, direction: str) -> Image:
     """
     """
@@ -216,11 +207,11 @@ def get_edges(image: SingleChannelImage, blur_size: int, block_size: int, c: flo
     blurred_image = apply_kernel(image, blur_kernel(blur_size))
     thresholds_image = apply_kernel(blurred_image, blur_kernel(block_size))
 
-    for row_index in range(len(thresholds_image)):
+    for row in zip(thresholds_image, blurred_image):
         current_row = []
 
-        for pixel_index in range(len(thresholds_image[row_index])):
-            if (thresholds_image[row_index][pixel_index] - c) > blurred_image[row_index][pixel_index]:
+        for threshold_pixel, blurred_pixel in zip(*row):
+            if threshold_pixel - c > blurred_pixel:
                 current_row.append(0)
             else:
                 current_row.append(255)
@@ -243,5 +234,93 @@ def quantize_colored_image(image: ColoredImage, N: int) -> ColoredImage:
                             quantize(all_channels[GREEN_CHANNEL_INDEX], N),
                             quantize(all_channels[BLUE_CHANNEL_INDEX], N)])
 
-if __name__ == '__main__':
+def handle_command_line():
+    """
+    """
+    if 2 != len(sys.argv):
+        print("[!] Too many parameters received. Usage: image_editor.py {image_path}")
+        return
+
+    return sys.argv[1]
+
+def grayscale_command(img_path):
+    """
+    """
     pass
+
+def blur_command(img_path):
+    """
+    """
+    pass
+
+def resize_command(img_path):
+    """
+    """
+    pass
+
+def rotate_command(img_path):
+    """
+    """
+    pass
+
+def edges_command(img_path):
+    """
+    """
+    pass
+
+def quantize_command(img_path):
+    """
+    """
+    pass
+
+def execute_command():
+    """
+    """
+    commands = {
+        1: RGB2grayscale,
+        2: blur_command,
+        3: resize_command,
+        4: rotate_command,
+        5: edges_command,
+        6: quantize_command,
+        7: show_image,
+        8: None
+    }
+
+    user_command = None
+    while not (user_command in commands.keys()):
+        print("Available commands:\n \
+              1: Grayscaling\n \
+              2: Blurring\n \
+              3: Resizing\n \
+              4: Rotating\n \
+              5: Edged Image\n \
+              6: Quantizing\n \
+              7: Show Image\n \
+              8: Quit Program")
+        user_input = input("Choose a command (1-8): ")
+        if user_input.isdecimal():
+            user_command = int(user_input)    
+            if not (user_command in commands.keys()):
+                print("Invalid command number - Only 1-8 available")
+        else:
+            print("Invalid command - Only numbers 1-8 are available")
+        
+    if QUIT_COMMAND_VALUE == user_command:
+        return None
+
+    return commands[user_command]
+
+def main():
+    """
+    """
+    image_path = handle_command_line()
+    current_image = load_image(image_path)
+
+    while current_image is not None:
+        current_image = execute_command()
+
+if __name__ == '__main__':
+    """
+    """
+    main()
