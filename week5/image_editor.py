@@ -39,19 +39,19 @@ test_rgb_image = [[[1, 2, 3], [1, 2, 3], [1, 2, 3]],
                   [[1, 2, 3], [1, 2, 3], [1, 2, 3]],
                   [[1, 2, 3], [1, 2, 3], [1, 2, 3]]]
 
-img = load_image(r"C:\users\nimro\downloads\temp.png")
+img = load_image(r"C:\users\nimro\downloads\temp2.jpg")
 
 def separate_channels(image: ColoredImage) -> List[SingleChannelImage]:
     """
     """
-    channel_list = [[], [], []]
-    for row in image:
-        red_row, green_row, blue_row = zip(*row)
-        channel_list[RED_CHANNEL_INDEX].append(list(red_row))
-        channel_list[GREEN_CHANNEL_INDEX].append(list(green_row))
-        channel_list[BLUE_CHANNEL_INDEX].append(list(blue_row))
+    channels = [[] for channel in range(len(image[0][0]))]
 
-    return channel_list
+    for row in image:
+        channel_row = list(zip(*row))
+        for channel in range(len(channel_row)):
+            channels[channel].append(list(channel_row[channel]))
+
+    return channels
 
 def combine_channels(channels: List[SingleChannelImage]) -> ColoredImage:
     """
@@ -68,9 +68,14 @@ def combine_channels(channels: List[SingleChannelImage]) -> ColoredImage:
 def calc_grayscale_sum(rgb_pixel):
     """
     """
-    return (rgb_pixel[RED_CHANNEL_INDEX] * RED_GRAYSCALE_VALUE) + \
-           (rgb_pixel[GREEN_CHANNEL_INDEX] * GREEN_GRAYSCALE_VALUE) + \
-           (rgb_pixel[BLUE_CHANNEL_INDEX] * BLUE_GRAYSCALE_VALUE)
+    sum_value = (rgb_pixel[RED_CHANNEL_INDEX] * RED_GRAYSCALE_VALUE) + \
+                (rgb_pixel[GREEN_CHANNEL_INDEX] * GREEN_GRAYSCALE_VALUE) + \
+                (rgb_pixel[BLUE_CHANNEL_INDEX] * BLUE_GRAYSCALE_VALUE)
+    if 255 < sum_value:
+        sum_value = 255
+    elif 0 > sum_value:
+        sum_value = 0
+    return sum_value
 
 def RGB2grayscale(colored_image: ColoredImage) -> SingleChannelImage:
     """
@@ -80,7 +85,7 @@ def RGB2grayscale(colored_image: ColoredImage) -> SingleChannelImage:
 def blur_kernel(size: int) -> Kernel:
     """
     """
-    return [[1/(size**2) for pixel in range(size)] for row in range(size)]
+    return [[1/(size**2)]*size]*size
 
 def apply_kernel_to_matrix(matrix, kernel):
     """
@@ -151,31 +156,55 @@ def bilinear_interpolation(image: SingleChannelImage, y: float, x: float) -> int
     """
     origin_pixel_y = round(y)
     origin_pixel_x = round(x)
-    
+
     a = 0
     b = 0
     c = 0
     d = image[origin_pixel_y][origin_pixel_x]
 
     # The pixel is not on the edge of the image from the "left" side
-    if 0 != x:
+    if 0 != origin_pixel_x:
         b = image[origin_pixel_y][origin_pixel_x-1]
     # The pixel is not on the edge of the image from the "up" side
-    if 0 != y:
+    if 0 != origin_pixel_y:
         c = image[origin_pixel_y-1][origin_pixel_x]
-    # The pixel is not on any edge of from the "left" or "up"
-    if (0 != y) and (0 != x):
+    # The pixel is not on any edge from the "left" or "up"
+    if (0 != origin_pixel_y) and (0 != origin_pixel_x):
         a = image[origin_pixel_y-1][origin_pixel_x-1]
 
     # Calculating with the magic formula
-    return round((a*(1-x)*(1-y)) + (b*y*(1-x)) + (c*x*(1-y)) + (d*x*y))
-
-print(bilinear_interpolation([[0, 64], [128, 255]], 0.5, 1))
-
+    delta_x = x%1
+    delta_y = y%1
+    return round((a*(1-delta_x)*(1-delta_y)) + \
+                (b*delta_y*(1-delta_x)) + \
+                (c*delta_x*(1-delta_y)) + \
+                (d*delta_x*delta_y))
 
 def resize(image: SingleChannelImage, new_height: int, new_width: int) -> SingleChannelImage:
-    pass
+    """
+    """
+    new_image = [[0]*new_width]*new_height
 
+    # Taking care of everything else
+    for row_index in range(len(new_image)):
+        for pixel_index in range(len(new_image[row_index])):
+            new_image[row_index][pixel_index] = \
+                bilinear_interpolation(image, 
+                                       (row_index/(len(new_image)-1))*(len(image)-1), 
+                                       (pixel_index/(len(new_image[row_index])-1)*(len(image[0])-1)))
+
+    # Taking care of the corners
+    new_image[0][0] = image[0][0]
+    new_image[0][len(new_image[0])-1] = image[0][len(image[0])-1]
+    new_image[len(new_image)-1][0] = image[len(image)-1][0]
+    new_image[len(new_image)-1][len(new_image[0])-1] = image[len(image)-1][len(image[0])-1]
+
+    return new_image
+
+#gray_img = RGB2grayscale(img)
+#show_image(gray_img)
+#new_img = resize(gray_img, 500, 500)
+#show_image(new_img)
 
 def rotate_90(image: Image, direction: str) -> Image:
     pass
