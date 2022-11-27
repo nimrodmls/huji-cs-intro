@@ -196,12 +196,30 @@ def resize(image: SingleChannelImage, new_height: int, new_width: int) -> Single
 #show_image(new_img)
 
 def rotate_90(image: Image, direction: str) -> Image:
-    pass
+    """
+    """
+    new_image = []
+    for combination in zip(*image):
+        current = list(combination)
+        if 'R' == direction:
+            current.reverse()
+            new_image.append(current)
+        if 'L' == direction:
+            new_image.insert(0, current)
 
+    return new_image
 
 def get_edges(image: SingleChannelImage, blur_size: int, block_size: int, c: float) -> SingleChannelImage:
-    pass
-
+    """
+    """
+    threshold = []
+    blurred_image = apply_kernel(image, blur_kernel(blur_size))
+    for row_index in range(len(blurred_image)):
+        for pixel_index in range(len(blurred_image[row_index])):
+            r = block_size // 2
+            current_sum = blurred_image[row_index-r:row_index+r+1][pixel_index-r:pixel_index+r+1]
+            threshold[row_index][pixel_index] = (current_sum/9) - c
+    return threshold
 
 def quantize(image: SingleChannelImage, N: int) -> SingleChannelImage:
     pass
