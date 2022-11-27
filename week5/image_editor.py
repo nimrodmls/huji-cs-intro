@@ -141,13 +141,13 @@ def apply_kernel(image: SingleChannelImage, kernel: Kernel) -> SingleChannelImag
             current_matrix = []
 
             kernel_length = len(kernel)
-            if 1 == kernel_length:
-                kernel_length = 3
+            if 1 == len(kernel):
+                image_row.append(image[row_index][column_index] * kernel[0][0])
+            else:
+                for current_row in padded_image[row_index:row_index+kernel_length]:
+                    current_matrix.append(current_row[column_index:column_index+kernel_length])
 
-            for current_row in padded_image[row_index:row_index+kernel_length]:
-                current_matrix.append(current_row[column_index:column_index+kernel_length])
-
-            image_row.append(round(apply_kernel_to_matrix(current_matrix, kernel)))
+                image_row.append(apply_kernel_to_matrix(current_matrix, kernel))
 
         manipulated_image.append(image_row)
 
@@ -212,14 +212,22 @@ def rotate_90(image: Image, direction: str) -> Image:
 def get_edges(image: SingleChannelImage, blur_size: int, block_size: int, c: float) -> SingleChannelImage:
     """
     """
-    threshold = []
+    edges_image = []
     blurred_image = apply_kernel(image, blur_kernel(blur_size))
-    for row_index in range(len(blurred_image)):
-        for pixel_index in range(len(blurred_image[row_index])):
-            r = block_size // 2
-            current_sum = blurred_image[row_index-r:row_index+r+1][pixel_index-r:pixel_index+r+1]
-            threshold[row_index][pixel_index] = (current_sum/9) - c
-    return threshold
+    thresholds_image = apply_kernel(blurred_image, blur_kernel(block_size))
+
+    for row_index in range(len(thresholds_image)):
+        current_row = []
+
+        for pixel_index in range(len(thresholds_image[row_index])):
+            if (thresholds_image[row_index][pixel_index] - c) > blurred_image[row_index][pixel_index]:
+                current_row.append(0)
+            else:
+                current_row.append(255)
+        
+        edges_image.append(current_row)
+
+    return edges_image
 
 def quantize(image: SingleChannelImage, N: int) -> SingleChannelImage:
     pass
