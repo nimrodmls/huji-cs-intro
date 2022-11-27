@@ -243,37 +243,70 @@ def handle_command_line():
 
     return sys.argv[1]
 
-def grayscale_command(img_path):
+def _get_number_input(msg, is_integer=True, is_odd=False):
+    """
+    """
+    user_input = input(msg)
+    if (not user_input.isdecimal()) and is_integer and ("0" != user_input):
+        print("[!] Received a non-integer")
+        return None
+    else:
+        user_input = int(user_input)
+        if 0 == user_input%2 and is_odd:
+            print("[!] Received an even integer, it should be odd")
+            return None
+
+    if not is_integer:
+        try:
+            user_input = float(user_input)
+        except ValueError:
+            print("[!] Received invalid floating-point number")
+            return None
+
+    return user_input
+
+def grayscale_command(image):
+    """
+    """
+    # Checking if there is only a single channel, if so, it's a grayscale
+    if list != type(image[0][0]):
+        print("[!] Image is already grayscaled. Returning to Menu.")
+        return image
+
+    return RGB2grayscale(image)
+
+def blur_command(image):
     """
     """
     pass
 
-def blur_command(img_path):
+def resize_command(image):
     """
     """
     pass
 
-def resize_command(img_path):
+def rotate_command(image):
     """
     """
     pass
 
-def rotate_command(img_path):
+def edges_command(image):
     """
     """
     pass
 
-def edges_command(img_path):
+def quantize_command(image):
     """
     """
     pass
 
-def quantize_command(img_path):
+def show_image_command(image):
     """
     """
-    pass
+    show_image(image)
+    return image
 
-def execute_command():
+def execute_command(image):
     """
     """
     commands = {
@@ -283,7 +316,7 @@ def execute_command():
         4: rotate_command,
         5: edges_command,
         6: quantize_command,
-        7: show_image,
+        7: show_image_command,
         8: None
     }
 
@@ -302,14 +335,14 @@ def execute_command():
         if user_input.isdecimal():
             user_command = int(user_input)    
             if not (user_command in commands.keys()):
-                print("Invalid command number - Only 1-8 available")
+                print("[!] Invalid command number - Only 1-8 available")
         else:
-            print("Invalid command - Only numbers 1-8 are available")
+            print("[!] Invalid command - Only numbers 1-8 are available")
         
     if QUIT_COMMAND_VALUE == user_command:
         return None
 
-    return commands[user_command]
+    return commands[user_command](image)
 
 def main():
     """
@@ -318,7 +351,7 @@ def main():
     current_image = load_image(image_path)
 
     while current_image is not None:
-        current_image = execute_command()
+        current_image = execute_command(current_image)
 
 if __name__ == '__main__':
     """
