@@ -92,7 +92,8 @@ def apply_kernel_to_matrix(matrix, kernel):
     same size
     """
     matrix_sum = 0
-    kernel_center = round(len(matrix)/2)-1
+    kernel_center = int((len(kernel)-1)/2)
+    kernel_center = kernel_center if 0 != kernel_center else 1
 
     for row in zip(matrix, kernel):
         for pixel, kernel_cell in zip(*row):
@@ -111,34 +112,39 @@ def get_padded_image(image, size):
     """
     """
     padded_image = copy.deepcopy(image)
+
+    if 0 == size:
+        size = 1
     
-    for row_index in range(len(image)):
+    for row_pads in range(size):
+        padded_image.insert(0, [None for row_len in range(len(image[0]))]) # Insert "above"
+        padded_image.append([None for row_len in range(len(image[0]))]) # Insert "below"
+
+    for row_index in range(len(padded_image)):
         for column_pads in range(size):
             padded_image[row_index].insert(0, None) # Insert "left"
             padded_image[row_index].append(None) # Insert "right"
-
-    for row_pads in range(size):
-        row_pad = [None for row_len in range(len(image[0]) + size+1)]
-        padded_image.insert(0, row_pad) # Insert "above"
-        padded_image.append(row_pad) # Insert "below"
 
     return padded_image
 
 def apply_kernel(image: SingleChannelImage, kernel: Kernel) -> SingleChannelImage:
     """
     """
-    kernel_center = round(len(kernel)/2)
-    padded_image = get_padded_image(image, kernel_center-1)
+    padded_image = get_padded_image(image, int((len(kernel)-1)/2))
     
     manipulated_image = []
-    for row_index in range(kernel_center, len(padded_image)):
+    for row_index in range(len(image)):
         image_row = []
 
-        for column_index in range(kernel_center, len(padded_image[row_index])):
+        for column_index in range(len(image[row_index])):
             current_matrix = []
 
-            for current_row in padded_image[row_index-kernel_center:row_index+kernel_center-1]:
-                current_matrix.append(current_row[column_index-kernel_center:column_index+kernel_center-1])
+            kernel_length = len(kernel)
+            if 1 == kernel_length:
+                kernel_length = 3
+
+            for current_row in padded_image[row_index:row_index+kernel_length]:
+                current_matrix.append(current_row[column_index:column_index+kernel_length])
 
             image_row.append(round(apply_kernel_to_matrix(current_matrix, kernel)))
 
@@ -146,6 +152,7 @@ def apply_kernel(image: SingleChannelImage, kernel: Kernel) -> SingleChannelImag
 
     return manipulated_image
 
+print(apply_kernel([[0]], blur_kernel(1)))
 #nimg = combine_channels([apply_kernel(separate_channels(img)[0], blur_kernel(3)),
 #apply_kernel(separate_channels(img)[1], blur_kernel(3)),
 #apply_kernel(separate_channels(img)[2], blur_kernel(3))])
