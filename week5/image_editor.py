@@ -14,6 +14,7 @@
 from ex5_helper import *
 from typing import Optional
 import copy
+import math
 
 ##############################################################################
 #                                  Constants                                 #
@@ -152,36 +153,17 @@ def apply_kernel(image: SingleChannelImage, kernel: Kernel) -> SingleChannelImag
 
     return manipulated_image
 
-print(apply_kernel([[0]], blur_kernel(1)))
-#nimg = combine_channels([apply_kernel(separate_channels(img)[0], blur_kernel(3)),
-#apply_kernel(separate_channels(img)[1], blur_kernel(3)),
-#apply_kernel(separate_channels(img)[2], blur_kernel(3))])
-#show_image(nimg)
-
 def bilinear_interpolation(image: SingleChannelImage, y: float, x: float) -> int:
     """
     """
-    origin_pixel_y = round(y)
-    origin_pixel_x = round(x)
+    delta_x = x%1 if x < 1 else 1
+    delta_y = y%1 if y < 1 else 1
 
-    a = 0
-    b = 0
-    c = 0
-    d = image[origin_pixel_y][origin_pixel_x]
-
-    # The pixel is not on the edge of the image from the "left" side
-    if 0 != origin_pixel_x:
-        b = image[origin_pixel_y][origin_pixel_x-1]
-    # The pixel is not on the edge of the image from the "up" side
-    if 0 != origin_pixel_y:
-        c = image[origin_pixel_y-1][origin_pixel_x]
-    # The pixel is not on any edge from the "left" or "up"
-    if (0 != origin_pixel_y) and (0 != origin_pixel_x):
-        a = image[origin_pixel_y-1][origin_pixel_x-1]
-
-    # Calculating with the magic formula
-    delta_x = x%1
-    delta_y = y%1
+    a = image[math.floor(y)][math.floor(x)]
+    b = image[math.ceil(y)][math.floor(x)]
+    c = image[math.floor(y)][math.ceil(x)]
+    d = image[math.ceil(y)][math.ceil(x)]
+    
     return round((a*(1-delta_x)*(1-delta_y)) + \
                 (b*delta_y*(1-delta_x)) + \
                 (c*delta_x*(1-delta_y)) + \
@@ -190,9 +172,9 @@ def bilinear_interpolation(image: SingleChannelImage, y: float, x: float) -> int
 def resize(image: SingleChannelImage, new_height: int, new_width: int) -> SingleChannelImage:
     """
     """
-    new_image = [[0]*new_width]*new_height
+    new_image = [[0 for columns in range(new_width)] for rows in range(new_height)]
 
-    # Taking care of everything else
+    # Taking care of all pixels
     for row_index in range(len(new_image)):
         for pixel_index in range(len(new_image[row_index])):
             new_image[row_index][pixel_index] = \
@@ -200,7 +182,7 @@ def resize(image: SingleChannelImage, new_height: int, new_width: int) -> Single
                                        (row_index/(len(new_image)-1))*(len(image)-1), 
                                        (pixel_index/(len(new_image[row_index])-1)*(len(image[0])-1)))
 
-    # Taking care of the corners
+    # Giving the corners a special treatment
     new_image[0][0] = image[0][0]
     new_image[0][len(new_image[0])-1] = image[0][len(image[0])-1]
     new_image[len(new_image)-1][0] = image[len(image)-1][0]
