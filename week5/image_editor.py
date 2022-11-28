@@ -40,6 +40,9 @@ QUIT_COMMAND_VALUE = 8
 
 def separate_channels(image: ColoredImage) -> List[SingleChannelImage]:
     """
+    Separating a colored image to multiple separate channels.
+    Can probably handle as many channels as possible (tested on single, dual and triple channels)
+    :param image: The colored image.
     """
     channels = [[] for channel in range(len(image[0][0]))]
 
@@ -239,7 +242,7 @@ def handle_command_line():
     """
     if 2 != len(sys.argv):
         print("[!] Invalid parameters amount received. Usage: image_editor.py {image_path}")
-        return
+        return None
 
     return sys.argv[1]
 
@@ -368,7 +371,7 @@ def execute_command(image):
     """
     """
     commands = {
-        1: RGB2grayscale,
+        1: grayscale_command,
         2: blur_command,
         3: resize_command,
         4: rotate_command,
@@ -406,8 +409,10 @@ def main():
     """
     """
     image_path = handle_command_line()
-    current_image = load_image(image_path)
+    if image_path is None:
+        return
 
+    current_image = load_image(image_path)
     while current_image is not None:
         current_image = execute_command(current_image)
 
