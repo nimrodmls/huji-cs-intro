@@ -238,22 +238,24 @@ def handle_command_line():
     """
     """
     if 2 != len(sys.argv):
-        print("[!] Too many parameters received. Usage: image_editor.py {image_path}")
+        print("[!] Invalid parameters amount received. Usage: image_editor.py {image_path}")
         return
 
     return sys.argv[1]
 
-def _get_number_input(msg, is_integer=True, is_odd=False):
+def _get_number_input(user_input, is_integer=True, bigger_than_one=False, is_odd=False):
     """
     """
-    user_input = input(msg)
-    if (not user_input.isdecimal()) and is_integer and ("0" != user_input):
+    if (not user_input.isdecimal()) and is_integer:
         print("[!] Received a non-integer")
         return None
     else:
         user_input = int(user_input)
         if 0 == user_input%2 and is_odd:
             print("[!] Received an even integer, it should be odd")
+            return None
+        elif 1 >= user_input and bigger_than_one:
+            print("[!] Number should be bigger than 1")
             return None
 
     if not is_integer:
@@ -264,6 +266,17 @@ def _get_number_input(msg, is_integer=True, is_odd=False):
             return None
 
     return user_input
+
+def _do_action_on_image(image, action):
+    """
+    """
+    new_image = None
+    # Image is RGB
+    if list == type(image[0][0]):
+        new_image = combine_channels([action(channel) for channel in separate_channels(image)])
+    else: # Image is single-channel
+        new_image = action(image)
+    return new_image
 
 def grayscale_command(image):
     """
@@ -278,27 +291,72 @@ def grayscale_command(image):
 def blur_command(image):
     """
     """
-    pass
+    kernel_size = _get_number_input(input("Enter an odd & positive kernel size: "), 
+        bigger_than_one=True, is_odd=True)
+    if kernel_size is None:
+        return image
+    return _do_action_on_image(image, lambda img: apply_kernel(img, blur_kernel(kernel_size)))
 
 def resize_command(image):
     """
     """
-    pass
+    user_input = input("Enter height & width (separated by comma): ").split(',')
+    if 2 != len(user_input):
+        print("[!] Incorrect amount of parameters")
+        return image
+    
+    height = _get_number_input(user_input[0], bigger_than_one=True)
+    if height is None:
+        return image
+        
+    width = _get_number_input(user_input[1], bigger_than_one=True)
+    if width is None:
+        return image
 
+    return _do_action_on_image(image, lambda img: resize(img, height, width))
+    
 def rotate_command(image):
     """
     """
-    pass
+    direction_input = input("Enter L(eft) or R(ight) for 90 degree rotation: ")
+    if direction_input not in ['L', 'R']:
+        print("[!] Incorrect parameter - Insert L or R")
+    
+    return _do_action_on_image(image, lambda img: rotate_90(img, direction_input))
 
 def edges_command(image):
     """
     """
-    pass
+    user_input = input("Enter blur & block kernel sizes, and a constant: ").split(',')
+    if 3 != len(user_input):
+        print("[!] Incorrect amount of parameters")
+        return image
+    
+    blur_kernel_size = _get_number_input(user_input[0], is_odd=True)
+    if blur_kernel_size is None:
+        return image
+
+    block_kernel_size = _get_number_input(user_input[1], is_odd=True)
+    if block_kernel_size is None:
+        return image
+
+    constant_value = _get_number_input(user_input[2], is_integer=False)
+    if constant_value is None:
+        return image
+
+    return _do_action_on_image(image, 
+        lambda img: get_edges(img, blur_kernel_size, block_kernel_size, constant_value))
+
 
 def quantize_command(image):
     """
     """
-    pass
+    hue_input = input("Insert hue value for quantization: ")
+    hue_value = _get_number_input(hue_input, bigger_than_one=True)
+    if hue_value is None:
+        return image
+
+    return _do_action_on_image(image, lambda img: quantize(img, hue_value))
 
 def show_image_command(image):
     """
