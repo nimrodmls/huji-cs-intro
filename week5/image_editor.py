@@ -232,10 +232,8 @@ def quantize(image: SingleChannelImage, N: int) -> SingleChannelImage:
 def quantize_colored_image(image: ColoredImage, N: int) -> ColoredImage:
     """
     """
-    all_channels = separate_channels(image)
-    return combine_channels([quantize(all_channels[RED_CHANNEL_INDEX], N),
-                            quantize(all_channels[GREEN_CHANNEL_INDEX], N),
-                            quantize(all_channels[BLUE_CHANNEL_INDEX], N)])
+    quantized_channels = [quantize(channel, N) for channel in separate_channels(image)]
+    return combine_channels(quantized_channels)
 
 def handle_command_line():
     """
