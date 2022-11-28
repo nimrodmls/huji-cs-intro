@@ -164,9 +164,9 @@ def bilinear_interpolation(image: SingleChannelImage, y: float, x: float) -> int
     d = image[math.ceil(y)][math.ceil(x)]
     
     return round((a*(1-delta_x)*(1-delta_y)) + \
-                (b*delta_y*(1-delta_x)) + \
-                (c*delta_x*(1-delta_y)) + \
-                (d*delta_x*delta_y))
+                 (b*delta_y*(1-delta_x)) + \
+                 (c*delta_x*(1-delta_y)) + \
+                 (d*delta_x*delta_y))
 
 def resize(image: SingleChannelImage, new_height: int, new_width: int) -> SingleChannelImage:
     """
@@ -314,7 +314,7 @@ def resize_command(image):
     if width is None:
         return image
 
-    return _do_action_on_image(image, lambda img: resize(img, height, width))
+    return resize(image, height, width)
     
 def rotate_command(image):
     """
