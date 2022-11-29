@@ -345,9 +345,10 @@ def edges_command(image):
     if constant_value is None:
         return image
 
-    return _do_action_on_image(image, 
-        lambda img: get_edges(img, blur_kernel_size, block_kernel_size, constant_value))
+    if list == type(image[0][0]):
+        image = RGB2grayscale(image)
 
+    return get_edges(image, blur_kernel_size, block_kernel_size, constant_value)
 
 def quantize_command(image):
     """
@@ -365,7 +366,7 @@ def show_image_command(image):
     show_image(image)
     return image
 
-def execute_command(image):
+def execute_command(image, filename):
     """
     """
     commands = {
@@ -399,6 +400,7 @@ def execute_command(image):
             print("[!] Invalid command - Only numbers 1-8 are available")
         
     if QUIT_COMMAND_VALUE == user_command:
+        save_image(image, filename)
         return None
 
     return commands[user_command](image)
@@ -412,7 +414,7 @@ def main():
 
     current_image = load_image(image_path)
     while current_image is not None:
-        current_image = execute_command(current_image)
+        current_image = execute_command(current_image, image_path)
 
 if __name__ == '__main__':
     """
