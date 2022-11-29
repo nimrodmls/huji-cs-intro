@@ -55,6 +55,9 @@ def separate_channels(image: ColoredImage) -> List[SingleChannelImage]:
 
 def combine_channels(channels: List[SingleChannelImage]) -> ColoredImage:
     """
+    Combining a colored image separated to different channels.
+    :parm channels: A list of 2D lists, each one represents the channel image.
+    :return: The colored image.
     """
     image = []
     for row in zip(*channels):
@@ -65,8 +68,11 @@ def combine_channels(channels: List[SingleChannelImage]) -> ColoredImage:
 
     return image
 
-def calc_grayscale_sum(rgb_pixel):
+def _calc_grayscale_sum(rgb_pixel):
     """
+    Calculating the Grayscale Sum for each colored RGB Pixel.
+    The summation is modified by constant factors.
+    :param rgb_pixel: The colored pixel. Expects 3 channels.
     """
     sum_value = (rgb_pixel[RED_CHANNEL_INDEX] * RED_GRAYSCALE_VALUE) + \
                 (rgb_pixel[GREEN_CHANNEL_INDEX] * GREEN_GRAYSCALE_VALUE) + \
@@ -79,21 +85,36 @@ def calc_grayscale_sum(rgb_pixel):
 
 def RGB2grayscale(colored_image: ColoredImage) -> SingleChannelImage:
     """
+    Converts a RGB (3-channel) image to single-channel grayscale image.
     """
-    return [[round(calc_grayscale_sum(pixel)) for pixel in row] for row in colored_image]
+    return [[round(_calc_grayscale_sum(pixel)) for pixel in row] for row in colored_image]
 
 def blur_kernel(size: int) -> Kernel:
     """
+    Creates a blurring kernel, with each cell being the inverse of the size squared.
+    :return: size x size blurring kernel.
     """
     return [[1/(size**2)]*size]*size
 
-def apply_kernel_to_matrix(matrix, kernel):
+def _get_matrix_center(matrix):
     """
-    same size
+    Getting the center of the matrix.
+    If the matrix is of a single cell, then the center is obviously 1.
+    """
+    # This function is not one of my proudest hacks
+    kernel_center = int((len(matrix)-1)/2)
+    # Getting the center of the kernel. If the kernel size is 1 then the center is 1 (the calculation above yields 0)
+    return kernel_center if 0 != kernel_center else 1
+
+def _apply_kernel_to_matrix(matrix, kernel):
+    """
+    Applies a kernel to matrix of the SAME size.
+    Invalid matrices and kernels will most likely cause an exception.
+    :param matrix: 2D List of the same size as kernel. The matrix to calculate the kernel on.
+    :param kernel: 2D List of the same size as the matrix.
     """
     matrix_sum = 0
-    kernel_center = int((len(kernel)-1)/2)
-    kernel_center = kernel_center if 0 != kernel_center else 1
+    kernel_center = _get_matrix_center(kernel)
 
     for row in zip(matrix, kernel):
         for pixel, kernel_cell in zip(*row):
@@ -108,14 +129,14 @@ def apply_kernel_to_matrix(matrix, kernel):
 
     return matrix_sum
 
-def get_padded_image(image, size):
+def _get_padded_image(image, size):
     """
+    Padding an image with the given size (in pixels).
+    The function does not modify the original image.
+    The value of all the padded pixels is None.
     """
     padded_image = copy.deepcopy(image)
 
-    if 0 == size:
-        size = 1
-    
     for row_pads in range(size):
         padded_image.insert(0, [None for row_len in range(len(image[0]))]) # Insert "above"
         padded_image.append([None for row_len in range(len(image[0]))]) # Insert "below"
@@ -130,7 +151,7 @@ def get_padded_image(image, size):
 def apply_kernel(image: SingleChannelImage, kernel: Kernel) -> SingleChannelImage:
     """
     """
-    padded_image = get_padded_image(image, int((len(kernel)-1)/2))
+    padded_image = _get_padded_image(image, _get_matrix_center(kernel))
     
     manipulated_image = []
     for row_index in range(len(image)):
@@ -139,14 +160,14 @@ def apply_kernel(image: SingleChannelImage, kernel: Kernel) -> SingleChannelImag
         for column_index in range(len(image[row_index])):
             current_matrix = []
 
-            kernel_length = len(kernel)
+            # Also not my proudest hacks
             if 1 == len(kernel):
                 image_row.append(image[row_index][column_index] * kernel[0][0])
             else:
-                for current_row in padded_image[row_index:row_index+kernel_length]:
-                    current_matrix.append(current_row[column_index:column_index+kernel_length])
+                for current_row in padded_image[row_index : row_index + len(kernel)]:
+                    current_matrix.append(current_row[column_index : column_index + len(kernel)])
 
-                image_row.append(apply_kernel_to_matrix(current_matrix, kernel))
+                image_row.append(_apply_kernel_to_matrix(current_matrix, kernel))
 
         manipulated_image.append(image_row)
 
