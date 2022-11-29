@@ -485,7 +485,4 @@ def main():
         current_image = _execute_command(current_image, image_path)
 
 if __name__ == '__main__':
-    img =get_edges([[23, 34, 45], [65, 54, 43], [3, 8, 4]], 3, 3, 3)
-    #[255, 255, 255], [255, 255, 255], [0, 0, 0]]
-    pass
-    #main()
+    main()
