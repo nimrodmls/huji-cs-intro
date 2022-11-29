@@ -150,6 +150,8 @@ def _get_padded_image(image, size):
 
 def apply_kernel(image: SingleChannelImage, kernel: Kernel) -> SingleChannelImage:
     """
+    Applying a kernel to the given image.
+    The original image is not modified.
     """
     padded_image = _get_padded_image(image, _get_matrix_center(kernel))
     
@@ -161,6 +163,7 @@ def apply_kernel(image: SingleChannelImage, kernel: Kernel) -> SingleChannelImag
             current_matrix = []
 
             # Also not my proudest hacks
+            # We give special treatment for single-cell kernels.
             if 1 == len(kernel):
                 image_row.append(image[row_index][column_index] * kernel[0][0])
             else:
@@ -175,10 +178,13 @@ def apply_kernel(image: SingleChannelImage, kernel: Kernel) -> SingleChannelImag
 
 def bilinear_interpolation(image: SingleChannelImage, y: float, x: float) -> int:
     """
+    Calculating the bilinear interpolation on the given image with the given coordinates.
+    The given image is single-channel.
     """
-    delta_x = x%1 if x < 1 else 1
-    delta_y = y%1 if y < 1 else 1
+    delta_x = x%1 if x != 1 else 1
+    delta_y = y%1 if y != 1 else 1
 
+    # Rounding to the ceiling or floor, according to each location requirements.
     a = image[math.floor(y)][math.floor(x)]
     b = image[math.ceil(y)][math.floor(x)]
     c = image[math.floor(y)][math.ceil(x)]
@@ -191,6 +197,8 @@ def bilinear_interpolation(image: SingleChannelImage, y: float, x: float) -> int
 
 def resize(image: SingleChannelImage, new_height: int, new_width: int) -> SingleChannelImage:
     """
+    Resizing an image to the given height and width properties.
+    The given image is single-channel.
     """
     new_image = [[0 for columns in range(new_width)] for rows in range(new_height)]
 
@@ -212,6 +220,9 @@ def resize(image: SingleChannelImage, new_height: int, new_width: int) -> Single
 
 def rotate_90(image: Image, direction: str) -> Image:
     """
+    Rotates by 90-degress the given image.
+    The image can be of multiple or single channel.
+    :param direction: Either 'L' for Left, or 'R' for Right.
     """
     new_image = []
     for combination in zip(*image):
@@ -226,6 +237,7 @@ def rotate_90(image: Image, direction: str) -> Image:
 
 def get_edges(image: SingleChannelImage, blur_size: int, block_size: int, c: float) -> SingleChannelImage:
     """
+    Creating a edge-highlighted image for the single channel image.
     """
     edges_image = []
     blurred_image = apply_kernel(image, blur_kernel(blur_size))
@@ -246,18 +258,32 @@ def get_edges(image: SingleChannelImage, blur_size: int, block_size: int, c: flo
 
 def quantize(image: SingleChannelImage, N: int) -> SingleChannelImage:
     """
+    Quantizing (hue control) the given single-channel image,
+    according to the given hue constant.
+    For multi-channel image quantization see 'quantize_colored_image' func.
     """
     return [[round(math.floor(pixel*(N/256))*(255/(N-1))) for pixel in row] for row in image]
 
 
 def quantize_colored_image(image: ColoredImage, N: int) -> ColoredImage:
     """
+    Quantizing (hue control) the given colored image,
+    according to the given hue constant.
+    For single-channel image quantization see 'quantize' func.
     """
     quantized_channels = [quantize(channel, N) for channel in separate_channels(image)]
     return combine_channels(quantized_channels)
 
-def handle_command_line():
+def _is_single_channel(image):
     """
+    Checks if an image is single channels.
+    Expects an at-least 2D list.
+    """
+    return list != type(image[0][0])
+
+def _handle_command_line():
+    """
+    Getting the image path from the command line.
     """
     if 2 != len(sys.argv):
         print("[!] Invalid parameters amount received. Usage: image_editor.py {image_path}")
@@ -267,6 +293,8 @@ def handle_command_line():
 
 def _get_number_input(user_input, is_integer=True, bigger_than_one=False, is_odd=False):
     """
+    Checking and converting the numerical user input.
+    Use the boolean flags according to what you with to check.
     """
     if (not user_input.isdecimal()) and is_integer:
         print("[!] Received a non-integer")
@@ -291,36 +319,43 @@ def _get_number_input(user_input, is_integer=True, bigger_than_one=False, is_odd
 
 def _do_action_on_image(image, action):
     """
+    Automatically separates the channels from a colored image, 
+    and calls the action for each channel.
+    If you wish to pass extra parameters to action, do it in a lambda.
     """
     new_image = None
     # Image is RGB
-    if list == type(image[0][0]):
+    if not _is_single_channel(image):
         new_image = combine_channels([action(channel) for channel in separate_channels(image)])
     else: # Image is single-channel
         new_image = action(image)
     return new_image
 
-def grayscale_command(image):
+def _grayscale_command(image):
     """
+    Wrapper for the grayscale command.
     """
     # Checking if there is only a single channel, if so, it's a grayscale
-    if list != type(image[0][0]):
+    if _is_single_channel(image):
         print("[!] Image is already grayscaled. Returning to Menu.")
         return image
 
     return RGB2grayscale(image)
 
-def blur_command(image):
+def _blur_command(image):
     """
+    Wrapper for the blur command.
+    Receives a single input from the user.
     """
-    kernel_size = _get_number_input(input("Enter an odd & positive kernel size: "), 
-        bigger_than_one=True, is_odd=True)
+    kernel_size = _get_number_input(input("Enter an odd & positive kernel size: "), is_odd=True)
     if kernel_size is None:
         return image
     return _do_action_on_image(image, lambda img: apply_kernel(img, blur_kernel(kernel_size)))
 
-def resize_command(image):
+def _resize_command(image):
     """
+    Wrapper for the resize command.
+    Receives a single input from the user.
     """
     user_input = input("Enter height & width (separated by comma): ").split(',')
     if 2 != len(user_input):
@@ -335,19 +370,24 @@ def resize_command(image):
     if width is None:
         return image
 
-    return resize(image, height, width)
+    return _do_action_on_image(image, lambda img: resize(img, height, width))
     
-def rotate_command(image):
+def _rotate_command(image):
     """
+    Wrapper for the rotate 90 degree command.
+    Receives a single input from the user.
     """
     direction_input = input("Enter L(eft) or R(ight) for 90 degree rotation: ")
     if direction_input not in ['L', 'R']:
         print("[!] Incorrect parameter - Insert L or R")
+        return image
     
-    return _do_action_on_image(image, lambda img: rotate_90(img, direction_input))
+    return rotate_90(image, direction_input)
 
-def edges_command(image):
+def _edges_command(image):
     """
+    Wrapper for the edge highlighting command.
+    Receives a single input from the user.
     """
     user_input = input("Enter blur & block kernel sizes, and a constant: ").split(',')
     if 3 != len(user_input):
@@ -366,13 +406,15 @@ def edges_command(image):
     if constant_value is None:
         return image
 
-    if list == type(image[0][0]):
+    if not _is_single_channel(image):
         image = RGB2grayscale(image)
 
     return get_edges(image, blur_kernel_size, block_kernel_size, constant_value)
 
-def quantize_command(image):
+def _quantize_command(image):
     """
+    Wrapper for the quantization command.
+    Receives a single input from the user.
     """
     hue_input = input("Insert hue value for quantization: ")
     hue_value = _get_number_input(hue_input, bigger_than_one=True)
@@ -381,23 +423,26 @@ def quantize_command(image):
 
     return _do_action_on_image(image, lambda img: quantize(img, hue_value))
 
-def show_image_command(image):
+def _show_image_command(image):
     """
+    Wrapper for the image showing command
     """
     show_image(image)
     return image
 
-def execute_command(image, filename):
+def _execute_command(image, filename):
     """
+    Executing a single command from the user.
+    :return: The most up-to-date image.
     """
     commands = {
-        1: grayscale_command,
-        2: blur_command,
-        3: resize_command,
-        4: rotate_command,
-        5: edges_command,
-        6: quantize_command,
-        7: show_image_command,
+        1: _grayscale_command,
+        2: _blur_command,
+        3: _resize_command,
+        4: _rotate_command,
+        5: _edges_command,
+        6: _quantize_command,
+        7: _show_image_command,
         8: None
     }
 
@@ -428,16 +473,19 @@ def execute_command(image, filename):
 
 def main():
     """
+    The main program.
+    Executes commands from the user until he/she ceases it.
     """
-    image_path = handle_command_line()
+    image_path = _handle_command_line()
     if image_path is None:
         return
 
     current_image = load_image(image_path)
     while current_image is not None:
-        current_image = execute_command(current_image, image_path)
+        current_image = _execute_command(current_image, image_path)
 
 if __name__ == '__main__':
-    """
-    """
-    main()
+    img =get_edges([[23, 34, 45], [65, 54, 43], [3, 8, 4]], 3, 3, 3)
+    #[255, 255, 255], [255, 255, 255], [0, 0, 0]]
+    pass
+    #main()
