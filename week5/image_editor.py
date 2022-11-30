@@ -466,7 +466,7 @@ def _execute_command(image, filename):
             print("[!] Invalid command - Only numbers 1-8 are available")
         
     if QUIT_COMMAND_VALUE == user_command:
-        save_image(image, filename)
+        save_image(image, input("Insert path for the image to be saved: "))
         return None
 
     return commands[user_command](image)
