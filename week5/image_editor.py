@@ -299,7 +299,7 @@ def _get_number_input(user_input, is_integer=True, bigger_than_one=False, is_odd
     if (not user_input.isdecimal()) and is_integer:
         print("[!] Received a non-integer")
         return None
-    else:
+    elif is_integer:
         user_input = int(user_input)
         if 0 == user_input%2 and is_odd:
             print("[!] Received an even integer, it should be odd")
