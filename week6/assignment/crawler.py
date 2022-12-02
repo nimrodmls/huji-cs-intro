@@ -11,16 +11,17 @@
 import urllib.parse
 import requests
 import bs4
-import pickle
 
 def _get_webpage(url: str) -> str:
     """
-    Getting webpage's HTML source
+    Getting webpage's HTML source 
     """
     return requests.get(url).text
 
 def _parse_href(href: str) -> str:
     """
+    Parsing the href.
+    If it's empty, None returned.
     """
     return href.get('href') if 0 != len(href.get('href')) else None
 
