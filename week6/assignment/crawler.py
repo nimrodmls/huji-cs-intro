@@ -12,6 +12,8 @@ import urllib.parse
 import requests
 import bs4
 
+LinksTable = dict[str, dict[str, int]]
+
 def _get_webpage(url: str) -> str:
     """
     Getting webpage's HTML source 
@@ -42,7 +44,7 @@ def _extract_all_links(webpage: str) -> dict:
                 # If there is already an entry, use it, if not, create it
                 if page not in page_links.keys():
                     page_links[page] = 0
-                    
+
                 page_links[page] += 1
 
     return page_links
@@ -55,7 +57,7 @@ def parse_index_file(file_path: str) -> list:
     with open(file_path, "r") as index_file:
         return index_file.read().split('\n')
 
-def crawl(base_url: str, site_index: list) -> dict[str, dict[str, int]]:
+def crawl(base_url: str, site_index: list) -> LinksTable:
     """
     :param base_url: The base URL of the website to crawl.
     :param site_index: The website index (all relative webpage paths)

@@ -8,8 +8,14 @@
 # NOTES: N/A
 #################################################################
 
-def _do_iteration(ranks: dict, links_table) -> dict:
+from crawler import LinksTable
+
+RanksTable = dict[str, float]
+
+def _do_iteration(ranks: RanksTable, links_table: LinksTable) -> RanksTable:
     """
+    Do a single iteration on the given ranks table & links table.
+    Returns the new ranks. New ranks can be passed for further iterations.
     """
     new_ranks = {}
     for current_page in ranks:
@@ -27,8 +33,10 @@ def _do_iteration(ranks: dict, links_table) -> dict:
                         sum(links_table[current_page].values()))
     return new_ranks
 
-def rank_pages(links_table, iterations):
+def rank_pages(links_table, iterations) -> RanksTable:
     """
+    Ranks the pages in the given links table.
+    Increased accuracy given with more iterations, but affects performance.
     """
     ranks = {name: 1 for name in links_table}
     for iteration in range(iterations):
