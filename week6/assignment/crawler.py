@@ -40,10 +40,10 @@ def _extract_all_links(webpage: str) -> dict:
             # Making sure there is indeed a reference, as it may be empty
             if page is not None:
                 # If there is already an entry, use it, if not, create it
-                if page in page_links.keys():
-                    page_links[page] += 1
-                else:
-                    page_links[page] = 1
+                if page not in page_links.keys():
+                    page_links[page] = 0
+                    
+                page_links[page] += 1
 
     return page_links
 
@@ -55,7 +55,7 @@ def parse_index_file(file_path: str) -> list:
     with open(file_path, "r") as index_file:
         return index_file.read().split('\n')
 
-def crawl(base_url: str, site_index):
+def crawl(base_url: str, site_index: list) -> dict[str, dict[str, int]]:
     """
     :param base_url: The base URL of the website to crawl.
     :param site_index: The website index (all relative webpage paths)
