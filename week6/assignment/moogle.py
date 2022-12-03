@@ -10,13 +10,13 @@
 
 # External imports
 import argparse
-import pickle
 
 # Internals imports
 import common
 import word_finder
 import crawler
 import ranker
+import search
 
 def _add_crawler_parser(subparser):
     """
@@ -58,6 +58,22 @@ def _add_word_dict_parser(subparser):
     word_dict_parser.add_argument('out_file', 
         help="Path to the output file")
 
+def _add_search_parser(subparser):
+    """
+    Creating the Search Action subparser
+    """
+    search_parser = subparser.add_parser('search',
+        help="Searching Moogle with the supplied query")
+    search_parser.add_argument('query',
+        help="The query to search in Moogle. MUST HAVE QUOTATION MARKS!")
+    search_parser.add_argument('rank_file',
+        help="Path to the ranks file on the drive")
+    search_parser.add_argument('words_file',
+        help="Path to the words index on the drive")
+    search_parser.add_argument('max_results',
+        help="How many results to show",
+        type=int)
+
 def _parse_parameters():
     """
     Getting the command line arguments from the user.
@@ -73,6 +89,7 @@ def _parse_parameters():
     _add_crawler_parser(subparsers)
     _add_ranker_parser(subparsers)
     _add_word_dict_parser(subparsers)
+    _add_search_parser(subparsers)
 
     return vars(parser.parse_args())
 
@@ -100,13 +117,25 @@ def _execute_word_dict_action(params: dict) -> None:
         common.parse_index_file(params['index_file']))
     common.save_pickle(params['out_file'], word_dict)
 
+def _execute_search_action(params: dict) -> None:
+    """
+    """
+    ranks = common.load_pickle(params['rank_file'])
+    words = common.load_pickle(params['words_file'])
+    results = search.search_query(params['query'], ranks, words)
+
+    for index in range(min(params['max_results'], len(results))):
+        current_page = results.keys()[index]
+        print("{page} {score}".format(page=current_page, score=[current_page]))
+
 def main():
     """
     """
     actions = {
         'crawl': _execute_crawler_action,
         'rank_page': _execute_ranker_action,
-        'word_dict': _execute_word_dict_action
+        'word_dict': _execute_word_dict_action,
+        'search': _execute_search_action
     }
 
     params = _parse_parameters()
