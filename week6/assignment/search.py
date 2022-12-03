@@ -17,7 +17,7 @@ def calculate_page_score(page: str, query:str, ranks_table: RanksTable, word_dic
     if page not in ranks_table:
         return 0
 
-    minimal_value = 0
+    minimal_value = None
     for word in query.split(' '):
         # The word is not indexed, searching it is meaningless
         if word not in word_dict:
@@ -27,9 +27,12 @@ def calculate_page_score(page: str, query:str, ranks_table: RanksTable, word_dic
         if page not in word_dict[word]:
             continue
 
-        if minimal_value >= word_dict[word][page]:
+        if (minimal_value is None) or (minimal_value >= word_dict[word][page]):
             minimal_value = word_dict[word][page]
 
+    if minimal_value is None:
+        return 0
+        
     return minimal_value * ranks_table[page]
 
 def search_query(query: str, ranks_table: RanksTable, words_dict: WordDict):
@@ -41,4 +44,3 @@ def search_query(query: str, ranks_table: RanksTable, words_dict: WordDict):
 
     sorted_scores = dict(sorted(scores.items(), key=lambda score: score[1]))
     return sorted_scores
-    

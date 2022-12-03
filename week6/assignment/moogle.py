@@ -124,9 +124,11 @@ def _execute_search_action(params: dict) -> None:
     words = common.load_pickle(params['words_file'])
     results = search.search_query(params['query'], ranks, words)
 
+    all_pages = list(results.keys())
+    all_pages.reverse() # Doing this since the sorting sorts from low score to high.
     for index in range(min(params['max_results'], len(results))):
-        current_page = results.keys()[index]
-        print("{page} {score}".format(page=current_page, score=[current_page]))
+        current_page = all_pages[index]
+        print("{page} {score}".format(page=current_page, score=results[current_page]))
 
 def main():
     """
