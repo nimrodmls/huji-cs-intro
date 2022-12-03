@@ -13,6 +13,8 @@ import argparse
 import pickle
 
 # Internals imports
+import common
+import word_finder
 import crawler
 import ranker
 
@@ -57,35 +59,22 @@ def _parse_parameters():
     _add_ranker_parser(subparsers)
 
     return vars(parser.parse_args())
-    
-def _save_pickle(file_path: str, obj) -> None:
-    """
-    Saving the given object to a file using pickle
-    """
-    with open(file_path, "wb") as pickle_file:
-        pickle.dump(obj, pickle_file)
-
-def _load_pickle(file_path: str):
-    """
-    """
-    with open(file_path, "rb") as pickle_file:
-        return pickle.load(pickle_file)
 
 def _execute_crawler_action(params: dict) -> None:
     """
     """
     links_table = crawler.crawl(
         params['base_url'],
-        crawler.parse_index_file(params['index_file']))
-    _save_pickle(params['out_file'], links_table)
+        common.parse_index_file(params['index_file']))
+    common.save_pickle(params['out_file'], links_table)
 
 def _execute_ranker_action(params: dict) -> None:
     """
     """
     ranking = ranker.rank_pages(
-        _load_pickle(params['links_file']), 
+        common.load_pickle(params['links_file']), 
         params['iterations'])
-    _save_pickle(params['out_file'], ranking)
+    common.save_pickle(params['out_file'], ranking)
 
 def main():
     """

@@ -2,7 +2,7 @@
 # FILE : ranker.py
 # WRITER : Nimrod M.
 # EXERCISE : intro2cs1 ex6 2023
-# DESCRIPTION: Implementing the Crawler of Moogle
+# DESCRIPTION: Implementing the Rank Pages logic of Moogle
 # STUDENTS I DISCUSSED THE EXERCISE WITH: N/A
 # WEB PAGES I USED: N/A
 # NOTES: N/A

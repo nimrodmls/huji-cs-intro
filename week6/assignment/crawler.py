@@ -8,17 +8,10 @@
 # NOTES: N/A
 #################################################################
 
-import urllib.parse
-import requests
 import bs4
+import common
 
 LinksTable = dict[str, dict[str, int]]
-
-def _get_webpage(url: str) -> str:
-    """
-    Getting webpage's HTML source 
-    """
-    return requests.get(url).text
 
 def _parse_href(href: str) -> str:
     """
@@ -49,15 +42,7 @@ def _extract_all_links(webpage: str) -> dict:
 
     return page_links
 
-def parse_index_file(file_path: str) -> list:
-    """
-    Utility function, if the index is packed in a file
-    :return: List of the webpages.
-    """
-    with open(file_path, "r") as index_file:
-        return index_file.read().split('\n')
-
-def crawl(base_url: str, site_index: list) -> LinksTable:
+def crawl(base_url: str, site_index: list[str]) -> LinksTable:
     """
     :param base_url: The base URL of the website to crawl.
     :param site_index: The website index (all relative webpage paths)
@@ -65,6 +50,6 @@ def crawl(base_url: str, site_index: list) -> LinksTable:
     """
     links_table = {}
     for current_entry in site_index:
-        current_page = _get_webpage(urllib.parse.urljoin(base_url, current_entry))
+        current_page = common.get_webpage(base_url, current_entry)
         links_table[current_entry] = _extract_all_links(current_page)
     return links_table
