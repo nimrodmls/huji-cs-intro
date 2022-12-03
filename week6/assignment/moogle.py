@@ -20,6 +20,7 @@ import ranker
 
 def _add_crawler_parser(subparser):
     """
+    Creating the Crawl Action subparser
     """
     crawl_parser = subparser.add_parser('crawl', 
         help="Extracting links information",)
@@ -32,6 +33,7 @@ def _add_crawler_parser(subparser):
 
 def _add_ranker_parser(subparser):
     """
+    Creating the Rank Page Action subparser
     """
     ranker_parser = subparser.add_parser('rank_page',
         help="Ranking all the pages in the given website")
@@ -41,6 +43,19 @@ def _add_ranker_parser(subparser):
     ranker_parser.add_argument('links_file',
         help="Path to the links dictionary (from crawl)")
     ranker_parser.add_argument('out_file',
+        help="Path to the output file")
+
+def _add_word_dict_parser(subparser):
+    """
+    Creating the Word Dict Action subparser
+    """
+    word_dict_parser = subparser.add_parser('word_dict',
+        help="Extracting all the words from the website")
+    word_dict_parser.add_argument('base_url', 
+        help="The base URL address to crawl")
+    word_dict_parser.add_argument('index_file', 
+        help="Path to the file storing the index of the website")
+    word_dict_parser.add_argument('out_file', 
         help="Path to the output file")
 
 def _parse_parameters():
@@ -57,6 +72,7 @@ def _parse_parameters():
 
     _add_crawler_parser(subparsers)
     _add_ranker_parser(subparsers)
+    _add_word_dict_parser(subparsers)
 
     return vars(parser.parse_args())
 
@@ -76,12 +92,21 @@ def _execute_ranker_action(params: dict) -> None:
         params['iterations'])
     common.save_pickle(params['out_file'], ranking)
 
+def _execute_word_dict_action(params: dict) -> None:
+    """
+    """
+    word_dict = word_finder.extract_words(
+        params['base_url'], 
+        common.parse_index_file(params['index_file']))
+    common.save_pickle(params['out_file'], word_dict)
+
 def main():
     """
     """
     actions = {
         'crawl': _execute_crawler_action,
-        'rank_page': _execute_ranker_action
+        'rank_page': _execute_ranker_action,
+        'word_dict': _execute_word_dict_action
     }
 
     params = _parse_parameters()
