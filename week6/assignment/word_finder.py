@@ -23,20 +23,19 @@ def _extract_words_from_page(webpage: str, page_path: str, words_dict: WordDict)
     soup = bs4.BeautifulSoup(webpage, "html.parser")
     # Iterating through all paragraphs, finding all the inks
     for paragraph in soup.find_all("p"):
-        words_list = paragraph.text.split(' ')
+        words_list = paragraph.text.split()
         for word in words_list:
 
             # Removing garbage from the word
-            current_word = word.strip('\n\t')
-            if 0 != len(current_word):
+            if 0 != len(word):
 
                 # Dealing with the possibility of having uninitialized fields
-                if current_word not in words_dict:
-                    words_dict[current_word] = {}
-                if page_path not in words_dict[current_word]:
-                    words_dict[current_word][page_path] = 0
+                if word not in words_dict:
+                    words_dict[word] = {}
+                if page_path not in words_dict[word]:
+                    words_dict[word][page_path] = 0
 
-                words_dict[current_word][page_path] += 1
+                words_dict[word][page_path] += 1
 
 def extract_words(base_url: str, site_index: list[str]) -> WordDict:
     """

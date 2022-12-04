@@ -18,7 +18,7 @@ def calculate_page_score(page: str, query:str, ranks_table: RanksTable, word_dic
         return 0
 
     minimal_value = None
-    for word in query.split(' '):
+    for word in query.split():
         # The word is not indexed, searching it is meaningless
         if word not in word_dict:
             continue
