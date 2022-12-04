@@ -39,10 +39,8 @@ def parse_index_file(file_path: str) -> list:
     with open(file_path, "r") as index_file:
         return index_file.read().splitlines()
 
-def sort_dict(dict_to_sort):
+def sort_dict_by_value(dict_to_sort: dict) -> tuple[dict, list]:
     """
+    Sortng the given dictionary by the value.
     """
-    sorted_dict = dict(sorted(dict_to_sort.items(), key=lambda rank: rank[1]))
-    all_keys = list(sorted_dict.keys())
-    all_keys.reverse()
-    return sorted_dict, all_keys
+    return dict(sorted(dict_to_sort.items(), key=lambda rank: rank[1], reverse=True))

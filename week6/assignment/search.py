@@ -8,6 +8,7 @@
 # NOTES: N/A
 #################################################################
 
+import common
 from ranker import RanksTable
 from word_finder import WordDict
 
@@ -31,17 +32,21 @@ def calculate_page_score(page: str, query:str, ranks_table: RanksTable, word_dic
 
 def search_query(query: str, max_results: int, ranks_table: RanksTable, words_dict: WordDict):
     """
+    Searching the given query using the given ranks and words tables.
+    If the query doesn't appear in any of the first pages from 'max_results',
+    then the search is rendered empty of results.
+    Otherwise, the search scores are returned. They should be sorted if needed.
     """
     scores = {}
-    sorted_ranks = dict(sorted(ranks_table.items(), key=lambda rank: rank[1]))
-    all_pages = list(sorted_ranks.keys())
-    all_pages.reverse()
-    
-    for page in range(min(max_results, len(sorted_ranks))):
-        score = calculate_page_score(all_pages[page], query, ranks_table, words_dict)
+    sorted_ranks = common.sort_dict_by_value(ranks_table)
+
+    # Taking only the max_results amount of pages from the ranks
+    # If there are less pages in the rank table than the max results requested,
+    # take the minimal value.
+    for page in list(sorted_ranks.keys())[:min(max_results, len(sorted_ranks))]:
+        score = calculate_page_score(page, query, ranks_table, words_dict)
         if 0 == score: # If there are no results for a certain word, return
             return {}
-        scores[all_pages[page]] = score
+        scores[page] = score
 
-    sorted_scores = dict(sorted(scores.items(), key=lambda score: score[1]))
-    return sorted_scores
+    return scores
