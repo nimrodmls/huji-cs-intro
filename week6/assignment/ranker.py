@@ -24,6 +24,7 @@ def _do_iteration(ranks: RanksTable, links_table: LinksTable) -> RanksTable:
             if link not in new_ranks.keys():
                 new_ranks[link] = 0
             
+            # Voodo calculations
             if link in links_table[current_page]:
                 new_ranks[link] += ranks[current_page] * \
                     (links_table[current_page][link] / \
