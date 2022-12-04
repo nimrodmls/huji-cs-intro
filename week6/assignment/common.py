@@ -37,4 +37,12 @@ def parse_index_file(file_path: str) -> list:
     :return: List of the webpages.
     """
     with open(file_path, "r") as index_file:
-        return index_file.read().split('\n')
+        return index_file.read().splitlines()
+
+def sort_dict(dict_to_sort):
+    """
+    """
+    sorted_dict = dict(sorted(dict_to_sort.items(), key=lambda rank: rank[1]))
+    all_keys = list(sorted_dict.keys())
+    all_keys.reverse()
+    return sorted_dict, all_keys

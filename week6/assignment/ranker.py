@@ -20,17 +20,14 @@ def _do_iteration(ranks: RanksTable, links_table: LinksTable) -> RanksTable:
     new_ranks = {}
     for current_page in ranks:
         for link in links_table:
-            # If it's the same page, don't count it in
-            if current_page != link:
-
-                # If the link isn't already in the new ranks, add it
-                if link not in new_ranks.keys():
-                    new_ranks[link] = 0
-                
-                if link in links_table[current_page]:
-                    new_ranks[link] += ranks[current_page] * \
-                        (links_table[current_page][link] / \
-                        sum(links_table[current_page].values()))
+            # If the link isn't already in the new ranks, add it
+            if link not in new_ranks.keys():
+                new_ranks[link] = 0
+            
+            if link in links_table[current_page]:
+                new_ranks[link] += ranks[current_page] * \
+                    (links_table[current_page][link] / \
+                    sum(links_table[current_page].values()))
     return new_ranks
 
 def rank_pages(links_table, iterations) -> RanksTable:
@@ -43,3 +40,4 @@ def rank_pages(links_table, iterations) -> RanksTable:
         ranks = _do_iteration(ranks, links_table)
 
     return ranks
+    

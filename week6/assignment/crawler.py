@@ -20,9 +20,10 @@ def _parse_href(href: str) -> str:
     """
     return href.get('href') if 0 != len(href.get('href')) else None
 
-def _extract_all_links(webpage: str) -> dict:
+def _extract_all_links(webpage: str, index: list[str]) -> dict:
     """
     Extracts all the links (hrefs) from the given webpage (HTML source)
+    Links which doesn't appear in the given index, are hence not added.
 
     :param webpage: HTML source of the webpage
     """
@@ -33,7 +34,8 @@ def _extract_all_links(webpage: str) -> dict:
         for link in paragraph.find_all("a"):
             page = _parse_href(link)
             # Making sure there is indeed a reference, as it may be empty
-            if page is not None:
+            if (page is not None) and (page in index):
+
                 # If there is already an entry, use it, if not, create it
                 if page not in page_links.keys():
                     page_links[page] = 0
@@ -51,5 +53,5 @@ def crawl(base_url: str, site_index: list[str]) -> LinksTable:
     links_table = {}
     for current_entry in site_index:
         current_page = common.get_webpage(base_url, current_entry)
-        links_table[current_entry] = _extract_all_links(current_page)
+        links_table[current_entry] = _extract_all_links(current_page, site_index)
     return links_table

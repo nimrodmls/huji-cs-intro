@@ -35,7 +35,7 @@ def _add_ranker_parser(subparser):
     """
     Creating the Rank Page Action subparser
     """
-    ranker_parser = subparser.add_parser('rank_page',
+    ranker_parser = subparser.add_parser('page_rank',
         help="Ranking all the pages in the given website")
     ranker_parser.add_argument('iterations',
         help="Number of iterations for ranking",
@@ -49,7 +49,7 @@ def _add_word_dict_parser(subparser):
     """
     Creating the Word Dict Action subparser
     """
-    word_dict_parser = subparser.add_parser('word_dict',
+    word_dict_parser = subparser.add_parser('words_dict',
         help="Extracting all the words from the website")
     word_dict_parser.add_argument('base_url', 
         help="The base URL address to crawl")
@@ -135,8 +135,8 @@ def main():
     """
     actions = {
         'crawl': _execute_crawler_action,
-        'rank_page': _execute_ranker_action,
-        'word_dict': _execute_word_dict_action,
+        'page_rank': _execute_ranker_action,
+        'words_dict': _execute_word_dict_action,
         'search': _execute_search_action
     }
 
