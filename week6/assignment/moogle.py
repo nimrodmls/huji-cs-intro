@@ -132,8 +132,15 @@ def _execute_search_action(params: dict) -> None:
         print("{page} {score}".format(page=current_page, 
                                       score=sorted_results[current_page]))
 
+def _create_submission_results():
+    """
+    """
+    pass
+
 def main():
     """
+    The main program, executes the need action with the parameters rececived
+    from the user.
     """
     actions = {
         'crawl': _execute_crawler_action,

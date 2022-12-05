@@ -44,3 +44,4 @@ def sort_dict_by_value(dict_to_sort: dict) -> tuple[dict, list]:
     Sortng the given dictionary by the value.
     """
     return dict(sorted(dict_to_sort.items(), key=lambda rank: rank[1], reverse=True))
+    
