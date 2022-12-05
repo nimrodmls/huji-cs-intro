@@ -135,7 +135,21 @@ def _execute_search_action(params: dict) -> None:
 def _create_submission_results():
     """
     """
-    pass
+    base_url = "https://www.cs.huji.ac.il/w~intro2cs1/ex6/wiki/"
+    iterations = 100
+    max_results = 4
+    queries = ["scar", "Crookshanks", "Horcrux", "Pensieve McGonagall", "broom wand cape"]
+    index = common.parse_index_file("week6\\assignment\\small_index.txt")
+    links_table = crawler.crawl(base_url,index)
+    ranks_table = ranker.rank_pages(links_table, iterations)
+    word_dict = word_finder.extract_words(base_url, index)
+    with open("C:\\Temp\\results.txt", "w") as results_file:
+        for query in queries:
+            results = search.search_query(query, max_results, ranks_table, word_dict)
+            for result in results:
+                results_file.write("{page} {score}\n".format(page=result, 
+                                      score=results[result]))
+            results_file.write("**********\n")
 
 def main():
     """
