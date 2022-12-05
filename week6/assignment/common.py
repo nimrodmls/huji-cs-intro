@@ -21,6 +21,7 @@ def save_pickle(file_path: str, obj) -> None:
 
 def load_pickle(file_path: str):
     """
+    Loading a pickle object from the given file
     """
     with open(file_path, "rb") as pickle_file:
         return pickle.load(pickle_file)

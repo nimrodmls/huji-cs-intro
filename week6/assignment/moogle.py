@@ -95,6 +95,7 @@ def _parse_parameters():
 
 def _execute_crawler_action(params: dict) -> None:
     """
+    Run the Crawl Action with the given parameters
     """
     links_table = crawler.crawl(
         params['base_url'],
@@ -103,6 +104,7 @@ def _execute_crawler_action(params: dict) -> None:
 
 def _execute_ranker_action(params: dict) -> None:
     """
+    Run the Page Rank Action with the given parameters
     """
     ranking = ranker.rank_pages(
         common.load_pickle(params['links_file']), 
@@ -111,6 +113,7 @@ def _execute_ranker_action(params: dict) -> None:
 
 def _execute_word_dict_action(params: dict) -> None:
     """
+    Run the Word Dictionary assembly with the given parameters
     """
     word_dict = word_finder.extract_words(
         params['base_url'], 
@@ -119,6 +122,8 @@ def _execute_word_dict_action(params: dict) -> None:
 
 def _execute_search_action(params: dict) -> None:
     """
+    Execute the Search Query Action with the given parameters
+    This function *prints* to the screen the results
     """
     ranks = common.load_pickle(params['rank_file'])
     words = common.load_pickle(params['words_file'])
@@ -134,6 +139,9 @@ def _execute_search_action(params: dict) -> None:
 
 def _create_submission_results():
     """
+    Utility function for creating submission results file.
+    This function is not relevant for all the other parts of the code.
+    Function is intentionally not used.
     """
     base_url = "https://www.cs.huji.ac.il/w~intro2cs1/ex6/wiki/"
     iterations = 100
@@ -146,9 +154,10 @@ def _create_submission_results():
     with open("C:\\Temp\\results.txt", "w") as results_file:
         for query in queries:
             results = search.search_query(query, max_results, ranks_table, word_dict)
-            for result in results:
+            sorted_results = common.sort_dict_by_value(results)
+            for result in sorted_results:
                 results_file.write("{page} {score}\n".format(page=result, 
-                                      score=results[result]))
+                                      score=sorted_results[result]))
             results_file.write("**********\n")
 
 def main():

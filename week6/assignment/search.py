@@ -14,6 +14,10 @@ from word_finder import WordDict
 
 def _calculate_page_score(page: str, query:str, ranks_table: RanksTable, word_dict: WordDict) -> float:
     """
+    Calculating the score of the given page with the given query.
+    If a word is not in the given words table then it's ignored.
+    If the page doesn't have the word then 0 is returned (other words in
+    the query are not checked). Otherwise, the score is returned.
     """
     minimal_value = None
     for word in query.split():
