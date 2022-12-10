@@ -4,12 +4,12 @@
 # EXERCISE : intro2cs1 ex7 2023
 # DESCRIPTION: Implementing recursive stuff
 # STUDENTS I DISCUSSED THE EXERCISE WITH: N/A
-# WEB PAGES I USED: N/A
+# WEB PAGES I USED: en.wikipedia.org/wiki/Tower_of_Hanoi
 # NOTES: N/A
 #################################################################
 
-from ex7_helper import N, add, subtract_1, divide_by_2, is_odd
-import hanoi_game
+from typing import Any
+from ex7_helper import N, add, subtract_1, divide_by_2, is_odd, append_to_end
 
 def mult(x: N, y: int) -> N:
     """
@@ -67,5 +67,35 @@ def is_power(b: int, x: int) -> bool:
     else:
         return is_power(log_mult(b, b), x)
 
+def _internal_reverse(s: str, index: int, current_str: str) -> str:
+    """
+    Helper function for the reverse function.
+    Allows the passing of extra parameters needed for the operation.
+    """
+    if len(s) == len(current_str):
+        return current_str
+
+    current_str = append_to_end(current_str, s[index-1])
+    return _internal_reverse(s, len(s)-len(current_str), current_str)
+
+def reverse(s: str) -> str:
+    """
+    Reverses a string from end to beginning
+    """
+    new_s = ""
+    return _internal_reverse(s, len(s), new_s)
+
+def play_hanoi(hanoi: Any, n: int, src: Any, dest: Any, temp: Any):
+    """
+    Playing the Towers of Hanoi Game.
+    Expecting to get a valid Hanoi and Tower objects from the module.
+    """
+    if 0 >= n:
+        return
+    
+    play_hanoi(hanoi, n-1, src, temp, dest)
+    hanoi.move(src, dest)
+    play_hanoi(hanoi, n-1, temp, dest, src)
+
 if __name__ == "__main__":
-    print(is_power(0, 0))
+    print(reverse("intro"))
