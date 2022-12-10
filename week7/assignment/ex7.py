@@ -28,16 +28,24 @@ def _subtract_times(n: int, times: int) -> int:
         return n
     return _subtract_times(subtract_1(n), subtract_1(times))
 
+def _internal_is_even(n: int, flag: bool) -> bool:
+    """
+    Internal function for the is_even function.
+    This allows passing a flag, alternating between Even and Odd
+    """
+    if 0 == n:
+        return flag
+    else:
+        return _internal_is_even(subtract_1(n), not flag)
+
 def is_even(n: int) -> bool:
     """
+    Checking if the given non-negative integer is even
     """
-    if -1 == n:
-        return False
-    elif 0 == n:
-        return True
-    else:
-        return is_even(_subtract_times(n, 2))
+    return _internal_is_even(n, True)
+
+
 
 
 if __name__ == "__main__":
-    print(is_even(0))
+    print(is_even(2))
