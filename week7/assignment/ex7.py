@@ -21,6 +21,23 @@ def mult(x: N, y: int) -> N:
         return x
     return add(x, mult(x, subtract_1(y)))
 
+def _subtract_times(n: int, times: int) -> int:
+    """
+    """
+    if 0 == times:
+        return n
+    return _subtract_times(subtract_1(n), subtract_1(times))
+
+def is_even(n: int) -> bool:
+    """
+    """
+    if -1 == n:
+        return False
+    elif 0 == n:
+        return True
+    else:
+        return is_even(_subtract_times(n, 2))
+
 
 if __name__ == "__main__":
-    print(mult(5,20))
+    print(is_even(0))
