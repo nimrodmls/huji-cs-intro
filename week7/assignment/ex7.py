@@ -97,5 +97,43 @@ def play_hanoi(hanoi: Any, n: int, src: Any, dest: Any, temp: Any):
     hanoi.move(src, dest)
     play_hanoi(hanoi, n-1, temp, dest, src)
 
+def _internal_number_of_ones(current: int, left: int, cnt: int) -> int:
+    """
+    """
+    if 0 == left:
+        return cnt
+    # Works only when 1 is on the right
+    if (1 == current % 10):
+        cnt += 1
+    if (1 == current // 10):
+        cnt += 1
+    if (10 <= current // 10):
+        _internal_number_of_ones()
+    return _internal_number_of_ones(current+1, left-1, cnt)
+
+def _internal_number_of_ones_2(current_n: int, cnt: int) -> int:
+    """
+    """
+    if 0 == current_n:
+        return cnt
+    
+    if (1 == current_n % 10) or (1 == current_n // 10):
+        if (1 == current_n % 10):
+            cnt += 1
+        if (1 == current_n // 10):
+            cnt += 1
+        return _internal_number_of_ones_2(current_n-1, cnt)
+    elif 10 <= current // 10:
+        return _internal_number_of_ones_2()
+    else:
+        return _internal_number_of_ones_2(current_n-1, cnt)
+
+def number_of_ones(n: int) -> int:
+    """
+    """
+    counter = 0
+    counter = _internal_number_of_ones(1, n, counter)
+    return counter
+
 if __name__ == "__main__":
-    print(reverse("intro"))
+    print(number_of_ones(13))
