@@ -8,7 +8,7 @@
 # NOTES: N/A
 #################################################################
 
-from ex7_helper import N, add, subtract_1
+from ex7_helper import N, add, subtract_1, divide_by_2, is_odd
 import hanoi_game
 
 def mult(x: N, y: int) -> N:
@@ -20,13 +20,6 @@ def mult(x: N, y: int) -> N:
     if 1 == y:
         return x
     return add(x, mult(x, subtract_1(y)))
-
-def _subtract_times(n: int, times: int) -> int:
-    """
-    """
-    if 0 == times:
-        return n
-    return _subtract_times(subtract_1(n), subtract_1(times))
 
 def _internal_is_even(n: int, flag: bool) -> bool:
     """
@@ -44,8 +37,35 @@ def is_even(n: int) -> bool:
     """
     return _internal_is_even(n, True)
 
+def log_mult(x: N, y: int) -> N:
+    """
+    Multiplies the given number x with the given non-negative integer y.
+    The function's runtime is O(log x)
+    """
+    if 0 == y:
+        return 0
+    elif 1 == y:
+        return x
+    h = log_mult(x, divide_by_2(y))
+    if is_odd(y):
+        return add(add(h, h), x)
+    else:
+        return add(h, h)
 
-
+def is_power(b: int, x: int) -> bool:
+    """
+    Checking if b raised to any power results x.
+    The function's runtime is O(log b * log x)
+    """
+    if b == x:
+        return True
+    # If b is 0 or 1, and it's not equal to x, 
+    # then no power in the world can raise b to x
+    # If b exceeds x it means there is no possible integer power.
+    elif (b > x) or (0 == b) or (1 == b):
+        return False
+    else:
+        return is_power(log_mult(b, b), x)
 
 if __name__ == "__main__":
-    print(is_even(2))
+    print(is_power(0, 0))
