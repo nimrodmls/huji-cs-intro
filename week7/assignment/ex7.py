@@ -122,18 +122,36 @@ def _internal_number_of_ones_2(current_n: int, cnt: int) -> int:
             cnt += 1
         if (1 == current_n // 10):
             cnt += 1
-        return _internal_number_of_ones_2(current_n-1, cnt)
-    elif 10 <= current // 10:
-        return _internal_number_of_ones_2()
-    else:
-        return _internal_number_of_ones_2(current_n-1, cnt)
+
+    if 10 <= current_n // 10:
+        cnt = _internal_number_of_ones_2(current_n // 10, cnt)
+
+    return _internal_number_of_ones_2(current_n-1, cnt)
+
+def _extra_internal(current_n: int, cnt: int) -> int:
+    """
+    """
+    if 0 == current_n:
+        return cnt
+    elif 1 == current_n:
+        return cnt + 1
+    elif 1 == current_n % 10:
+        cnt += 1
+    return _extra_internal(current_n // 10, cnt)
+
+def _internal_number_of_ones_3(current_n: int, cnt: int) -> int:
+    """
+    """
+    if 0 == current_n:
+        return cnt
+    return _internal_number_of_ones_3(current_n-1, _extra_internal(current_n, cnt))
 
 def number_of_ones(n: int) -> int:
     """
     """
     counter = 0
-    counter = _internal_number_of_ones(1, n, counter)
+    counter = _internal_number_of_ones_3(n, counter)
     return counter
 
 if __name__ == "__main__":
-    print(number_of_ones(13))
+    print(number_of_ones(900))
