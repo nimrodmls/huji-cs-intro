@@ -153,39 +153,15 @@ def number_of_ones(n: int) -> int:
     counter = _internal_number_of_ones(n, counter)
     return counter
 
-def _internal_magic_list(n: int, index: int, current_list: List) -> List[Any]:
-    """
-    """
-    if 0 == n:
-        return current_list
-    return _internal_magic_list(n-1, index+1, _extra_internal(index, current_list))
-
-def _extra_internal(index: int, current_list: List):
-    """
-    """
-    if 1 == index:
-        return [[]]
-    current_list.append(_extra_internal(index-1, [[]]))
-    return current_list
-
 def magic_list(n: int) -> List[Any]:
-    """
-    """
-    lst = []
-    return _internal_magic_list(n, 1, lst)
-
-def magic_list_2(n: int) -> List[Any]:
     """
     """
     if 0 == n:
         return []
-    lst = magic_list_2(n-1)
-    lst.append(magic_list_2(n-1))
-    return lst
+    new_list = magic_list(n-1)
+    new_list.append(magic_list(n-1))
+    return new_list
 
 if __name__ == "__main__":
     #print(number_of_ones(981))
-    for i in range(5):
-        print(magic_list(i))
-        print(magic_list_2(i))
-        assert magic_list(i) == magic_list_2(i)
+    pass
