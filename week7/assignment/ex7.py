@@ -8,7 +8,7 @@
 # NOTES: N/A
 #################################################################
 
-from typing import Any
+from typing import Any, List
 from ex7_helper import N, add, subtract_1, divide_by_2, is_odd, append_to_end
 
 def mult(x: N, y: int) -> N:
@@ -97,7 +97,7 @@ def play_hanoi(hanoi: Any, n: int, src: Any, dest: Any, temp: Any):
     hanoi.move(src, dest)
     play_hanoi(hanoi, n-1, temp, dest, src)
 
-def _internal_number_of_ones(current: int, left: int, cnt: int) -> int:
+def _internal_number_of_ones_(current: int, left: int, cnt: int) -> int:
     """
     """
     if 0 == left:
@@ -108,8 +108,8 @@ def _internal_number_of_ones(current: int, left: int, cnt: int) -> int:
     if (1 == current // 10):
         cnt += 1
     if (10 <= current // 10):
-        _internal_number_of_ones()
-    return _internal_number_of_ones(current+1, left-1, cnt)
+        _internal_number_of_ones_()
+    return _internal_number_of_ones_(current+1, left-1, cnt)
 
 def _internal_number_of_ones_2(current_n: int, cnt: int) -> int:
     """
@@ -128,7 +128,7 @@ def _internal_number_of_ones_2(current_n: int, cnt: int) -> int:
 
     return _internal_number_of_ones_2(current_n-1, cnt)
 
-def _extra_internal(current_n: int, cnt: int) -> int:
+def _count_ones(current_n: int, cnt: int) -> int:
     """
     """
     if 0 == current_n:
@@ -137,21 +137,55 @@ def _extra_internal(current_n: int, cnt: int) -> int:
         return cnt + 1
     elif 1 == current_n % 10:
         cnt += 1
-    return _extra_internal(current_n // 10, cnt)
+    return _count_ones(current_n // 10, cnt)
 
-def _internal_number_of_ones_3(current_n: int, cnt: int) -> int:
+def _internal_number_of_ones(current_n: int, cnt: int) -> int:
     """
     """
     if 0 == current_n:
         return cnt
-    return _internal_number_of_ones_3(current_n-1, _extra_internal(current_n, cnt))
+    return _internal_number_of_ones(current_n-1, _count_ones(current_n, cnt))
 
 def number_of_ones(n: int) -> int:
     """
     """
     counter = 0
-    counter = _internal_number_of_ones_3(n, counter)
+    counter = _internal_number_of_ones(n, counter)
     return counter
 
+def _internal_magic_list(n: int, index: int, current_list: List) -> List[Any]:
+    """
+    """
+    if 0 == n:
+        return current_list
+    return _internal_magic_list(n-1, index+1, _extra_internal(index, current_list))
+
+def _extra_internal(index: int, current_list: List):
+    """
+    """
+    if 1 == index:
+        return [[]]
+    current_list.append(_extra_internal(index-1, [[]]))
+    return current_list
+
+def magic_list(n: int) -> List[Any]:
+    """
+    """
+    lst = []
+    return _internal_magic_list(n, 1, lst)
+
+def magic_list_2(n: int) -> List[Any]:
+    """
+    """
+    if 0 == n:
+        return []
+    lst = magic_list_2(n-1)
+    lst.append(magic_list_2(n-1))
+    return lst
+
 if __name__ == "__main__":
-    print(number_of_ones(900))
+    #print(number_of_ones(981))
+    for i in range(5):
+        print(magic_list(i))
+        print(magic_list_2(i))
+        assert magic_list(i) == magic_list_2(i)
