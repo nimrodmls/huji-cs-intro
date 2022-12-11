@@ -52,12 +52,10 @@ def log_mult(x: N, y: int) -> N:
     else:
         return add(h, h)
 
-def is_power(b: int, x: int) -> bool:
+def _internal_is_power(b: int, x: int, orig: int) -> bool:
     """
-    Checking if b raised to any power results x.
-    The function's runtime is O(log b * log x)
     """
-    if b == x:
+    if (b == x) or (x == 1):
         return True
     # If b is 0 or 1, and it's not equal to x, 
     # then no power in the world can raise b to x
@@ -65,7 +63,17 @@ def is_power(b: int, x: int) -> bool:
     elif (b > x) or (0 == b) or (1 == b):
         return False
     else:
-        return is_power(log_mult(b, b), x)
+        current_exponent = log_mult(b, orig)
+        if x == current_exponent:
+            return True
+        return _internal_is_power(current_exponent, x, orig)
+
+def is_power(b: int, x: int) -> bool:
+    """
+    Checking if b raised to any power results x.
+    The function's runtime is O(log b * log x)
+    """
+    return _internal_is_power(b, x, b)
 
 def _internal_reverse(s: str, index: int, current_str: str) -> str:
     """
@@ -85,7 +93,7 @@ def reverse(s: str) -> str:
     new_s = ""
     return _internal_reverse(s, len(s), new_s)
 
-def play_hanoi(hanoi: Any, n: int, src: Any, dest: Any, temp: Any):
+def play_hanoi(hanoi: Any, n: int, src: Any, dest: Any, temp: Any) -> None:
     """
     Playing the Towers of Hanoi Game.
     Expecting to get a valid Hanoi and Tower objects from the module.
@@ -107,8 +115,6 @@ def _internal_number_of_ones_(current: int, left: int, cnt: int) -> int:
         cnt += 1
     if (1 == current // 10):
         cnt += 1
-    if (10 <= current // 10):
-        _internal_number_of_ones_()
     return _internal_number_of_ones_(current+1, left-1, cnt)
 
 def _internal_number_of_ones_2(current_n: int, cnt: int) -> int:
@@ -153,15 +159,54 @@ def number_of_ones(n: int) -> int:
     counter = _internal_number_of_ones(n, counter)
     return counter
 
+def _compare_1d_lists(l1: List[int], l2: List[int], index: int) -> bool:
+    """
+    """
+    # Lists are not of the same length, they're obviously not the same
+    if len(l1) != len(l2):
+        return False
+    
+    # We reached the end, great success
+    # Getting here means that the length of both lists are the same
+    if len(l1) == index:
+        return True
+    
+    if l1[index] == l2[index]:
+        # If the items are the same, continue for the next items
+        return _compare_1d_lists(l1, l2, index+1)
+    else:
+        # One different element is enough to sell the rights to the 
+        # songs we don't have, wrap our instruments and go back to Netanya
+        return False
+
+def _internal_compare_2d_lists(l1: List[List[int]], l2: List[List[int]], index: int) -> bool:
+    """
+    """
+    if 0 == index:
+        return True
+    # Actually comparing
+    result = _compare_1d_lists(l1[index-1], l2[index-1], 0)
+    if result:
+        # Continue for the next lists if this one is okay
+        return _internal_compare_2d_lists(l1, l2, index-1)
+    else:
+        return False
+
+def compare_2d_lists(l1: List[List[int]], l2: List[List[int]]) -> bool:
+    """
+    """
+    # Lists are not of the same length, they're obviously not the same
+    if len(l1) != len(l2):
+        return False
+
+    return _internal_compare_2d_lists(l1, l2, len(l1))
+
 def magic_list(n: int) -> List[Any]:
     """
     """
-    if 0 == n:
-        return []
-    new_list = magic_list(n-1)
-    new_list.append(magic_list(n-1))
+    new_list = []
+    if 0 != n:
+        new_list = magic_list(n-1)
+        new_list.append(magic_list(n-1))
     return new_list
-
-if __name__ == "__main__":
-    #print(number_of_ones(981))
-    pass
+    
