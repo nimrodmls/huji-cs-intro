@@ -54,6 +54,8 @@ def log_mult(x: N, y: int) -> N:
 
 def _internal_is_power(b: int, x: int, orig: int) -> bool:
     """
+    Internal function for is_power.
+    Doing the actual calculations since it preserves the original b value.
     """
     if (b == x) or (x == 1):
         return True
@@ -105,48 +107,26 @@ def play_hanoi(hanoi: Any, n: int, src: Any, dest: Any, temp: Any) -> None:
     hanoi.move(src, dest)
     play_hanoi(hanoi, n-1, temp, dest, src)
 
-def _internal_number_of_ones_(current: int, left: int, cnt: int) -> int:
-    """
-    """
-    if 0 == left:
-        return cnt
-    # Works only when 1 is on the right
-    if (1 == current % 10):
-        cnt += 1
-    if (1 == current // 10):
-        cnt += 1
-    return _internal_number_of_ones_(current+1, left-1, cnt)
-
-def _internal_number_of_ones_2(current_n: int, cnt: int) -> int:
-    """
-    """
-    if 0 == current_n:
-        return cnt
-    
-    if (1 == current_n % 10) or (1 == current_n // 10):
-        if (1 == current_n % 10):
-            cnt += 1
-        if (1 == current_n // 10):
-            cnt += 1
-
-    if 10 <= current_n // 10:
-        cnt = _internal_number_of_ones_2(current_n // 10, cnt)
-
-    return _internal_number_of_ones_2(current_n-1, cnt)
-
 def _count_ones(current_n: int, cnt: int) -> int:
     """
+    Internal function for number_of_ones.
+    Counting how many ones are in the given number current_n.
     """
     if 0 == current_n:
         return cnt
+    # If it's just one, so yeah, it's definitely 1.
     elif 1 == current_n:
         return cnt + 1
+    # If there is 1 to the right. 
+    # We will lose it when we call count_ones the next time.
     elif 1 == current_n % 10:
         cnt += 1
     return _count_ones(current_n // 10, cnt)
 
 def _internal_number_of_ones(current_n: int, cnt: int) -> int:
     """
+    Internal function for number_of_ones.
+    Iterating on all possible numbers from initial current_n to 0.
     """
     if 0 == current_n:
         return cnt
@@ -154,6 +134,8 @@ def _internal_number_of_ones(current_n: int, cnt: int) -> int:
 
 def number_of_ones(n: int) -> int:
     """
+    Counting the number of ones present in all numbers from 0 to n.
+    This function is probably not the most efficient thing in the world.
     """
     counter = 0
     counter = _internal_number_of_ones(n, counter)
@@ -161,6 +143,8 @@ def number_of_ones(n: int) -> int:
 
 def _compare_1d_lists(l1: List[int], l2: List[int], index: int) -> bool:
     """
+    Internal function for compare_2d_lists.
+    The function compares 1 dimensional lists of ints.
     """
     # Lists are not of the same length, they're obviously not the same
     if len(l1) != len(l2):
@@ -181,6 +165,8 @@ def _compare_1d_lists(l1: List[int], l2: List[int], index: int) -> bool:
 
 def _internal_compare_2d_lists(l1: List[List[int]], l2: List[List[int]], index: int) -> bool:
     """
+    Internal function for compare_2d_lists.
+    The function calls for _compare_1d_lists for every pair of nested list in the given lists.
     """
     if 0 == index:
         return True
@@ -194,6 +180,9 @@ def _internal_compare_2d_lists(l1: List[List[int]], l2: List[List[int]], index: 
 
 def compare_2d_lists(l1: List[List[int]], l2: List[List[int]]) -> bool:
     """
+    Compares 2 given 2-dimensional lists of ints.
+    If either the elements are different, or the lists are in different sizes,
+    the comparison is rendered false.
     """
     # Lists are not of the same length, they're obviously not the same
     if len(l1) != len(l2):
@@ -203,6 +192,7 @@ def compare_2d_lists(l1: List[List[int]], l2: List[List[int]]) -> bool:
 
 def magic_list(n: int) -> List[Any]:
     """
+    Creates a magic list with exponentially growing nested lists.
     """
     new_list = []
     if 0 != n:
