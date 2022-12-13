@@ -141,6 +141,32 @@ def number_of_ones(n: int) -> int:
     counter = _internal_number_of_ones(n, counter)
     return counter
 
+def _internal_number_of_ones_2(current_n, original_num, index, current_factor, cnt):
+    """
+    """
+    if 0 == current_n:
+        return cnt
+    
+    # Getting the current number
+    current_num = current_n % 10
+
+    # Calculating the common case
+    cnt += log_mult(log_mult(index, current_num), current_factor // 10)
+
+    # Adding according to the current number
+    if 1 == current_num:
+        cnt += (original_num % current_factor) + 1
+    elif 0 != current_num:
+        cnt += current_factor
+
+    return _internal_number_of_ones_2(current_n // 10, original_num, index+1, log_mult(current_factor, 10), cnt)
+
+def number_of_ones_2(n: int) -> int:
+    """
+    """
+    counter = 0
+    return _internal_number_of_ones_2(n, n, 0, 1, counter)
+
 def _compare_1d_lists(l1: List[int], l2: List[int], index: int) -> bool:
     """
     Internal function for compare_2d_lists.
@@ -200,3 +226,5 @@ def magic_list(n: int) -> List[Any]:
         new_list.append(magic_list(n-1))
     return new_list
     
+if __name__ == "__main__":
+    print(number_of_ones_2(1))
