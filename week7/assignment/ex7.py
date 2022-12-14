@@ -52,6 +52,27 @@ def log_mult(x: N, y: int) -> N:
     else:
         return add(h, h)
 
+def _raise_power(x: int, n: int) -> int:
+    """
+    """
+    if 0 == n:
+        return 1
+    y = _raise_power(x, n // 2)
+    if 0 == n % 2:
+        return log_mult(y, y)
+    else:
+        return log_mult(log_mult(y, y), x)
+
+def _internal_is_power_2(b: int, x: int, cnt: int) -> bool:
+    """
+    """
+    current_exponent = _raise_power(b, cnt)
+    if (x == current_exponent) or (x == 1):
+        return True
+    if x < current_exponent:
+        return False
+    return _internal_is_power_2(b, x, cnt+1)
+
 def _internal_is_power(b: int, x: int, orig: int) -> bool:
     """
     Internal function for is_power.
@@ -75,7 +96,8 @@ def is_power(b: int, x: int) -> bool:
     Checking if b raised to any power results x.
     The function's runtime is O(log b * log x)
     """
-    return _internal_is_power(b, x, b)
+    #return _internal_is_power(b, x, b)
+    return _internal_is_power_2(b, x, 0)
 
 def _internal_reverse(s: str, index: int, current_str: str) -> str:
     """
