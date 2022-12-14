@@ -159,7 +159,11 @@ def _internal_number_of_ones_2(current_n, original_num, index, current_factor, c
     elif 0 != current_num:
         cnt += current_factor
 
-    return _internal_number_of_ones_2(current_n // 10, original_num, index+1, log_mult(current_factor, 10), cnt)
+    return _internal_number_of_ones_2(current_n // 10, 
+                                      original_num, 
+                                      index+1, 
+                                      log_mult(current_factor, 10), 
+                                      cnt)
 
 def number_of_ones_2(n: int) -> int:
     """
@@ -227,4 +231,4 @@ def magic_list(n: int) -> List[Any]:
     return new_list
     
 if __name__ == "__main__":
-    print(number_of_ones_2(1))
+    print(number_of_ones_2(10000))
