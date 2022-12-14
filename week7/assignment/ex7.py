@@ -54,6 +54,8 @@ def log_mult(x: N, y: int) -> N:
 
 def _raise_power(x: int, n: int) -> int:
     """
+    Raising x to the power of n.
+    This is an internal function used by _internal_is_power_2
     """
     if 0 == n:
         return 1
@@ -65,12 +67,28 @@ def _raise_power(x: int, n: int) -> int:
 
 def _internal_is_power_2(b: int, x: int, cnt: int) -> bool:
     """
+    Another questionable implementation of is_power.
+    If you want this to work, switch the call to _internalk_is_power_2 with this one,
+    and use cnt=0 instead of cnt=b.
     """
-    current_exponent = _raise_power(b, cnt)
-    if (x == current_exponent) or (x == 1):
+    # If we received 0 on x and b, then they obviously share all powers
+    if (x == b) or (1 == x): 
         return True
-    if x < current_exponent:
+    if (0 == b) or (1 == b):
         return False
+
+    # If b is 0 or 1, and it's not equal to x, 
+    # then no power in the world can raise b to x
+    # If b exceeds x it means there is no possible integer power.
+    current_exponent = _raise_power(b, cnt)
+
+    # We found an exponent!
+    if x == current_exponent:
+        return True
+    elif x < current_exponent:
+        # We surpassed x, there's no way there is an exponent there
+        return False
+
     return _internal_is_power_2(b, x, cnt+1)
 
 def _internal_is_power(b: int, x: int, orig: int) -> bool:
@@ -96,8 +114,7 @@ def is_power(b: int, x: int) -> bool:
     Checking if b raised to any power results x.
     The function's runtime is O(log b * log x)
     """
-    #return _internal_is_power(b, x, b)
-    return _internal_is_power_2(b, x, 0)
+    return _internal_is_power(b, x, b)
 
 def _internal_reverse(s: str, index: int, current_str: str) -> str:
     """
@@ -131,7 +148,7 @@ def play_hanoi(hanoi: Any, n: int, src: Any, dest: Any, temp: Any) -> None:
 
 def _count_ones(current_n: int, cnt: int) -> int:
     """
-    Internal function for number_of_ones.
+    Internal function for _internal_number_of_ones_2.
     Counting how many ones are in the given number current_n.
     """
     if 0 == current_n:
@@ -145,26 +162,31 @@ def _count_ones(current_n: int, cnt: int) -> int:
         cnt += 1
     return _count_ones(current_n // 10, cnt)
 
-def _internal_number_of_ones(current_n: int, cnt: int) -> int:
+def _internal_number_of_ones_2(current_n: int, cnt: int) -> int:
     """
-    Internal function for number_of_ones.
+    Internal function for number_of_ones_2.
     Iterating on all possible numbers from initial current_n to 0.
     """
     if 0 == current_n:
         return cnt
-    return _internal_number_of_ones(current_n-1, _count_ones(current_n, cnt))
+    return _internal_number_of_ones_2(current_n-1, _count_ones(current_n, cnt))
 
-def number_of_ones(n: int) -> int:
+def number_of_ones_2(n: int) -> int:
     """
     Counting the number of ones present in all numbers from 0 to n.
-    This function is probably not the most efficient thing in the world.
+    This function is probably not the most efficient thing in the world,
+    This implementation is different and requires more recursion depth.
+    Another, more efficient solution, is down below.
     """
     counter = 0
-    counter = _internal_number_of_ones(n, counter)
+    counter = _internal_number_of_ones_2(n, counter)
     return counter
 
-def _internal_number_of_ones_2(current_n, original_num, index, current_factor, cnt):
+def _internal_number_of_ones(
+    current_n: int, original_num: int, index: int, current_factor: int, cnt: int) -> int:
     """
+    Internal function used by number_of_ones
+    This function solves the problem primarily by calculations and less by recursion
     """
     if 0 == current_n:
         return cnt
@@ -181,17 +203,18 @@ def _internal_number_of_ones_2(current_n, original_num, index, current_factor, c
     elif 0 != current_num:
         cnt += current_factor
 
-    return _internal_number_of_ones_2(current_n // 10, 
+    return _internal_number_of_ones(current_n // 10, 
                                       original_num, 
                                       index+1, 
                                       log_mult(current_factor, 10), 
                                       cnt)
 
-def number_of_ones_2(n: int) -> int:
+def number_of_ones(n: int) -> int:
     """
+    Counting the number of ones present in all numbers from 0 to n.
     """
     counter = 0
-    return _internal_number_of_ones_2(n, n, 0, 1, counter)
+    return _internal_number_of_ones(n, n, 0, 1, counter)
 
 def _compare_1d_lists(l1: List[int], l2: List[int], index: int) -> bool:
     """
@@ -252,5 +275,3 @@ def magic_list(n: int) -> List[Any]:
         new_list.append(magic_list(n-1))
     return new_list
     
-if __name__ == "__main__":
-    print(number_of_ones_2(10000))
