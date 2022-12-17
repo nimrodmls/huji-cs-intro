@@ -36,13 +36,14 @@ def _get_cells_to_check(picture: Picture, row: int, col: int) -> Tuple[List[int]
 
     return row_cells_left, row_cells_right, column_cells_above, column_cells_below
 
-def max_seen_cells(picture: Picture, row: int, col: int) -> int:
+def _seen_cells(picture: Picture, row: int, col: int, count_undef=True) -> int:
     """
     """
+    invalid_cells = [BLACK_CELL] if count_undef else [BLACK_CELL, UNDEF_CELL]
     seen_cells = 0
 
     # Current cell is black, nothing is seen from here but darkness
-    if BLACK_CELL == picture[row][col]:
+    if picture[row][col] in invalid_cells:
         return 0
 
     # Going over all the relevant cells
@@ -55,23 +56,29 @@ def max_seen_cells(picture: Picture, row: int, col: int) -> int:
             current_cell = cells_direction[current_index]
 
         # As long as we don't meet with a black cell, continue
-        while (BLACK_CELL != current_cell) and (current_index < len(cells_direction)):
+        while (current_cell not in invalid_cells) and (current_index < len(cells_direction)):
 
             current_cell = cells_direction[current_index]
-            if BLACK_CELL != current_cell:
+            if current_cell not in invalid_cells:
                 seen_cells += 1 # Incrementing the seen cells
 
             current_index += 1 # Advancing to the next index
 
     return seen_cells
 
+def max_seen_cells(picture: Picture, row: int, col: int) -> int:
+    """
+    """
+    return _seen_cells(picture, row, col, count_undef=True)
 
 picture = [[-1, 0, 1, -1], [0, 1, -1, 1], [1, 0, 1, 0]] 
-print(max_seen_cells(picture, 1, 1))
 
 def min_seen_cells(picture: Picture, row: int, col: int) -> int:
-    ...
+    """
+    """
+    return _seen_cells(picture, row, col, count_undef=False)
 
+print(min_seen_cells(picture, 1, 1))
 
 def check_constraints(picture: Picture, constraints_set: Set[Constraint]) -> int:
     ...
