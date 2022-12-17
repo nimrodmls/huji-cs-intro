@@ -10,7 +10,6 @@
 
 from typing import List, Tuple, Set, Optional
 
-
 # We define the types of a partial picture and a constraint (for type checking).
 Picture = List[List[int]]
 Constraint = Tuple[int, int, int] # Row, Column, Value
@@ -19,6 +18,11 @@ Constraint = Tuple[int, int, int] # Row, Column, Value
 BLACK_CELL = 0
 WHITE_CELL = 1
 UNDEF_CELL = -1 # Undefined cell
+
+# Constraints values for check_constraints
+CONSTRAINTS_INVALID = 0
+CONSTRAINTS_VALID = 1
+CONSTRAINTS_PARTIAL = 2
 
 def _get_cells_to_check(picture: Picture, row: int, col: int) -> Tuple[List[int], 
                                                                        List[int], 
@@ -78,11 +82,38 @@ def min_seen_cells(picture: Picture, row: int, col: int) -> int:
     """
     return _seen_cells(picture, row, col, count_undef=False)
 
-print(min_seen_cells(picture, 1, 1))
-
 def check_constraints(picture: Picture, constraints_set: Set[Constraint]) -> int:
-    ...
+    """
+    """
+    constraint_status = CONSTRAINTS_VALID
+    for constraint in constraints_set:
+        minimal_seen = min_seen_cells(picture, constraint[0], constraint[1])
+        maximal_seen = max_seen_cells(picture, constraint[0], constraint[1])
 
+        # The minimal and maximal are different, 
+        # we can't have a fully valid result at this time
+        if maximal_seen != minimal_seen:
+            # Checking the constraint's 'seen' value to determine the result
+            if (minimal_seen <= constraint[2]) and (maximal_seen >= constraint[2]):
+                # If we happen to come across a valid constraint, 
+                # then we mark the whole result as partial 
+                # (it's enough to have 1 to determine this)
+                return CONSTRAINTS_PARTIAL
+            else:
+                # The constraint is not valid, then we mark it so and if
+                # the loop finishes with it, it means no constraint is valid
+                constraint_status = CONSTRAINTS_INVALID
+
+    return constraint_status
+
+picture1 = [[-1, 0, 1, -1], 
+            [0, 1, -1, 1], 
+            [1, 0, 1, 0]]
+picture2 = [[0, 0, 1, 1], 
+            [0, 1, 1, 1], 
+            [1, 0, 1, 0]]
+
+print(check_constraints(picture1, {(0, 3, 3), (1, 2, 5), (2, 0, 1)}))
 
 def solve_puzzle(constraints_set: Set[Constraint], n: int, m: int) -> Optional[Picture]:
     ...
