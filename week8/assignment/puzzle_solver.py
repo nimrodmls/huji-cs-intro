@@ -112,6 +112,10 @@ def check_constraints(picture: Picture, constraints_set: Set[Constraint]) -> int
                 # The constraint is not valid, then we mark it so and if
                 # the loop finishes with it, it means no constraint is valid
                 constraint_status = CONSTRAINTS_INVALID
+        # Since we have determined that the max and min are the same, 
+        # we just need to check that it matches with the requirement in the seen value
+        elif constraint[CONSTRAINT_SEEN_INDEX] != minimal_seen:
+            return CONSTRAINTS_INVALID
 
     return constraint_status
 
@@ -121,8 +125,6 @@ picture1 = [[-1, 0, 1, -1],
 picture2 = [[0, 0, 1, 1], 
             [0, 1, 1, 1], 
             [1, 0, 1, 0]]
-
-print(check_constraints(picture1, {(0, 3, 3), (1, 2, 5), (2, 0, 1)}))
 
 def _set_seen_1(picture: Picture, row: int, column: int) -> Picture:
     """
@@ -167,9 +169,38 @@ def _create_picture(constraints_set: Set[Constraint], rows: int, columns: int) -
     return picture
 
 constraints_set = {(0, 0, 0), (0, 3, 3), (1, 2, 5), (2, 0, 1)}
-print(_create_picture(constraints_set, 3, 4))
 
+def _internal_solve_puzzle(picture: Picture, 
+                           constraints_set: Set[Constraint], 
+                           row_size: int, 
+                           column_size: int, 
+                           index: int):
+    """
+    """
+    # We reached the end, let the drums roll and decide the result of this picture
+    if (row_size * column_size) == index: 
+        return check_constraints(picture, constraints_set)
 
+    row, column = (index // row_size), (index % column_size)
+
+    if UNDEF_CELL != picture[row][column]:
+        return _internal_solve_puzzle(picture, constraints_set, row_size, column_size, index + 1)
+
+    for cell_value in [BLACK_CELL, WHITE_CELL]:
+
+        picture[row][column] = cell_value
+        constraints_status = check_constraints(picture, constraints_set)
+
+        if CONSTRAINTS_PARTIAL == constraints_status:
+            result = _internal_solve_puzzle(picture, constraints_set, row_size, column_size, index + 1)
+            if result == CONSTRAINTS_VALID:
+                return result
+        elif CONSTRAINTS_VALID == constraints_status:
+            return constraints_status
+        elif CONSTRAINTS_INVALID == constraints_status:
+            picture[row][column] = UNDEF_CELL
+
+    return constraints_status
 
 def solve_puzzle(constraints_set: Set[Constraint], n: int, m: int) -> Optional[Picture]:
     """
@@ -177,7 +208,14 @@ def solve_puzzle(constraints_set: Set[Constraint], n: int, m: int) -> Optional[P
     picture = _create_picture(constraints_set, n, m)
     if picture is None: # Failed to create picture with the given constraints
         return None
-    
+
+    puzzle_status = _internal_solve_puzzle(picture, constraints_set, n, m, 0)
+    if puzzle_status in [CONSTRAINTS_INVALID, CONSTRAINTS_PARTIAL]:
+        return None
+
+    return picture
+
+print(solve_puzzle({(0, 2, 3), (1, 1, 4), (2, 2, 5)}, 3, 3))
 
 def how_many_solutions(constraints_set: Set[Constraint], n: int, m: int) -> int:
     ...
