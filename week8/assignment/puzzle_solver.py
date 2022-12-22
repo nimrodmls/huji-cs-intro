@@ -181,7 +181,7 @@ def _internal_solve_puzzle(picture: Picture,
     if (row_size * column_size) == index: 
         return check_constraints(picture, constraints_set)
 
-    row, column = (index // row_size), (index % column_size)
+    row, column = (index // (row_size+1)), (index % column_size)
 
     if UNDEF_CELL != picture[row][column]:
         return _internal_solve_puzzle(picture, constraints_set, row_size, column_size, index + 1)
@@ -202,6 +202,37 @@ def _internal_solve_puzzle(picture: Picture,
 
     return constraints_status
 
+def _internal_solve_puzzle_c(picture: Picture, 
+                           constraints_set: Set[Constraint], 
+                           row_size: int, 
+                           column_size: int, 
+                           index: int,
+                           sol_count: int):
+    """
+    """
+    # We reached the end, let the drums roll and decide the result of this picture
+    if (row_size * column_size) == index: 
+        return sol_count
+
+    row, column = (index // row_size), (index % column_size)
+
+    if UNDEF_CELL != picture[row][column]:
+        return _internal_solve_puzzle_c(picture, constraints_set, row_size, column_size, index + 1, sol_count)
+
+    for cell_value in [BLACK_CELL, WHITE_CELL]:
+
+        picture[row][column] = cell_value
+        constraints_status = check_constraints(picture, constraints_set)
+
+        if CONSTRAINTS_PARTIAL == constraints_status:
+            sol_count = _internal_solve_puzzle_c(picture, constraints_set, row_size, column_size, index + 1, sol_count)
+        elif CONSTRAINTS_VALID == constraints_status:
+            return sol_count + 1
+        elif CONSTRAINTS_INVALID == constraints_status:
+            picture[row][column] = UNDEF_CELL
+
+    return sol_count
+
 def solve_puzzle(constraints_set: Set[Constraint], n: int, m: int) -> Optional[Picture]:
     """
     """
@@ -215,11 +246,41 @@ def solve_puzzle(constraints_set: Set[Constraint], n: int, m: int) -> Optional[P
 
     return picture
 
-print(solve_puzzle({(0, 2, 3), (1, 1, 4), (2, 2, 5)}, 3, 3))
+#print(solve_puzzle({(0, 3, 3), (1, 2, 5), (2, 0, 1), (0, 0, 0)}, 3, 4))
+
+def _internal_how_many_solutions(picture, constraints_set: Set[Constraint], row_size, column_size, index, sol_count):
+    """
+    """
+    if (row_size * column_size) == index: 
+        return sol_count
+
+    row, column = (index // (row_size+1)), (index % column_size)
+
+    if UNDEF_CELL != picture[row][column]:
+        return _internal_how_many_solutions(picture, constraints_set, row_size, column_size, index + 1, sol_count)
+
+    for constraint_value in [BLACK_CELL, UNDEF_CELL]:
+        if constraint_value is BLACK_CELL:
+            new_constraint = (row, column, BLACK_CELL)
+            constraints_set.add(new_constraint)
+        result = solve_puzzle(constraints_set, row_size, column_size)
+        if result is None:
+            if constraint_value is BLACK_CELL:
+                constraints_set.remove(new_constraint)
+        else:
+            sol_count += 1
+            _internal_how_many_solutions(picture, constraints_set, row_size, column_size, index + 1, sol_count)
+
+    return sol_count
 
 def how_many_solutions(constraints_set: Set[Constraint], n: int, m: int) -> int:
-    ...
+    """
+    """
+    base_picture = _create_picture(constraints_set, n, m)
+    solution_count = _internal_solve_puzzle_c(base_picture, constraints_set, n, m, 0, 0)
+    return solution_count
 
+print(how_many_solutions({(0, 2, 3), (1, 1, 4), (2, 2, 5)}, 3, 3))
 
 def generate_puzzle(picture: Picture) -> Set[Constraint]:
     ...
