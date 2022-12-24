@@ -117,10 +117,33 @@ class Board:
         :param car: car object of car to add
         :return: True upon success. False if failed
         """
-        # Remember to consider all the reasons adding a car can fail.
-        # You may assume the car is a legal car object following the API.
-        # implement your code and erase the "pass"
-        pass
+        # First we check that the coordinates are OK, 
+        # only then we proceed to place the car on the board
+        # Sure, we can implement this with backtracking most likely,
+        # but thinking about it again, no.
+        for coordinate in car.car_coordinates():
+            try:
+                # If the cell has anything but an empty value, then it's impossible
+                if self.cell_content(coordinate) is not None:
+                    return False
+            except InvalidCoordinateException:
+                return False
+
+        # Now actually changing the cells
+        for coordinate in car.car_coordinates():
+            row_index = coordinate[Board.COORDINATE_ROW_INDEX]
+            cell_index = coordinate[Board.COORDINATE_CELL_INDEX]
+            self._board[row_index][cell_index] = car.get_name()
+        
+        return True
+
+    def _check_move_left(self, coordinate):
+        """
+        Checks if moving left is possible.
+        :return: False if impossible, True otherwise.
+        """
+        try:
+            if self.cell_content(coordinate) is not None:
 
     def move_car(self, name, move_key):
         """
