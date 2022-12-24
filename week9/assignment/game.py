@@ -1,3 +1,15 @@
+#################################################################
+# FILE : game.py
+# WRITER : Nimrod M.
+# EXERCISE : intro2cs1 ex9 2023
+# DESCRIPTION: Implementing the main program for Rush Hour Game
+# STUDENTS I DISCUSSED THE EXERCISE WITH: N/A
+# WEB PAGES I USED: N/A
+# NOTES: N/A
+#################################################################
+
+import sys
+
 class Game:
     """
     Add class description here
@@ -39,6 +51,10 @@ class Game:
         # implement your code and erase the "pass"
         pass
 
+def _add_cars_to_board():
+    """
+    """
+    pass
 
 if __name__== "__main__":
     # Your code here

@@ -1,7 +1,21 @@
+#################################################################
+# FILE : car.py
+# WRITER : Nimrod M.
+# EXERCISE : intro2cs1 ex9 2023
+# DESCRIPTION: Implementing the Car for Rush Hour Game
+# STUDENTS I DISCUSSED THE EXERCISE WITH: N/A
+# WEB PAGES I USED: N/A
+# NOTES: N/A
+#################################################################
+
 class Car:
     """
     Add class description here
     """
+
+    VERTICAL_ORIENTATION = 0
+    HORIZONTAL_ORIENTATION = 1
+
     def __init__(self, name, length, location, orientation):
         """
         A constructor for a Car object
