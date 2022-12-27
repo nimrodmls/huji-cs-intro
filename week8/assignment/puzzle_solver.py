@@ -347,9 +347,13 @@ def generate_puzzle(picture: Picture) -> Set[Constraint]:
         #   we found thus far, and of the unknown necessity ones.
         current_constraints: Set[Constraint] = set()
         current_constraints.update(final_constraints, temp_constraints)
-        # Trying to solve the puzzle, seeing of the solution is the same
+        # Trying to solve the puzzle, checking if the solution is the same
         solution = solve_puzzle(current_constraints, len(picture), len(picture[0]))
-        if solution != picture:
+        # If the picture is different than the original, or there
+        #   are more solutions than a single one, it means that this 
+        #   constraint is necessary
+        if (solution != picture) or \
+            (1 != how_many_solutions(current_constraints, len(picture), len(picture[0]))):
             final_constraints.add(constraint)
 
     return final_constraints
