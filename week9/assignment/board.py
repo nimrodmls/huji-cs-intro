@@ -42,8 +42,10 @@ class Board:
     BOARD_SIZE = 7
     EMPTY_CELL_VALUE = '.'
     EXIT_CELL = (3, 7)
+
     COORDINATE_ROW_INDEX = 0
     COORDINATE_CELL_INDEX = 1
+    
     MOVE_NAME_INDEX = 0
     MOVE_KEY_INDEX = 1
     MOVE_DESCRIPTION_INDEX = 2
@@ -55,7 +57,6 @@ class Board:
         self._board = [[Board.EMPTY_CELL_VALUE for cell_index in range(Board.BOARD_SIZE)] 
                             for row_index in range(Board.BOARD_SIZE)]
         self._cars = {}
-        self._occupied_cells = set()
 
     def __str__(self):
         """
@@ -128,6 +129,22 @@ class Board:
 
         return None if Board.EMPTY_CELL_VALUE == cell_value else cell_value
 
+    def _update_board(self, value, new_coordinates, old_coordinates=None):
+        """
+        """
+        # Emptying the old coordinates
+        if old_coordinates is not None:
+            for coordinate in old_coordinates:
+                row_index = coordinate[Board.COORDINATE_ROW_INDEX]
+                cell_index = coordinate[Board.COORDINATE_CELL_INDEX]
+                self._board[row_index][cell_index] = Board.EMPTY_CELL_VALUE
+        
+        # Setting the new coordinates
+        for coordinate in new_coordinates:
+            row_index = coordinate[Board.COORDINATE_ROW_INDEX]
+            cell_index = coordinate[Board.COORDINATE_CELL_INDEX]
+            self._board[row_index][cell_index] = value
+
     def add_car(self, car):
         """
         Adds a car to the game.
@@ -140,12 +157,7 @@ class Board:
             if self.cell_content(coordinate) is not None:
                 return False
 
-        # Now actually changing the cells
-        for coordinate in car.car_coordinates():
-            row_index = coordinate[Board.COORDINATE_ROW_INDEX]
-            cell_index = coordinate[Board.COORDINATE_CELL_INDEX]
-            self._board[row_index][cell_index] = car.get_name()
-        
+        self._update_board(car.get_name(), car.car_coordinates())
         self._cars[car.get_name()] = car
 
         return True
@@ -167,11 +179,13 @@ class Board:
         if move_key not in self._get_car_moves(current_car):
             return False 
 
-        old_coordinates = current_car.car_coordinates()
+        old_coordinates = set(current_car.car_coordinates())
         # Letting the car know that it should update its coordinates
         self._cars[name].move(move_key)
 
         # Updating the board accordingly
+        new_coordinates = set(current_car.car_coordinates())
+        self._update_board(current_car.get_name(), new_coordinates, old_coordinates)
         
 
     def _is_valid_coordinate(self, coordinate):

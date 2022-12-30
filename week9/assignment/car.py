@@ -13,6 +13,9 @@ class Car:
     Add class description here
     """
 
+    COORDINATE_ROW_INDEX = 0
+    COORDINATE_CELL_INDEX = 1
+
     VERTICAL_ORIENTATION = 0
     HORIZONTAL_ORIENTATION = 1
 
@@ -24,16 +27,23 @@ class Car:
         :param location: A tuple representing the car's head (row, col) location
         :param orientation: One of either 0 (VERTICAL) or 1 (HORIZONTAL)
         """
-        # Note that this function is required in your Car implementation.
-        # implement your code and erase the "pass"
-        pass
+        self._name = name
+        self._length = length
+        self._location = location
+        self._orientation = orientation
 
     def car_coordinates(self):
         """
         :return: A list of coordinates the car is in
         """
-        # implement your code and erase the "pass"
-        pass
+        head_row = self._location[Car.COORDINATE_ROW_INDEX]
+        head_column = self._location[Car.COORDINATE_CELL_INDEX]
+
+        if self._orientation is Car.VERTICAL_ORIENTATION:
+            return [(head_row - index, head_column) for index in range(self._length)]
+
+        else: # Horizontal
+            return [(head_row, head_column - index) for index in range(self._length)]
 
     def possible_moves(self):
         """
@@ -76,3 +86,6 @@ class Car:
         """
         # implement your code and erase the "pass"
         pass
+
+a = Car("O", 3, (2, 3), Car.VERTICAL_ORIENTATION)
+print(a.car_coordinates())
