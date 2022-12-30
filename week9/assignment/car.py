@@ -19,6 +19,11 @@ class Car:
     VERTICAL_ORIENTATION = 0
     HORIZONTAL_ORIENTATION = 1
 
+    MOVE_KEY_UP = 'u'
+    MOVE_KEY_DOWN = 'd'
+    MOVE_KEY_RIGHT = 'r'
+    MOVE_KEY_LEFT = 'l'
+
     def __init__(self, name, length, location, orientation):
         """
         A constructor for a Car object
@@ -40,52 +45,68 @@ class Car:
         head_column = self._location[Car.COORDINATE_CELL_INDEX]
 
         if self._orientation is Car.VERTICAL_ORIENTATION:
-            return [(head_row - index, head_column) for index in range(self._length)]
+            return [(head_row + index, head_column) for index in range(self._length)]
 
-        else: # Horizontal
+        else: # Horizontal orientation
             return [(head_row, head_column - index) for index in range(self._length)]
 
     def possible_moves(self):
         """
         :return: A dictionary of strings describing possible movements permitted by this car.
         """
-        # For this car type, keys are from 'udrl'
-        # The keys for vertical cars are 'u' and 'd'.
-        # The keys for horizontal cars are 'l' and 'r'.
-        # You may choose appropriate strings.
-        # implement your code and erase the "pass"
-        # The dictionary returned should look something like this:
-        # result = {'f': "cause the car to fly and reach the Moon",
-        #          'd': "cause the car to dig and reach the core of Earth",
-        #          'a': "another unknown action"}
-        # A car returning this dictionary supports the commands 'f','d','a'.
-        # implement your code and erase the "pass"
-        pass
+        if self._orientation is Car.VERTICAL_ORIENTATION:
+            return {
+                Car.MOVE_KEY_DOWN: "The car will go one cell downwards",
+                Car.MOVE_KEY_UP: "The car will go one cell upwards"
+            }
+
+        else: # Horizontal orientation
+            return {
+                Car.MOVE_KEY_RIGHT: "The car will go one cell to the right",
+                Car.MOVE_KEY_LEFT: "The car will go one cell to the left"
+            }
 
     def movement_requirements(self, move_key):
         """ 
         :param move_key: A string representing the key of the required move.
         :return: A list of cell locations which must be empty in order for this move to be legal.
         """
-        # For example, a car in locations [(1,2),(2,2)] requires [(3,2)] to
-        # be empty in order to move down (with a key 'd').
-        # implement your code and erase the "pass"
-        pass
+        head_row = self._location[Car.COORDINATE_ROW_INDEX]
+        head_column = self._location[Car.COORDINATE_CELL_INDEX]
+
+        if move_key is Car.MOVE_KEY_LEFT:
+            return [(head_row, head_column - 1)]
+        elif move_key is Car.MOVE_KEY_RIGHT:
+            return [(head_row, head_column + self._length)]
+        elif move_key is Car.MOVE_KEY_DOWN:
+            return [(head_row + self._length, head_column)]
+        elif move_key is Car.MOVE_KEY_UP:
+            return [(head_row - 1, head_column)]
 
     def move(self, move_key):
         """ 
         :param move_key: A string representing the key of the required move.
         :return: True upon success, False otherwise
         """
-        # implement your code and erase the "pass"
-        pass
+        head_row = self._location[Car.COORDINATE_ROW_INDEX]
+        head_column = self._location[Car.COORDINATE_CELL_INDEX]
+
+        moves = {
+            Car.MOVE_KEY_DOWN: (head_row - 1, head_column),
+            Car.MOVE_KEY_UP: (head_row + 1, head_column),
+            Car.MOVE_KEY_LEFT: (head_row, head_column - 1),
+            Car.MOVE_KEY_RIGHT: (head_row, head_column + 1)
+        }
+
+        if move_key not in moves:
+            return False
+
+        self._location = moves[move_key]
+        return True
 
     def get_name(self):
         """
         :return: The name of this car.
         """
-        # implement your code and erase the "pass"
-        pass
-
-a = Car("O", 3, (2, 3), Car.VERTICAL_ORIENTATION)
-print(a.car_coordinates())
+        return self._name
+        
