@@ -48,7 +48,7 @@ class Car:
             return [(head_row + index, head_column) for index in range(self._length)]
 
         else: # Horizontal orientation
-            return [(head_row, head_column - index) for index in range(self._length)]
+            return [(head_row, head_column + index) for index in range(self._length)]
 
     def possible_moves(self):
         """
@@ -92,8 +92,8 @@ class Car:
         head_column = self._location[Car.COORDINATE_CELL_INDEX]
 
         moves = {
-            Car.MOVE_KEY_DOWN: (head_row - 1, head_column),
-            Car.MOVE_KEY_UP: (head_row + 1, head_column),
+            Car.MOVE_KEY_DOWN: (head_row + 1, head_column),
+            Car.MOVE_KEY_UP: (head_row - 1, head_column),
             Car.MOVE_KEY_LEFT: (head_row, head_column - 1),
             Car.MOVE_KEY_RIGHT: (head_row, head_column + 1)
         }
@@ -109,4 +109,3 @@ class Car:
         :return: The name of this car.
         """
         return self._name
-        

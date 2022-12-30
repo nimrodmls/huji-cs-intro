@@ -8,30 +8,7 @@
 # NOTES: N/A
 #################################################################
 
-from helper import load_json
-
-#class Coordinate(object):
-#    """
-#    """
-#    DEFAULT_VALUE = '.'
-#
-#    def __init__(self, row_index, cell_index, cell_value=DEFAULT_VALUE):
-#        """
-#        """
-#        self._row_index = row_index
-#        self._cell_index = cell_index
-#        self._cell_value = cell_value
-#
-#    def get_coordinates():
-#        """
-#        """
-#        return 
-
-class InvalidCoordinateException(Exception):
-    """
-    Raised when the given coordinate is invalid
-    """
-    pass
+import car
 
 class Board:
     """
@@ -45,7 +22,7 @@ class Board:
 
     COORDINATE_ROW_INDEX = 0
     COORDINATE_CELL_INDEX = 1
-    
+
     MOVE_NAME_INDEX = 0
     MOVE_KEY_INDEX = 1
     MOVE_DESCRIPTION_INDEX = 2
@@ -57,6 +34,7 @@ class Board:
         self._board = [[Board.EMPTY_CELL_VALUE for cell_index in range(Board.BOARD_SIZE)] 
                             for row_index in range(Board.BOARD_SIZE)]
         self._cars = {}
+        self._occupied_cells = set()
 
     def __str__(self):
         """
@@ -66,8 +44,18 @@ class Board:
         # The game may assume this function returns a reasonable representation
         # of the board for printing, but may not assume details about it.
         # implement your code and erase the "pass"
+        board = [[Board.EMPTY_CELL_VALUE for cell_index in range(Board.BOARD_SIZE)] 
+                            for row_index in range(Board.BOARD_SIZE)]
+
+        for car in self._cars:
+            for coordinate in self._cars[car].car_coordinates():
+                if coordinate not in self.cell_list():
+                    row_index = coordinate[Board.COORDINATE_ROW_INDEX]
+                    cell_index = coordinate[Board.COORDINATE_CELL_INDEX]
+                    board[row_index][cell_index] = self._cars[car].get_name()
+
         final_str = ""
-        for row in self._board:
+        for row in board:
             final_str += " ".join(row) + "\n"
         return final_str
 
@@ -92,7 +80,7 @@ class Board:
             # Checking the requirements for each key, and making sure each on is fulfilled
             #   if it is, then it's added to the result
             for requirement in requirements:
-                if self.cell_content(requirement) is None:
+                if self._is_valid_coordinate(requirement) and self.cell_content(requirement) is None:
                     all_moves[move_key] = move_keys[move_key]
         return all_moves
 
@@ -105,9 +93,9 @@ class Board:
         all_moves = []
         # Iterating on all cars on the board
         for car in self._cars:
-            current_moves = self._get_car_moves(car)
+            current_moves = self._get_car_moves(self._cars[car])
             for move in current_moves:
-                all_moves.append((car.get_name(), move, current_moves[move]))
+                all_moves.append((self._cars[car].get_name(), move, current_moves[move]))
         return all_moves
 
     def target_location(self):
@@ -186,6 +174,7 @@ class Board:
         # Updating the board accordingly
         new_coordinates = set(current_car.car_coordinates())
         self._update_board(current_car.get_name(), new_coordinates, old_coordinates)
+        return True
         
 
     def _is_valid_coordinate(self, coordinate):
@@ -199,4 +188,12 @@ class Board:
         return True
 
 board = Board()
-print(board.cell_content((99,4)))
+new_car = car.Car("O", 3, (2, 0), car.Car.HORIZONTAL_ORIENTATION)
+board.add_car(new_car)
+print(board.move_car('o', 'r'))
+print(board.move_car('O', 'r'))
+print(board.move_car('O', 'r'))
+print(board.move_car('O', 'r'))
+print(board.move_car('O', 'r'))
+print(board.move_car('O', 'r'))
+print(car)
