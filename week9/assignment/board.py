@@ -31,10 +31,7 @@ class Board:
         """
         Initializes a new & empty board
         """
-        self._board = [[Board.EMPTY_CELL_VALUE for cell_index in range(Board.BOARD_SIZE)] 
-                            for row_index in range(Board.BOARD_SIZE)]
         self._cars = {}
-        self._occupied_cells = set()
 
     def __str__(self):
         """
@@ -49,7 +46,7 @@ class Board:
 
         for car in self._cars:
             for coordinate in self._cars[car].car_coordinates():
-                if coordinate not in self.cell_list():
+                if coordinate in self.cell_list():
                     row_index = coordinate[Board.COORDINATE_ROW_INDEX]
                     cell_index = coordinate[Board.COORDINATE_CELL_INDEX]
                     board[row_index][cell_index] = self._cars[car].get_name()
@@ -111,27 +108,10 @@ class Board:
         :param coordinate: tuple of (row,col) of the coordinate to check
         :return: The name if the car in coordinate, None if empty
         """
-        row_index = coordinate[Board.COORDINATE_ROW_INDEX]
-        cell_index = coordinate[Board.COORDINATE_CELL_INDEX]
-        cell_value = self._board[row_index][cell_index]
-
-        return None if Board.EMPTY_CELL_VALUE == cell_value else cell_value
-
-    def _update_board(self, value, new_coordinates, old_coordinates=None):
-        """
-        """
-        # Emptying the old coordinates
-        if old_coordinates is not None:
-            for coordinate in old_coordinates:
-                row_index = coordinate[Board.COORDINATE_ROW_INDEX]
-                cell_index = coordinate[Board.COORDINATE_CELL_INDEX]
-                self._board[row_index][cell_index] = Board.EMPTY_CELL_VALUE
-        
-        # Setting the new coordinates
-        for coordinate in new_coordinates:
-            row_index = coordinate[Board.COORDINATE_ROW_INDEX]
-            cell_index = coordinate[Board.COORDINATE_CELL_INDEX]
-            self._board[row_index][cell_index] = value
+        for car in self._cars:
+            if coordinate in self._cars[car].car_coordinates():
+                return self._cars[car].get_name()
+        return None
 
     def add_car(self, car):
         """
@@ -145,7 +125,6 @@ class Board:
             if self.cell_content(coordinate) is not None:
                 return False
 
-        self._update_board(car.get_name(), car.car_coordinates())
         self._cars[car.get_name()] = car
 
         return True
@@ -167,15 +146,8 @@ class Board:
         if move_key not in self._get_car_moves(current_car):
             return False 
 
-        old_coordinates = set(current_car.car_coordinates())
-        # Letting the car know that it should update its coordinates
         self._cars[name].move(move_key)
-
-        # Updating the board accordingly
-        new_coordinates = set(current_car.car_coordinates())
-        self._update_board(current_car.get_name(), new_coordinates, old_coordinates)
         return True
-        
 
     def _is_valid_coordinate(self, coordinate):
         """
@@ -191,9 +163,15 @@ board = Board()
 new_car = car.Car("O", 3, (2, 0), car.Car.HORIZONTAL_ORIENTATION)
 board.add_car(new_car)
 print(board.move_car('o', 'r'))
+print(board)
 print(board.move_car('O', 'r'))
+print(board)
 print(board.move_car('O', 'r'))
+print(board)
 print(board.move_car('O', 'r'))
+print(board)
 print(board.move_car('O', 'r'))
+print(board)
 print(board.move_car('O', 'r'))
+print(board)
 print(car)
