@@ -44,6 +44,9 @@ class Board:
     EXIT_CELL = (3, 7)
     COORDINATE_ROW_INDEX = 0
     COORDINATE_CELL_INDEX = 1
+    MOVE_NAME_INDEX = 0
+    MOVE_KEY_INDEX = 1
+    MOVE_DESCRIPTION_INDEX = 2
 
     def __init__(self):
         """
@@ -51,7 +54,8 @@ class Board:
         """
         self._board = [[Board.EMPTY_CELL_VALUE for cell_index in range(Board.BOARD_SIZE)] 
                             for row_index in range(Board.BOARD_SIZE)]
-        self._cars = []
+        self._cars = {}
+        self._occupied_cells = set()
 
     def __str__(self):
         """
@@ -76,6 +80,21 @@ class Board:
         cells.append(Board.EXIT_CELL)
         return cells
 
+    def _get_car_moves(self, car):
+        """
+        """
+        all_moves = {}
+        move_keys = car.possible_moves()
+        # Iterating on each key from the possible moves of that car object 
+        for move_key in move_keys:
+            requirements = car.movement_requirements(move_key)
+            # Checking the requirements for each key, and making sure each on is fulfilled
+            #   if it is, then it's added to the result
+            for requirement in requirements:
+                if self.cell_content(requirement) is None:
+                    all_moves[move_key] = move_keys[move_key]
+        return all_moves
+
     def possible_moves(self):
         """
         This function returns the legal moves of all cars in this board
@@ -83,9 +102,11 @@ class Board:
                  representing legal moves
         """
         all_moves = []
+        # Iterating on all cars on the board
         for car in self._cars:
-            moves = car.possible_moves()
-            all_moves += [(car.get_name(), move, moves[move]) for move in moves]
+            current_moves = self._get_car_moves(car)
+            for move in current_moves:
+                all_moves.append((car.get_name(), move, current_moves[move]))
         return all_moves
 
     def target_location(self):
@@ -98,13 +119,9 @@ class Board:
     def cell_content(self, coordinate):
         """
         Checks if the given coordinates are empty.
-        Raises InvalidCoordinateException if the given coordinate is invalid.
         :param coordinate: tuple of (row,col) of the coordinate to check
         :return: The name if the car in coordinate, None if empty
         """
-        if not self._is_valid_coordinate(coordinate):
-            raise InvalidCoordinateException
-
         row_index = coordinate[Board.COORDINATE_ROW_INDEX]
         cell_index = coordinate[Board.COORDINATE_CELL_INDEX]
         cell_value = self._board[row_index][cell_index]
@@ -119,14 +136,8 @@ class Board:
         """
         # First we check that the coordinates are OK, 
         # only then we proceed to place the car on the board
-        # Sure, we can implement this with backtracking most likely,
-        # but thinking about it again, no.
         for coordinate in car.car_coordinates():
-            try:
-                # If the cell has anything but an empty value, then it's impossible
-                if self.cell_content(coordinate) is not None:
-                    return False
-            except InvalidCoordinateException:
+            if self.cell_content(coordinate) is not None:
                 return False
 
         # Now actually changing the cells
@@ -135,15 +146,9 @@ class Board:
             cell_index = coordinate[Board.COORDINATE_CELL_INDEX]
             self._board[row_index][cell_index] = car.get_name()
         
-        return True
+        self._cars[car.get_name()] = car
 
-    def _check_move_left(self, coordinate):
-        """
-        Checks if moving left is possible.
-        :return: False if impossible, True otherwise.
-        """
-        try:
-            if self.cell_content(coordinate) is not None:
+        return True
 
     def move_car(self, name, move_key):
         """
@@ -152,8 +157,22 @@ class Board:
         :param move_key: Key of move in car to activate
         :return: True upon success, False otherwise
         """
-        # implement your code and erase the "pass"
-        pass
+        # First checking if that car even exists in the records
+        if name not in self._cars:
+            return False
+
+        current_car = self._cars[name]
+
+        # Now finding out if that move_key is possible
+        if move_key not in self._get_car_moves(current_car):
+            return False 
+
+        old_coordinates = current_car.car_coordinates()
+        # Letting the car know that it should update its coordinates
+        self._cars[name].move(move_key)
+
+        # Updating the board accordingly
+        
 
     def _is_valid_coordinate(self, coordinate):
         """
