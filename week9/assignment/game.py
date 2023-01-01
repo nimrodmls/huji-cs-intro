@@ -46,9 +46,9 @@ class Game:
         """
         """
         print(self._board)
-        print("Possible moves for current turn: ")
+        print("[!] Possible moves for current turn: ")
         for move in self._board.possible_moves():
-            print("{name},{key} - {description}".format(
+            print("\t[>] {name},{key} - {description}".format(
                 name=move[Game.CAR_MOVE_NAME_INDEX],
                 key=move[Game.CAR_MOVE_KEY_INDEX],
                 description=move[Game.CAR_MOVE_DESCRIPTION_INDEX]
@@ -71,7 +71,7 @@ class Game:
         don't interfere with the API.
         """
         self._new_turn_prompt()
-        user_input = input("Enter the move (or ! to exit): ")
+        user_input = input("[!] Enter the move (or ! to exit): ")
         if Game.EXIT_INPUT == user_input:
             print("[!] Exiting Game...")
             return False
@@ -82,19 +82,17 @@ class Game:
             print("[!] Invalid input! Make sure you follow the car,direction style.")
             return True # This is intentional, we don't want the game to exit
 
-        # Doing some magic for extracting all valid move keys for current turn
-        move_keys = list(zip(*self._board.possible_moves()))[Game.CAR_MOVE_KEY_INDEX]
-        user_direction = ready_input[Game.INPUT_CAR_DIRECTION_INDEX]
         # Making sure the user direction input is okay,
         #   this is actually checked in board in some way, but the instructions
         #   are quite unclear about those validations
-        if user_direction not in move_keys or user_direction not in ['u', 'r', 'd', 'l']:
+        user_direction = ready_input[Game.INPUT_CAR_DIRECTION_INDEX]
+        if user_direction not in ['u', 'r', 'd', 'l']:
             print("[!] Invalid direction! Make sure it is a valid direction!")
             return True
         
         # Trying to actually move the car
         if not self._board.move_car(ready_input[Game.INPUT_CAR_NAME_INDEX], user_direction):
-            print ("[!] Moving the car has failed - Car doesn't exist")
+            print ("[!] Moving the car has failed")
             return True
 
         return True
