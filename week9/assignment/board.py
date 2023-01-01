@@ -43,17 +43,26 @@ class Board:
         # implement your code and erase the "pass"
         board = [[Board.EMPTY_CELL_VALUE for cell_index in range(Board.BOARD_SIZE)] 
                             for row_index in range(Board.BOARD_SIZE)]
+        # Artificially adding the target location as it's not really part of the board
+        board[Board.EXIT_CELL[Board.COORDINATE_ROW_INDEX]].append(">")
 
+        board_coordinates = self.cell_list()
         for car in self._cars:
             for coordinate in self._cars[car].car_coordinates():
-                if coordinate in self.cell_list():
+                # If the car somehow managed to get out of the board, then we won't print
+                #   the cells outside the board range. This can happen when the car is moved
+                #   not via the Board.move_car (since the car doesn't know the range of
+                #   the board)
+                if coordinate in board_coordinates:
                     row_index = coordinate[Board.COORDINATE_ROW_INDEX]
                     cell_index = coordinate[Board.COORDINATE_CELL_INDEX]
                     board[row_index][cell_index] = self._cars[car].get_name()
 
+        # Building the board string
         final_str = ""
         for row in board:
             final_str += " ".join(row) + "\n"
+
         return final_str
 
     def cell_list(self):
@@ -65,21 +74,6 @@ class Board:
                     for cell_index in range(Board.BOARD_SIZE)]
         cells.append(Board.EXIT_CELL)
         return cells
-
-    def _get_car_moves(self, car):
-        """
-        """
-        all_moves = {}
-        move_keys = car.possible_moves()
-        # Iterating on each key from the possible moves of that car object 
-        for move_key in move_keys:
-            requirements = car.movement_requirements(move_key)
-            # Checking the requirements for each key, and making sure each on is fulfilled
-            #   if it is, then it's added to the result
-            for requirement in requirements:
-                if self._is_valid_coordinate(requirement) and self.cell_content(requirement) is None:
-                    all_moves[move_key] = move_keys[move_key]
-        return all_moves
 
     def possible_moves(self):
         """
@@ -120,8 +114,11 @@ class Board:
         :return: True upon success. False if failed
         """
         # First we check that the coordinates are OK, 
-        # only then we proceed to place the car on the board
+        #   only then we proceed to place the car on the board
         for coordinate in car.car_coordinates():
+            if coordinate not in self.cell_list():
+                return False
+
             if self.cell_content(coordinate) is not None:
                 return False
 
@@ -149,29 +146,33 @@ class Board:
         self._cars[name].move(move_key)
         return True
 
+    def _get_car_moves(self, car):
+        """
+        """
+        all_moves = {}
+        move_keys = car.possible_moves()
+        # Iterating on each key from the possible moves of that car object 
+        for move_key in move_keys:
+            requirements = car.movement_requirements(move_key)
+            # Checking the requirements for each key, and making sure each on is fulfilled
+            #   if it is, then it's added to the result
+            for requirement in requirements:
+                # Checking that the coordinate is within the boundries of the board
+                #   and that the cell is empty
+                if self._is_valid_coordinate(requirement) and self.cell_content(requirement) is None:
+                    all_moves[move_key] = move_keys[move_key]
+        return all_moves
+
     def _is_valid_coordinate(self, coordinate):
         """
         Validates the given coordinate with the board.
         :return: True for valid, False for invalid
         """
+        # Giving the target location special treatment as it's actually outside the board
+        if self.target_location() == coordinate:
+            return True
+
         for index in coordinate:
             if index >= Board.BOARD_SIZE or index < 0:
                 return False
         return True
-
-board = Board()
-new_car = car.Car("O", 3, (2, 0), car.Car.HORIZONTAL_ORIENTATION)
-board.add_car(new_car)
-print(board.move_car('o', 'r'))
-print(board)
-print(board.move_car('O', 'r'))
-print(board)
-print(board.move_car('O', 'r'))
-print(board)
-print(board.move_car('O', 'r'))
-print(board)
-print(board.move_car('O', 'r'))
-print(board)
-print(board.move_car('O', 'r'))
-print(board)
-print(car)
