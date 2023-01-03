@@ -8,8 +8,6 @@
 # NOTES: N/A
 #################################################################
 
-import car
-
 class Board:
     """
     Add a class description here.

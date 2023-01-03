@@ -111,31 +111,30 @@ class Game:
         print(self._board)
         print("[!] The game has been won!")      
 
-def _add_cars_to_board(board, car_config):
+def _add_car_to_board(board, car_name, car_config):
     """
     """
-    for car_name in car_config:
-        # Checking that car name is valid
-        if car_name not in ['Y', 'B', 'O', 'G', 'W', 'R']:
-            return False
+    # Checking that car name is valid
+    if car_name not in ['Y', 'B', 'O', 'G', 'W', 'R']:
+        return False
 
-        # Checking car length validity
-        car_length = car_config[car_name][CAR_CONFIG_LENGTH_INDEX]
-        if car_length not in range(2,5):
-            return False
+    # Checking car length validity
+    car_length = car_config[CAR_CONFIG_LENGTH_INDEX]
+    if car_length not in range(2,5):
+        return False
 
-        # Location validity is checked within board
-        car_location = car_config[car_name][CAR_CONFIG_LOC_INDEX]
-        
-        # Checking orientation validity
-        car_orientation = car_config[car_name][CAR_CONFIG_ORIENTATION_INDEX]
-        if car_orientation not in [Car.HORIZONTAL_ORIENTATION, Car.VERTICAL_ORIENTATION]:
-            return False
+    # Location validity is checked within board
+    car_location = car_config[CAR_CONFIG_LOC_INDEX]
+    
+    # Checking orientation validity
+    car_orientation = car_config[CAR_CONFIG_ORIENTATION_INDEX]
+    if car_orientation not in [Car.HORIZONTAL_ORIENTATION, Car.VERTICAL_ORIENTATION]:
+        return False
 
-        # Trying to add the car to the board
-        current_car = Car(car_name, car_length, car_location, car_orientation)
-        if not board.add_car(current_car):
-            return False
+    # Trying to add the car to the board
+    current_car = Car(car_name, car_length, car_location, car_orientation)
+    if not board.add_car(current_car):
+        return False
 
     return True
 
@@ -145,8 +144,15 @@ def main(json_path):
     """
     board = Board()
     car_config = load_json(json_path)
-    if not _add_cars_to_board(board, car_config):
-        print("[!] Error - Car config invalid, make sure cars don't overlap and are named properly")
+
+    result = False
+    for car_name in car_config:
+        if _add_car_to_board(board, car_name, car_config[car_name]):
+            result = True # We successfully added a car to the board, 
+                          # the game can start even if some failed
+            
+    if not result:
+        return
 
     game = Game(board)
     game.play()
