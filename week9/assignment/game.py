@@ -82,6 +82,14 @@ class Game:
             print("[!] Invalid input! Make sure you follow the car,direction style.")
             return True # This is intentional, we don't want the game to exit
 
+        # Making sure the car name is OK, it may be possible that the car is
+        #   added by a mysterious way into the board, but it's not valid according
+        #   to the game rules, so we don't allow it.
+        user_car_name = ready_input[Game.INPUT_CAR_NAME_INDEX]
+        if user_car_name not in ['Y', 'B', 'O', 'G', 'W', 'R']:
+            print("[!] Invalid car name! Make sure you name a valid car!")
+            return True # This is intentional, we don't want the game to exit
+            
         # Making sure the user direction input is okay,
         #   this is actually checked in board in some way, but the instructions
         #   are quite unclear about those validations

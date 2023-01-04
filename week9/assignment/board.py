@@ -111,7 +111,11 @@ class Board:
         :param car: car object of car to add
         :return: True upon success. False if failed
         """
-        # First we check that the coordinates are OK, 
+        # We make sure the car name doesn't exist
+        if car.get_name() in self._cars:
+            return False
+
+        # We check that the coordinates are OK, 
         #   only then we proceed to place the car on the board
         for coordinate in car.car_coordinates():
             if coordinate not in self.cell_list():
@@ -144,6 +148,17 @@ class Board:
         self._cars[name].move(move_key)
         return True
 
+    def _is_valid_requirements(self, requirements):
+        """
+        """
+        for requirement in requirements:
+            # Checking that the coordinate is within the boundries of the board
+            #   and that the cell is empty
+            if not self._is_valid_coordinate(requirement) or \
+                                    self.cell_content(requirement) is not None:
+                return False
+        return True
+
     def _get_car_moves(self, car):
         """
         """
@@ -154,11 +169,8 @@ class Board:
             requirements = car.movement_requirements(move_key)
             # Checking the requirements for each key, and making sure each on is fulfilled
             #   if it is, then it's added to the result
-            for requirement in requirements:
-                # Checking that the coordinate is within the boundries of the board
-                #   and that the cell is empty
-                if self._is_valid_coordinate(requirement) and self.cell_content(requirement) is None:
-                    all_moves[move_key] = move_keys[move_key]
+            if self._is_valid_requirements(requirements):
+                all_moves[move_key] = move_keys[move_key]
         return all_moves
 
     def _is_valid_coordinate(self, coordinate):

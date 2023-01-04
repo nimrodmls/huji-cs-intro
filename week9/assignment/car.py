@@ -91,12 +91,17 @@ class Car:
         head_row = self._location[Car.COORDINATE_ROW_INDEX]
         head_column = self._location[Car.COORDINATE_CELL_INDEX]
 
-        moves = {
-            Car.MOVE_KEY_DOWN: (head_row + 1, head_column),
-            Car.MOVE_KEY_UP: (head_row - 1, head_column),
-            Car.MOVE_KEY_LEFT: (head_row, head_column - 1),
-            Car.MOVE_KEY_RIGHT: (head_row, head_column + 1)
-        }
+        moves = {}
+        if self._orientation is Car.VERTICAL_ORIENTATION:
+            moves = {
+                Car.MOVE_KEY_DOWN: (head_row + 1, head_column),
+                Car.MOVE_KEY_UP: (head_row - 1, head_column),
+            }
+        else: # Horizontal Orientation
+            moves = {
+                Car.MOVE_KEY_LEFT: (head_row, head_column - 1),
+                Car.MOVE_KEY_RIGHT: (head_row, head_column + 1)
+            }
 
         if move_key not in moves:
             return False
