@@ -20,10 +20,14 @@ CAR_CONFIG_LENGTH_INDEX = 0
 CAR_CONFIG_LOC_INDEX = 1
 CAR_CONFIG_ORIENTATION_INDEX = 2
 
-
 class Game:
     """
-    Add class description here
+    The primary game functionality for Rush Hour.
+    The game rules are that the board is 7x7, exit cell is in (3,7),
+    with cars permitted to go either left, right, up or down.
+    The permitted cars are Y(ellow), B(lue), O(range), G(reen), W(hite), R(ed).
+    Once a car in horizontal orientation arrives to the target cell, the game
+    is stopped. User is permitted to stop the game beforehand.
     """
 
     CAR_MOVE_NAME_INDEX = 0
@@ -44,6 +48,8 @@ class Game:
 
     def _new_turn_prompt(self):
         """
+        Prints the board, along with information about the possible
+        movements of the cars on board.
         """
         print(self._board)
         print("[!] Possible moves for current turn: ")
@@ -56,19 +62,12 @@ class Game:
 
     def __single_turn(self):
         """
-        Note - this function is here to guide you and it is *not mandatory*
-        to implement it. 
-
-        The function runs one round of the game :
-            1. Get user's input of: what color car to move, and what 
-                direction to move it.
-            2. Check if the input is valid.
-            3. Try moving car according to user's input.
-
-        Before and after every stage of a turn, you may print additional 
-        information for the user, e.g., printing the board. In particular,
-        you may support additional features, (e.g., hints) as long as they
-        don't interfere with the API.
+        Does a single turn for the user.
+        The user is prompted with the details of the car movements, and is
+        requested with directions for a car on the board.
+        Whether the input is valid or invalid, the function returns True, signals
+        to the caller that the game shall continue.
+        If the user requested the game to exit, the function returns False.
         """
         self._new_turn_prompt()
         user_input = input("[!] Enter the move (or ! to exit): ")
@@ -121,6 +120,9 @@ class Game:
 
 def _add_car_to_board(board, car_name, car_config):
     """
+    Adding a car, according to the given configuration, to the board.
+    If the car does not comply with the game rules, the addition fails 
+    and False is returned. Otherwise True. 
     """
     # Checking that car name is valid
     if car_name not in ['Y', 'B', 'O', 'G', 'W', 'R']:
@@ -149,23 +151,31 @@ def _add_car_to_board(board, car_name, car_config):
 def main(json_path):
     """
     The primary function for initializing the game objects and running the game.
+    All the cars from the configuration are added, this is best effort.
+    If no cars comply with the game rules, the game finishes instantly.
+    
+    :param json_path: The path on the filesystem for the JSON configuration.
     """
     board = Board()
     car_config = load_json(json_path)
 
     result = False
+    # Adding all cars to the board
     for car_name in car_config:
         if _add_car_to_board(board, car_name, car_config[car_name]):
             result = True # We successfully added a car to the board, 
                           # the game can start even if some failed
             
     if not result:
+        print("[!] Car configuration is invalid, game cannot start!")
         return
 
+    # Starting the game
     game = Game(board)
     game.play()
 
 if __name__== "__main__":
+    # Checking if we received a single argument
     if 2 != len(sys.argv):
         print("[!] Error - Expected JSON Config Path; {exec} [json_path]".format(exec=sys.argv[0]))
     else:

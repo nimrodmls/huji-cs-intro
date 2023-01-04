@@ -10,8 +10,8 @@
 
 class Board:
     """
-    Add a class description here.
-    Write briefly about the purpose of the class
+    Represents a board in the Rush Hour Game.
+    This board is a 7x7 board and complies with any sort of car.
     """
 
     BOARD_SIZE = 7
@@ -150,6 +150,8 @@ class Board:
 
     def _is_valid_requirements(self, requirements):
         """
+        Returns True if all movement requirements were satisfied.
+        False otherwise (some or all requirements left unsatisfied).
         """
         for requirement in requirements:
             # Checking that the coordinate is within the boundries of the board
@@ -161,6 +163,10 @@ class Board:
 
     def _get_car_moves(self, car):
         """
+        Returns all the possible moves which satisfy all requirements on the
+        board for the requested car.
+
+        :return: Dictionary of direction ID as key, and description as value
         """
         all_moves = {}
         move_keys = car.possible_moves()
@@ -176,6 +182,7 @@ class Board:
     def _is_valid_coordinate(self, coordinate):
         """
         Validates the given coordinate with the board.
+        
         :return: True for valid, False for invalid
         """
         # Giving the target location special treatment as it's actually outside the board

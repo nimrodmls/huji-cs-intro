@@ -10,7 +10,10 @@
 
 class Car:
     """
-    Add class description here
+    Represents a Car in the Rush Hour game.
+    This car can comply with any board, of any size (but 2-dimensional).
+    The car complies only with Up, Down, Left, Right movemenet directions,
+    and can be only in vertical or horizontal orientation, of any length or name.
     """
 
     COORDINATE_ROW_INDEX = 0
