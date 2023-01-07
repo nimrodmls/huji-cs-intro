@@ -9,8 +9,7 @@
 #################################################################
 
 from typing import List
-from game_display import GameDisplay
-from common import BaseGameObject, Coordinate, Direction, draw_coordinates
+from common import BaseGameObject, Coordinate, Direction
 
 class Snake(BaseGameObject):
     """
@@ -22,18 +21,6 @@ class Snake(BaseGameObject):
         super().__init__(self._get_initial_position(location, length), "black")
 
         self._current_direction = Direction.UP
-
-    def __str__(self) -> str:
-        """
-        Prints the Snake's Coordinates
-        Primarily used for debugging matters.
-        """
-        return str(self._coordinates)
-
-    def get_coordinates(self) -> List[Coordinate]:
-        """
-        """
-        return self._coordinates
 
     def movement_requirements(self, direction: Direction) -> Coordinate:
         """

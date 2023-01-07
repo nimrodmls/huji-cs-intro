@@ -44,6 +44,11 @@ class Coordinate(object):
         Returns the coordinates in a string format (similar to __str__)
         """
         return self.__str__()
+
+    def __eq__(self, other: object) -> bool:
+        if (other.row == self.row) and (other.column == self.column):
+            return True
+        return False
     
 class BaseGameObject(object):
     """
@@ -54,10 +59,22 @@ class BaseGameObject(object):
         self._coordinates = coordinates
         self._color = color
 
-    def draw_object(self, gui: GameDisplay):
+    def __str__(self) -> str:
+        """
+        Prints the game object's Coordinates
+        Primarily used for debugging matters.
+        """
+        return str(self._coordinates)
+
+    def draw_object(self, gui: GameDisplay) -> None:
         """
         """
         draw_coordinates(gui, self._coordinates, self._color)
+
+    def get_coordinates(self) -> List[Coordinate]:
+        """
+        """
+        return self._coordinates
 
     def interact(self, snake_game):
         """

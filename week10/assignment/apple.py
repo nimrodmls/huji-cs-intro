@@ -8,4 +8,11 @@
 # NOTES: N/A
 #################################################################
 
-from common import BaseGameObject
+from common import BaseGameObject, Coordinate
+
+class Apple(BaseGameObject):
+    """
+    """
+
+    def __init__(self, coordinate: Coordinate) -> None:
+        super().__init__([coordinate], "green")
