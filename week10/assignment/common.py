@@ -8,6 +8,9 @@
 # NOTES: N/A
 #################################################################
 
+from typing import List
+from game_display import GameDisplay
+
 class Direction(object):
     """
     Used as an Enum for Directions
@@ -45,8 +48,26 @@ class Coordinate(object):
 class BaseGameObject(object):
     """
     """
+    def __init__(self, coordinates: List[Coordinate], color: str) -> None:
+        """
+        """
+        self._coordinates = coordinates
+        self._color = color
+
+    def draw_object(self, gui: GameDisplay):
+        """
+        """
+        draw_coordinates(gui, self._coordinates, self._color)
 
     def interact(self, snake_game):
         """
+        snake_game should be a SnakeGame object, 
+        it is not typed in order to prevent circular dependencies
         """
         raise NotImplementedError
+
+def draw_coordinates(gui: GameDisplay, coordinates: List[Coordinate], color) -> None:
+    """
+    """
+    for coordinate in coordinates:
+        gui.draw_cell(coordinate.column, coordinate.row, color)

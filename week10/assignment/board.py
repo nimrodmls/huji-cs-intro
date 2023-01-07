@@ -8,7 +8,8 @@
 # NOTES: N/A
 #################################################################
 
-from common import Coordinate, BaseGameObject
+from game_display import GameDisplay
+from common import Coordinate, BaseGameObject, Direction
 from snake import Snake
 
 class Board(object):
@@ -20,19 +21,36 @@ class Board(object):
         """
         self._dimensions = dimensions
         self._snake = snake
+        self._walls = []
+        self._apples = []
 
-    def __str__(self):
+    def draw_board(self, gui: GameDisplay):
         """
-        Prints the game board to the screen
         """
-        pass
+        for game_object in (self._walls + self._apples + [self._snake]):
+            game_object.draw_object(gui)
 
     def add_object(self, board_object: BaseGameObject) -> bool:
         """
         """
         pass
 
-    def move_snake(self, direction, interaction_callback) -> bool:
+    def move_snake(self, direction: Direction, expand: bool, interaction_callback) -> bool:
         """
         """
-        pass
+        in_boundries = True
+        requirement = self._snake.movement_requirements(direction)
+        # Checking the row coordinate is within the boundries
+        if requirement.row > self._dimensions.row or requirement.row < 0:
+            in_boundries = False 
+
+        # Checking the column coordinate is within the boundries
+        if requirement.column > self._dimensions.column or requirement.column < 0:
+            in_boundries = False 
+
+        # Whether inside or outside the boundries, we try to move, 
+        #   the game object will decide if it should end the game
+        # Not checking the return value on purpose, we've nothing to do with it
+        self._snake.move(direction, expand)
+
+        return in_boundries
