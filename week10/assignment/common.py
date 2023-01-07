@@ -72,6 +72,9 @@ class BaseGameObject(object):
         """
         return str(self._coordinates)
 
+    def __len__(self) -> int:
+        return len(self._coordinates)
+
     def draw_object(self, gui: GameDisplay) -> None:
         """
         """
