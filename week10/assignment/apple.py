@@ -9,6 +9,7 @@
 #################################################################
 
 from common import BaseGameObject, Coordinate
+from snake import Snake
 
 class Apple(BaseGameObject):
     """
@@ -16,3 +17,13 @@ class Apple(BaseGameObject):
 
     def __init__(self, coordinate: Coordinate) -> None:
         super().__init__([coordinate], "green")
+
+    def movement_requirements(self):
+        """
+        """
+        return None
+    
+    def move(self):
+        """
+        """
+        return None

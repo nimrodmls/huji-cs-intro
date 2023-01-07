@@ -8,7 +8,7 @@
 # NOTES: N/A
 #################################################################
 
-from typing import List
+from typing import List, Tuple
 from game_display import GameDisplay
 
 class Direction(object):
@@ -32,6 +32,12 @@ class Coordinate(object):
         # Intentionally public, to refrain from getter/setter functions
         self.row = row
         self.column = column
+
+    @staticmethod
+    def from_legacy_coordinate(legacy_coordinate: Tuple[int, int]):
+        """
+        """
+        return Coordinate(legacy_coordinate[1], legacy_coordinate[0])
 
     def __str__(self) -> str:
         """
@@ -76,7 +82,17 @@ class BaseGameObject(object):
         """
         return self._coordinates
 
-    def interact(self, snake_game):
+    def movement_requirements(self):
+        """
+        """
+        raise NotImplementedError
+
+    def move(self):
+        """
+        """
+        raise NotImplementedError
+
+    def interact(self, snake_game, source):
         """
         snake_game should be a SnakeGame object, 
         it is not typed in order to prevent circular dependencies

@@ -21,24 +21,37 @@ class Snake(BaseGameObject):
         super().__init__(self._get_initial_position(location, length), "black")
 
         self._current_direction = Direction.UP
+        self._expansion = 0
 
-    def movement_requirements(self, direction: Direction) -> Coordinate:
+    def movement_requirements(self) -> Coordinate:
         """
         Returns the requirements for the given direction regardless of 
         whether it is valid or invalid (e.g. if the current direction is
         left and this function is given right)
         """
         head = self._coordinates[0] # The head element of the snake
-        if Direction.LEFT == direction:
+        if Direction.LEFT == self._current_direction:
             return Coordinate(head.row, head.column-1)
-        elif Direction.RIGHT == direction:
+        elif Direction.RIGHT == self._current_direction:
             return Coordinate(head.row, head.column+1)
-        elif Direction.UP == direction:
+        elif Direction.UP == self._current_direction:
             return Coordinate(head.row+1, head.column)
         else: # Direction is Down
             return Coordinate(head.row-1, head.column)
 
-    def move(self, direction: Direction, expand=False) -> bool:
+    def move(self) -> None:
+        """
+        """
+        new_coordinate = self.movement_requirements()
+        self._coordinates.insert(0, new_coordinate) # Adding the new head
+
+        # If expanding the snake length is not necessary, remove the tail element
+        if 0 == self._expansion:
+            self._coordinates.pop() # Removing the last element (the tail)
+        else: # Otherwise, expand by 1 and decrement the expanion ratio
+            self._expansion -= 1
+
+    def change_direction(self, direction: Direction) -> bool:
         """
         """
         # Checking if the direction is in the valid directions 
@@ -46,15 +59,14 @@ class Snake(BaseGameObject):
         if direction not in self._get_valid_directions():
             return False
 
-        new_coordinate = self.movement_requirements(direction)
-        self._coordinates.insert(0, new_coordinate) # Adding the new head
-        if not expand: # If expanding the snake length is not necessary, remove the tail element
-            self._coordinates.pop() # Removing the last element (the tail)
-
         # Updating the current direction
         self._current_direction = direction
-
         return True
+
+    def expand(self, factor: int) -> None:
+        """
+        """
+        self._expansion += factor
 
     def _get_valid_directions(self) -> List[Direction]:
         """

@@ -25,35 +25,28 @@ class Board(object):
         """
         """
         self._dimensions = dimensions
-        self._snake = snake
-        self._walls = []
-        self._apples = []
+        self._game_objects: List[BaseGameObject] = [snake]
 
     def draw_board(self, gui: GameDisplay):
         """
         """
-        for game_object in self._get_game_objects():
+        for game_object in self._game_objects:
             game_object.draw_object(gui)
 
-    def add_object(self, board_object: BaseGameObject) -> bool:
+    def add_game_object(self, game_object: BaseGameObject) -> bool:
         """
         """
-        pass
+        self._game_objects.append(game_object)
 
-    def remove_object(self, board_object: BaseGameObject):
+    def remove_game_object(self, game_object: BaseGameObject):
         """
         """
-        
-
-    def _get_game_objects(self) -> List[BaseGameObject]:
-        """
-        """
-        return self._walls + self._apples + [self._snake]
+        self._game_objects.remove(game_object)
 
     def _get_object_at_coordinate(self, coordinate: Coordinate) -> BaseGameObject:
         """
         """
-        for game_object in self._get_game_objects():
+        for game_object in self._game_objects:
             if coordinate in game_object.get_coordinates():
                 return game_object
 
@@ -70,23 +63,17 @@ class Board(object):
 
         return True
 
-    def move_snake(self, direction: Direction, expand: bool, interaction_callback: InteractionCallback) -> bool:
+    def move_game_objects(self, interaction_callback: InteractionCallback) -> bool:
         """
         """
-        requirement = self._snake.movement_requirements(direction)
-        in_boundries = self._is_in_boundries(requirement)
-        
-        # If the requested coordinate is within the board, then check
-        #   if there is another object at the requested coordinate,
-        #   and in case there is, then let the caller know via the interaction_callback
-        if in_boundries:
-            destination_obj = self._get_object_at_coordinate(requirement)
-            if destination_obj is not None:
-                interaction_callback(self._snake, destination_obj)
+        for game_object in self._game_objects:
+            requirement = game_object.movement_requirements()
+            # If the game object can move and the requirements are satisfied
+            if requirement is not None and self._is_in_boundries(requirement):
 
-        # Whether inside or outside the boundries, we try to move, 
-        #   the game object will decide if it should end the game
-        # Not checking the return value on purpose, we've nothing to do with it
-        self._snake.move(direction, expand)
+                # If there is a game object at the destination, interact with it
+                destination_obj = self._get_object_at_coordinate(requirement)
+                if destination_obj is not None:
+                    interaction_callback(game_object, destination_obj)
 
-        return in_boundries
+                game_object.move()
