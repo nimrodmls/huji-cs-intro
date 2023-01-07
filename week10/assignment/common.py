@@ -85,12 +85,12 @@ class BaseGameObject(object):
         """
         return self._coordinates
 
-    def movement_requirements(self):
+    def movement_requirements(self) -> Coordinate:
         """
         """
         raise NotImplementedError
 
-    def move(self):
+    def move(self) -> bool:
         """
         """
         raise NotImplementedError
@@ -102,8 +102,46 @@ class BaseGameObject(object):
         """
         raise NotImplementedError
 
+class BaseDynamicGameObject(BaseGameObject):
+    """
+    """
+    def __init__(self, starting_direction, coordinates: List[Coordinate], color: str) -> None:
+        super().__init__(coordinates, color)
+        self._current_direction = starting_direction
+
+    def movement_requirements(self) -> Coordinate:
+        """
+        Returns the requirements for the given direction regardless of 
+        whether it is valid or invalid (e.g. if the current direction is
+        left and this function is given right)
+        """
+        head = self._coordinates[0] # The head element of the snake
+        if Direction.LEFT == self._current_direction:
+            return Coordinate(head.row, head.column-1)
+        elif Direction.RIGHT == self._current_direction:
+            return Coordinate(head.row, head.column+1)
+        elif Direction.UP == self._current_direction:
+            return Coordinate(head.row+1, head.column)
+        else: # Direction is Down
+            return Coordinate(head.row-1, head.column)
+
+def is_in_boundries(height: int, width: int, coordinate: Coordinate) -> bool:
+    """
+    """
+    # Checking the row coordinate is within the boundries
+    if coordinate.row >= height or coordinate.row < 0:
+        return False
+
+    # Checking the column coordinate is within the boundries
+    if coordinate.column >= width or coordinate.column < 0:
+        return False 
+
+    return True
+
 def draw_coordinates(gui: GameDisplay, coordinates: List[Coordinate], color) -> None:
     """
     """
     for coordinate in coordinates:
-        gui.draw_cell(coordinate.column, coordinate.row, color)
+        # Only if the coordinate is within the display board draw it
+        if is_in_boundries(gui.height, gui.width, coordinate):
+            gui.draw_cell(coordinate.column, coordinate.row, color)

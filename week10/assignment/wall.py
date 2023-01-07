@@ -8,4 +8,12 @@
 # NOTES: N/A
 #################################################################
 
-from common import BaseGameObject
+from typing import List
+from common import BaseDynamicGameObject
+
+class Wall(BaseDynamicGameObject):
+    """
+    """
+
+    #def __init__(self, length: int = 3) -> None:
+    #    super().__init__(coordinates, color)

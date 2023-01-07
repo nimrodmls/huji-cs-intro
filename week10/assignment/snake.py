@@ -9,35 +9,17 @@
 #################################################################
 
 from typing import List
-from common import BaseGameObject, Coordinate, Direction
+from common import BaseDynamicGameObject, Coordinate, Direction
 
-class Snake(BaseGameObject):
+class Snake(BaseDynamicGameObject):
     """
     """
 
-    def __init__(self, location: Coordinate, length: int) -> None:
+    def __init__(self, location: Coordinate, length: int = 3) -> None:
         # The coordinates which the snake occupies, the order of this list is
         #   integral to the operation of the object
-        super().__init__(self._get_initial_position(location, length), "black")
-
-        self._current_direction = Direction.UP
+        super().__init__(Direction.UP, self._get_initial_position(location, length), "black")
         self._expansion = 0
-
-    def movement_requirements(self) -> Coordinate:
-        """
-        Returns the requirements for the given direction regardless of 
-        whether it is valid or invalid (e.g. if the current direction is
-        left and this function is given right)
-        """
-        head = self._coordinates[0] # The head element of the snake
-        if Direction.LEFT == self._current_direction:
-            return Coordinate(head.row, head.column-1)
-        elif Direction.RIGHT == self._current_direction:
-            return Coordinate(head.row, head.column+1)
-        elif Direction.UP == self._current_direction:
-            return Coordinate(head.row+1, head.column)
-        else: # Direction is Down
-            return Coordinate(head.row-1, head.column)
 
     def move(self) -> None:
         """

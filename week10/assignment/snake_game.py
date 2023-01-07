@@ -14,8 +14,11 @@ class SnakeGame:
 
     def __init__(self, total_apples: int) -> None:
         self.__key_clicked = None
-        self._snake = Snake(Coordinate(4,4), 3)
+        self._snake = Snake(Coordinate(4,4))
         self._board = Board(self._snake, Coordinate(HEIGHT, WIDTH))
+        self._board.add_game_object(Apple(Coordinate(0, 5)))
+        self._board.add_game_object(Apple(Coordinate(1, 5)))
+        self._board.add_game_object(Apple(Coordinate(2, 5)))
         self._total_apples = total_apples
         self._current_apples = 0
         self._score = 0

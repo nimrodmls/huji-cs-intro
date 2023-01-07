@@ -10,7 +10,7 @@
 
 from typing import List, Callable
 from game_display import GameDisplay
-from common import Coordinate, BaseGameObject
+from common import Coordinate, BaseGameObject, is_in_boundries
 from snake import Snake
 
 # Signature for the interaction callback, first game object is the source and
@@ -74,6 +74,8 @@ class Board(object):
             elif requirement is not None and not self._is_in_boundries(requirement):
                 interaction_callback(game_object, OutOfBounds)
 
+                game_object.move()
+
     def _get_object_at_coordinate(self, coordinate: Coordinate) -> BaseGameObject:
         """
         """
@@ -86,12 +88,4 @@ class Board(object):
     def _is_in_boundries(self, coordinate: Coordinate) -> bool:
         """
         """
-        # Checking the row coordinate is within the boundries
-        if coordinate.row > self._dimensions.row or coordinate.row < 0:
-            return False
-
-        # Checking the column coordinate is within the boundries
-        if coordinate.column > self._dimensions.column or coordinate.column < 0:
-            return False 
-
-        return True
+        return is_in_boundries(self._dimensions.row, self._dimensions.column, coordinate)
