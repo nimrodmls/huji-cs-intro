@@ -8,8 +8,8 @@
 # NOTES: N/A
 #################################################################
 
-from common import BaseGameObject, Coordinate, Direction
 from typing import List
+from common import BaseGameObject, Coordinate, Direction
 
 class Snake(BaseGameObject):
     """
@@ -18,6 +18,8 @@ class Snake(BaseGameObject):
     def __init__(self, location: Coordinate, length: int) -> None:
         super().__init__()
 
+        # The coordinates which the snake occupies, the order of this list is
+        #   integral to the operation of the object
         self._coordinates = self._get_initial_position(location, length)
         self._head = location
         # Relying on the fact that it is a sorted coordinate list, 
@@ -25,11 +27,18 @@ class Snake(BaseGameObject):
         self._tail = self._coordinates[-1]
         self._current_direction = Direction.UP
 
+    def __str__(self):
+        """
+        Prints the Snake's Coordinates
+        Primarily used for debugging matters.
+        """
+        return str(self._coordinates)
+
     def _get_initial_position(self, head_location: Coordinate, length: int) -> List[Coordinate]:
         """
         """
         # Initializing the starting coordinates of the snake to be under the head location
-        return [Coordinate(head_location.row+index, head_location.column) 
+        return [Coordinate(head_location.row-index, head_location.column) 
                     for index in range(length)]
 
     def get_coordinates(self) -> List[Coordinate]:
@@ -37,17 +46,53 @@ class Snake(BaseGameObject):
         """
         return self._coordinates
 
-    def expand(self):
+    def movement_requirements(self, direction):
         """
+        Returns the requirements for the given direction regardless of 
+        whether it is valid or invalid (e.g. if the current direction is
+        left and this function is given right)
         """
-        self._coordinates.append()
+        head = self._coordinates[0] # The head element of the snake
+        if Direction.LEFT == direction:
+            return Coordinate(head.row, head.column-1)
+        elif Direction.RIGHT == direction:
+            return Coordinate(head.row, head.column+1)
+        elif Direction.UP == direction:
+            return Coordinate(head.row+1, head.column)
+        else: # Direction is Down
+            return Coordinate(head.row-1, head.column)
 
-    def move(self, direction) -> bool:
+    def _get_valid_directions(self) -> List[Direction]:
         """
         """
-        pass
+        if (Direction.LEFT == self._current_direction) or \
+                (Direction.RIGHT == self._current_direction):
+            return [Direction.UP, Direction.DOWN, self._current_direction]
+        else: # Up or Down
+            return [Direction.RIGHT, Direction.LEFT, self._current_direction]
 
-a = Snake(Coordinate(4,5), 3)
-for coordinate in a.get_coordinates():
-    print(coordinate)
-print(a._head, a._tail)
+    def move(self, direction: Direction, expand=False) -> bool:
+        """
+        """
+        if direction is None:
+            return False
+
+        # Checking if the direction is in the valid directions 
+        #   for the current snake orientation
+        if direction not in self._get_valid_directions():
+            return False
+
+        new_coordinate = self.movement_requirements(direction)
+        self._coordinates.insert(0, new_coordinate) # Adding the new head
+        if not expand: # If expanding the snake length is not necessary, remove the tail element
+            self._coordinates.pop() # Removing the last element (the tail)
+
+        # Updating the current direction
+        self._current_direction = direction
+        
+        return True
+ 
+# a = Snake(Coordinate(4,5), 3)
+# for coordinate in a.get_coordinates():
+#     print(coordinate)
+# print(a._head, a._tail)

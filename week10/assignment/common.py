@@ -8,8 +8,6 @@
 # NOTES: N/A
 #################################################################
 
-from snake_game import SnakeGame
-
 class Direction(object):
     """
     Used as an Enum for Directions
@@ -18,6 +16,8 @@ class Direction(object):
     RIGHT = "Right"
     UP = "Up"
     DOWN = "Down"
+
+    Directions = [LEFT, RIGHT, UP, DOWN]
 
 class Coordinate(object):
     """
@@ -30,17 +30,23 @@ class Coordinate(object):
         self.row = row
         self.column = column
 
-    def __str__(self):
+    def __str__(self) -> str:
         """
         Prints the coordinates in (row, column) format
         """
         return "({row}, {column})".format(row=self.row, column=self.column)
+
+    def __repr__(self) -> str:
+        """
+        Returns the coordinates in a string format (similar to __str__)
+        """
+        return self.__str__()
     
 class BaseGameObject(object):
     """
     """
 
-    def interact(self, snake_game: SnakeGame):
+    def interact(self, snake_game):
         """
         """
         raise NotImplementedError
