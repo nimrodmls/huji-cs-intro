@@ -9,11 +9,18 @@
 #################################################################
 
 from typing import List
-from common import BaseDynamicGameObject
+from common import BaseDynamicGameObject, Coordinate, Direction
 
 class Wall(BaseDynamicGameObject):
     """
     """
 
-    #def __init__(self, length: int = 3) -> None:
-    #    super().__init__(coordinates, color)
+    def __init__(self, location: Coordinate, direction: Direction, length: int = 3) -> None:
+        """
+        """
+        super().__init__(coordinates, color)
+
+    def _get_initial_position(self, head_location: Coordinate, direction: Direction) -> List[Coordinate]:
+        """
+        """
+        pass
