@@ -90,7 +90,7 @@ class BaseGameObject(object):
         """
         raise NotImplementedError
 
-    def move(self) -> bool:
+    def move(self) -> None:
         """
         """
         raise NotImplementedError

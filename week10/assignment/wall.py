@@ -15,12 +15,28 @@ class Wall(BaseDynamicGameObject):
     """
     """
 
-    def __init__(self, location: Coordinate, direction: Direction, length: int = 3) -> None:
+    def __init__(self, location: Coordinate, direction: Direction) -> None:
         """
+        The received location is a coordinate of where the middle of the wall lies.
         """
-        super().__init__(coordinates, color)
+        super().__init__(direction, self._get_initial_position(location, direction), "blue")
 
-    def _get_initial_position(self, head_location: Coordinate, direction: Direction) -> List[Coordinate]:
+    def move(self) -> None:
         """
         """
-        pass
+        self._coordinates.insert(0, self.movement_requirements()) # Adding the new head
+        self._coordinates.pop() # Removing the last element (the tail)
+
+    def _get_initial_position(
+        self, mid_location: Coordinate, direction: Direction) -> List[Coordinate]:
+        """
+        """
+        # Orientation is vertical, initialize
+        if direction in [Direction.UP, Direction.DOWN]:
+            # The new row indices are one above and one below of the middle
+            return [Coordinate(row_index, mid_location.column) 
+                        for row_index in range(mid_location.row-1, mid_location.row+2)]
+        elif direction in [Direction.LEFT, Direction.RIGHT]:
+            # The new column indices are one to the left and one to the right of the middle
+            return [Coordinate(mid_location.row, column_index) 
+                        for column_index in range(mid_location.column-1, mid_location.column+2)]

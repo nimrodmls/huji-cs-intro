@@ -9,6 +9,7 @@ from snake import Snake
 from common import Coordinate, BaseGameObject
 from board import Board, OutOfBounds
 from apple import Apple
+from wall import Wall
 
 class SnakeGame:
 
@@ -19,6 +20,7 @@ class SnakeGame:
         self._board.add_game_object(Apple(Coordinate(0, 5)))
         self._board.add_game_object(Apple(Coordinate(1, 5)))
         self._board.add_game_object(Apple(Coordinate(2, 5)))
+        self._board.add_game_object(Wall(Coordinate(20, 20), "Up"))
         self._total_apples = total_apples
         self._current_apples = 0
         self._score = 0
