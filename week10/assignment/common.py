@@ -80,11 +80,6 @@ class BaseGameObject(object):
         """
         return self._color
         
-    def draw_object(self, gui: GameDisplay) -> None:
-        """
-        """
-        draw_coordinates(gui, self._coordinates, self._color)
-
     def get_coordinates(self) -> List[Coordinate]:
         """
         """
@@ -97,13 +92,6 @@ class BaseGameObject(object):
 
     def move(self) -> bool:
         """
-        """
-        raise NotImplementedError
-
-    def interact(self, snake_game, source):
-        """
-        snake_game should be a SnakeGame object, 
-        it is not typed in order to prevent circular dependencies
         """
         raise NotImplementedError
 
