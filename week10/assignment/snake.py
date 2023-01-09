@@ -50,6 +50,11 @@ class Snake(BaseDynamicGameObject):
         """
         self._expansion += factor
 
+    def split(self, coordinate: Coordinate) -> None:
+        """
+        """
+        self._coordinates = self._coordinates[:self._coordinates.index(coordinate)]
+
     def _get_valid_directions(self) -> List[Direction]:
         """
         """

@@ -16,6 +16,7 @@ from snake import Snake
 # Signature for the interaction callback, first game object is the source and
 #   the second game object is the destination
 InteractionCallback = Callable[[BaseGameObject, BaseGameObject], None]
+OutOfBoundsCallback = Callable[[BaseGameObject, bool], bool]
 
 class Board(object):
     """
@@ -25,7 +26,7 @@ class Board(object):
         """
         """
         self._dimensions = dimensions
-        self._game_objects: List[BaseGameObject] = [snake]
+        self._game_objects: List[BaseGameObject] = [snake] if snake is not None else []
 
     def draw_board(self, gui: GameDisplay):
         """
@@ -53,28 +54,26 @@ class Board(object):
 
     def move_game_objects(self, 
                           interaction_callback: InteractionCallback,
-                          out_of_bounds_callback) -> bool:
+                          out_of_bounds_callback: OutOfBoundsCallback) -> bool:
         """
         """
         for game_object in self._game_objects:
             requirement = game_object.movement_requirements()
             # If the game object can move and the requirements are satisfied
             if requirement is not None and self._is_in_boundries(requirement):
-
+                destination_obj =  self._get_object_at_coordinate(requirement)
+                game_object.move()
+                
                 # If there is a game object at the destination, interact with it
-                destination_obj = self._get_object_at_coordinate(requirement)
                 if destination_obj is not None:
                     interaction_callback(game_object, destination_obj)
             
+            elif requirement is not None and not self._is_in_boundries(requirement):
                 game_object.move()
 
-            elif requirement is not None and not self._is_in_boundries(requirement):
-                should_continue = \
-                     out_of_bounds_callback(game_object, 
-                                            self._is_off_board(
-                                                game_object.get_coordinates()))
-                if should_continue:            
-                    game_object.move()
+                out_of_bounds_callback(game_object,
+                                       self._is_off_board(
+                                             game_object.get_coordinates()))
 
     def _get_object_at_coordinate(self, coordinate: Coordinate) -> BaseGameObject:
         """
