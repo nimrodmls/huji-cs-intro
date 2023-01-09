@@ -14,19 +14,23 @@ from common import BaseDynamicGameObject, Coordinate, Direction
 class Wall(BaseDynamicGameObject):
     """
     """
-    DEFAULT_LENGTH = 3
 
-    def __init__(self, location: Coordinate, direction: Direction) -> None:
+    def __init__(self, location: Coordinate, direction: Direction, move_callback) -> None:
         """
         The received location is a coordinate of where the middle of the wall lies.
         """
         super().__init__(direction, self._get_initial_position(location, direction), "blue")
+        self._move_callback = move_callback
 
-    def move(self) -> None:
+    def move(self) -> bool:
         """
         """
-        self._coordinates.insert(0, self.movement_requirements()) # Adding the new head
-        self._coordinates.pop() # Removing the last element (the tail)
+        # Check if moving is permitted before actually moving
+        if self._move_callback():
+            self._coordinates.insert(0, self.movement_requirements()) # Adding the new head
+            self._coordinates.pop() # Removing the last element (the tail)
+            return True
+        return False # If no movement made, return so
 
     def _get_initial_position(
         self, mid_location: Coordinate, direction: Direction) -> List[Coordinate]:

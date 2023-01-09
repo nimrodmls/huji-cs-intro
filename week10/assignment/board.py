@@ -10,8 +10,7 @@
 
 from typing import List, Callable
 from game_display import GameDisplay
-from common import Coordinate, BaseGameObject, is_in_boundries
-from snake import Snake
+from common import Coordinate, BaseGameObject, is_in_boundries, draw_coordinates
 
 # Signature for the interaction callback, first game object is the source and
 #   the second game object is the destination
@@ -22,17 +21,24 @@ class Board(object):
     """
     """
 
-    def __init__(self, snake: Snake, dimensions: Coordinate) -> None:
+    def __init__(self, dimensions: Coordinate) -> None:
         """
         """
         self._dimensions = dimensions
-        self._game_objects: List[BaseGameObject] = [snake] if snake is not None else []
+        self._game_objects: List[BaseGameObject] = []
 
     def draw_board(self, gui: GameDisplay):
         """
         """
+        priority_draw = []
+        priority_color = "blue"
         for game_object in self._game_objects:
-            game_object.draw_object(gui)
+            if priority_color == game_object.get_object_color:
+                priority_draw.append(game_object.get_coordinates())
+            else:
+                draw_coordinates(gui, game_object.get_coordinates(), game_object.get_object_color())
+        for coords in priority_draw:
+            draw_coordinates(gui, coords, priority_color)
 
     def add_game_object(self, game_object: BaseGameObject) -> bool:
         """
@@ -62,10 +68,9 @@ class Board(object):
             # If the game object can move and the requirements are satisfied
             if requirement is not None and self._is_in_boundries(requirement):
                 destination_obj =  self._get_object_at_coordinate(requirement)
-                game_object.move()
-                
+
                 # If there is a game object at the destination, interact with it
-                if destination_obj is not None:
+                if game_object.move() and destination_obj is not None:
                     interaction_callback(game_object, destination_obj)
             
             elif requirement is not None and not self._is_in_boundries(requirement):

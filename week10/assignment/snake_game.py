@@ -15,14 +15,19 @@ class SnakeGame:
 
     def __init__(self, total_apples: int, total_walls: int) -> None:
         self.__key_clicked = None
-        self._snake = None #Snake(Coordinate(4,4))
-        self._board = Board(None, Coordinate(HEIGHT, WIDTH))
+        self._snake = Snake(Coordinate(4,4))
+        self._board = Board(Coordinate(HEIGHT, WIDTH))
         self._total_apples = total_apples
         self._current_apples = 0
         self._total_walls = total_walls
         self._current_walls = 0
         self._score = 0
         self._is_over = False
+        self._current_round = 0
+        self._board.add_game_object(self._snake)
+        # Edge case: Adding apples and walls on the Snake itself will cause
+        #   them not to generate in the first round
+        self._add_apples_and_walls()
 
     def read_key(self, key_clicked: Optional[str])-> None:
         self.__key_clicked = key_clicked
@@ -69,11 +74,23 @@ class SnakeGame:
         self._board.move_game_objects(self._interaction_callback, 
                                       self._out_of_bounds_callback)
 
+        self._add_apples_and_walls()
+
+    def _wall_move_callback(self):
+        """
+        """
+        return 0 == (self._current_round % 2)
+
+    def _add_apples_and_walls(self):
+        """
+        """
         # Adding walls if missing any
         if self._total_walls > self._current_walls:
             x_coord, y_coord, direction = get_random_wall_data()
             if self._board.add_game_object(
-                Wall(Coordinate.from_legacy_coordinate((x_coord, y_coord)), direction)):
+                Wall(Coordinate.from_legacy_coordinate((x_coord, y_coord)), 
+                     direction,
+                     self._wall_move_callback)):
                 self._current_walls += 1
 
         # Adding apples if missing
@@ -87,7 +104,7 @@ class SnakeGame:
         gd.show_score(self._score)
 
     def end_round(self) -> None:
-        pass
+        self._current_round += 1
 
     def set_is_over(self):
         self._is_over = True

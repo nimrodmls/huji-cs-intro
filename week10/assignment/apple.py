@@ -23,7 +23,7 @@ class Apple(BaseGameObject):
         """
         return None
     
-    def move(self):
+    def move(self) -> None:
         """
         """
         return None

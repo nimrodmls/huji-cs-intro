@@ -75,6 +75,11 @@ class BaseGameObject(object):
     def __len__(self) -> int:
         return len(self._coordinates)
 
+    def get_object_color(self):
+        """
+        """
+        return self._color
+        
     def draw_object(self, gui: GameDisplay) -> None:
         """
         """
@@ -90,7 +95,7 @@ class BaseGameObject(object):
         """
         raise NotImplementedError
 
-    def move(self) -> None:
+    def move(self) -> bool:
         """
         """
         raise NotImplementedError

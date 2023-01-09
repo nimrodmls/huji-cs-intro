@@ -20,10 +20,15 @@ class Snake(BaseDynamicGameObject):
         #   integral to the operation of the object
         super().__init__(Direction.UP, self._get_initial_position(location, length), "black")
         self._expansion = 0
+        self._to_split = None
 
-    def move(self) -> None:
+    def move(self) -> bool:
         """
         """
+        if self._to_split is not None:
+            self._coordinates = self._coordinates[:self._to_split]
+            self._to_split = None
+
         new_coordinate = self.movement_requirements()
         self._coordinates.insert(0, new_coordinate) # Adding the new head
 
@@ -32,6 +37,8 @@ class Snake(BaseDynamicGameObject):
             self._coordinates.pop() # Removing the last element (the tail)
         else: # Otherwise, expand by 1 and decrement the expanion ratio
             self._expansion -= 1
+
+        return True
 
     def change_direction(self, direction: Direction) -> bool:
         """
@@ -53,7 +60,7 @@ class Snake(BaseDynamicGameObject):
     def split(self, coordinate: Coordinate) -> None:
         """
         """
-        self._coordinates = self._coordinates[:self._coordinates.index(coordinate)]
+        self._to_split = self._coordinates.index(coordinate)
 
     def _get_valid_directions(self) -> List[Direction]:
         """
