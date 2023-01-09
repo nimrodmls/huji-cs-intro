@@ -6,7 +6,7 @@ from game_display import GameDisplay
 def main_loop(gd: GameDisplay, args: argparse.Namespace) -> None:
 
     # INIT OBJECTS
-    game = SnakeGame(args.apples)
+    game = SnakeGame(args.apples, args.walls)
     gd.show_score(0)
     # DRAW BOARD
     game.draw_board(gd)    

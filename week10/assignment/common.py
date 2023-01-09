@@ -115,7 +115,7 @@ class BaseDynamicGameObject(BaseGameObject):
         whether it is valid or invalid (e.g. if the current direction is
         left and this function is given right)
         """
-        head = self._coordinates[0] # The head element of the snake
+        head = self._coordinates[0] # The head element
         if Direction.LEFT == self._current_direction:
             return Coordinate(head.row, head.column-1)
         elif Direction.RIGHT == self._current_direction:

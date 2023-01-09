@@ -17,11 +17,6 @@ from snake import Snake
 #   the second game object is the destination
 InteractionCallback = Callable[[BaseGameObject, BaseGameObject], None]
 
-class OutOfBounds(BaseGameObject):
-    """
-    """
-    pass
-
 class Board(object):
     """
     """
@@ -56,7 +51,9 @@ class Board(object):
         if game_object in self._game_objects:
             self._game_objects.remove(game_object)
 
-    def move_game_objects(self, interaction_callback: InteractionCallback) -> bool:
+    def move_game_objects(self, 
+                          interaction_callback: InteractionCallback,
+                          out_of_bounds_callback) -> bool:
         """
         """
         for game_object in self._game_objects:
@@ -72,9 +69,12 @@ class Board(object):
                 game_object.move()
 
             elif requirement is not None and not self._is_in_boundries(requirement):
-                interaction_callback(game_object, OutOfBounds)
-
-                game_object.move()
+                should_continue = \
+                     out_of_bounds_callback(game_object, 
+                                            self._is_off_board(
+                                                game_object.get_coordinates()))
+                if should_continue:            
+                    game_object.move()
 
     def _get_object_at_coordinate(self, coordinate: Coordinate) -> BaseGameObject:
         """
@@ -84,6 +84,15 @@ class Board(object):
                 return game_object
 
         return None # No object at the specified coordinate
+
+    def _is_off_board(self, coordinates: List[Coordinate]) -> bool:
+        """
+        """
+        for coordinate in coordinates:
+            # Checking if at least one coordinate is on the board
+            if self._is_in_boundries(coordinate):
+                return False
+        return True
 
     def _is_in_boundries(self, coordinate: Coordinate) -> bool:
         """

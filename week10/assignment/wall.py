@@ -14,6 +14,7 @@ from common import BaseDynamicGameObject, Coordinate, Direction
 class Wall(BaseDynamicGameObject):
     """
     """
+    DEFAULT_LENGTH = 3
 
     def __init__(self, location: Coordinate, direction: Direction) -> None:
         """
@@ -31,12 +32,15 @@ class Wall(BaseDynamicGameObject):
         self, mid_location: Coordinate, direction: Direction) -> List[Coordinate]:
         """
         """
-        # Orientation is vertical, initialize
-        if direction in [Direction.UP, Direction.DOWN]:
-            # The new row indices are one above and one below of the middle
-            return [Coordinate(row_index, mid_location.column) 
-                        for row_index in range(mid_location.row-1, mid_location.row+2)]
-        elif direction in [Direction.LEFT, Direction.RIGHT]:
-            # The new column indices are one to the left and one to the right of the middle
-            return [Coordinate(mid_location.row, column_index) 
-                        for column_index in range(mid_location.column-1, mid_location.column+2)]
+        if direction == Direction.UP:
+            return [Coordinate(mid_location.row+row_index, mid_location.column) 
+                        for row_index in range(1, -2, -1)]
+        elif direction == Direction.DOWN:
+            return [Coordinate(mid_location.row+row_index, mid_location.column) 
+                        for row_index in range(-1, 2)]
+        elif direction == Direction.LEFT:
+            return [Coordinate(mid_location.row, mid_location.column+column_index) 
+                        for column_index in range(-1, 2)]
+        elif direction == Direction.RIGHT:
+            return [Coordinate(mid_location.row, mid_location.column+column_index) 
+                        for column_index in range(1, -2, -1)]
