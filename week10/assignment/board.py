@@ -1,6 +1,6 @@
 #################################################################
 # FILE : board.py
-# WRITER : Nimrod M.
+# WRITERS : Nimrod M. ; Dor K.
 # EXERCISE : intro2cs1 ex10 2023
 # DESCRIPTION: Implements the game board for the Snake Game
 # STUDENTS I DISCUSSED THE EXERCISE WITH: N/A

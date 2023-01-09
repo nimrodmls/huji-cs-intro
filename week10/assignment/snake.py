@@ -1,6 +1,6 @@
 #################################################################
 # FILE : board.py
-# WRITER : Nimrod M.
+# WRITERS : Nimrod M. ; Dor K.
 # EXERCISE : intro2cs1 ex10 2023
 # DESCRIPTION: Implements the Snake for the Snake Game
 # STUDENTS I DISCUSSED THE EXERCISE WITH: N/A
@@ -9,7 +9,14 @@
 #################################################################
 
 from typing import List
-from common import BaseDynamicGameObject, Coordinate, Direction
+from common import BaseDynamicGameObject, Coordinate, Direction, SnakeException
+
+class EmptySnakeException(SnakeException):
+    """
+    Exception raised upon Snake Object trying to move, 
+    although it has no coordinates.
+    """
+    pass
 
 class Snake(BaseDynamicGameObject):
     """
@@ -28,6 +35,9 @@ class Snake(BaseDynamicGameObject):
         if self._to_split is not None:
             self._coordinates = self._coordinates[:self._to_split]
             self._to_split = None
+        
+        if 1 >= len(self._coordinates):
+            raise EmptySnakeException
 
         new_coordinate = self.movement_requirements()
         self._coordinates.insert(0, new_coordinate) # Adding the new head
