@@ -11,18 +11,24 @@
 from typing import List
 from common import BaseDynamicGameObject, Coordinate, Direction, SnakeException
 
-class EmptySnakeException(SnakeException):
+class TerminatingSnakeSplit(SnakeException):
     """
-    Exception raised upon Snake Object trying to move, 
-    although it has no coordinates.
+    Exception raised upon Snake Object being split to death
     """
     pass
 
 class Snake(BaseDynamicGameObject):
     """
+    Represents the Snake Game Object in the game.
+    The object is intended to be placed on a board, although it's not mandatory.
     """
 
     def __init__(self, location: Coordinate, length: int = 3) -> None:
+        """
+        Creates a new Snake with its head in the given coordinate and initial given length.
+        The Snake starts at an upwards orientation, with the starting coordinates being
+        from head to the tail perpendicular to the X-Axis.
+        """
         # The coordinates which the snake occupies, the order of this list is
         #   integral to the operation of the object
         super().__init__(Direction.UP, self._get_initial_position(location, length), "black")
@@ -31,6 +37,7 @@ class Snake(BaseDynamicGameObject):
 
     def move(self) -> bool:
         """
+        Moving 
         """
         if self._to_split is not None:
             if 1 >= len(self._coordinates[:self._to_split]):
@@ -72,7 +79,7 @@ class Snake(BaseDynamicGameObject):
         """
         self._to_split = self._coordinates.index(coordinate)
         if self._to_split in [0,1]:
-            raise EmptySnakeException
+            raise TerminatingSnakeSplit
 
     def _get_valid_directions(self) -> List[Direction]:
         """
