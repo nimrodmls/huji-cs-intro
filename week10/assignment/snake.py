@@ -37,12 +37,14 @@ class Snake(BaseDynamicGameObject):
 
     def move(self) -> bool:
         """
-        Moving 
+        Moving the Snake in the set direction.
+        To set the direction use change_direction.
+
+        If the Snake is during expansion phase, it will not empty
+        the coordinates it occupies until the expansion phase is done.
+        (e.g. the tail is not removed during this phase)
         """
-        if self._to_split is not None:
-            if 1 >= len(self._coordinates[:self._to_split]):
-                raise EmptySnakeException
-                
+        if self._to_split is not None:             
             self._coordinates = self._coordinates[:self._to_split]
             self._to_split = None
         
@@ -55,10 +57,13 @@ class Snake(BaseDynamicGameObject):
         else: # Otherwise, expand by 1 and decrement the expanion ratio
             self._expansion -= 1
 
+        # Moving the snake cannot fail
         return True
 
     def change_direction(self, direction: Direction) -> bool:
         """
+        Changes the direction the snake is moving to.
+        If the direction is invalid False is returned, True otherwise.
         """
         # Checking if the direction is in the valid directions 
         #   for the current snake orientation
@@ -69,13 +74,18 @@ class Snake(BaseDynamicGameObject):
         self._current_direction = direction
         return True
 
-    def expand(self, factor: int) -> None:
+    def expand(self, amount: int) -> None:
         """
+        Ordering the Snake to expand on the next moves by the given amount.
+        Expansion process is taking 'amount' of calls to move to fully complete.
         """
-        self._expansion += factor
+        self._expansion += amount
 
     def split(self, coordinate: Coordinate) -> None:
         """
+        Ordering the Snake to split part of its body from the given
+        coordinate (included) to the tail
+        Raises TerminatingSnakeSplit if the split is causing the Snake to terminate.
         """
         self._to_split = self._coordinates.index(coordinate)
         if self._to_split in [0,1]:
@@ -83,6 +93,9 @@ class Snake(BaseDynamicGameObject):
 
     def _get_valid_directions(self) -> List[Direction]:
         """
+        Returns the valid directions for the snake to move at its current orientation.
+        It is not permitted for the snake to move down (up) if it's oriented up (down)
+        or to move left (right) if it's oriented right (left).
         """
         if (Direction.LEFT == self._current_direction) or \
                 (Direction.RIGHT == self._current_direction):
@@ -92,6 +105,8 @@ class Snake(BaseDynamicGameObject):
 
     def _get_initial_position(self, head_location: Coordinate, length: int) -> List[Coordinate]:
         """
+        Returns the initial coordinates considering the location of the head and length.
+        The function expects that the snake would be oriented UPWARDS.
         """
         # Initializing the starting coordinates of the snake to be under the head location
         return [Coordinate(head_location.row-index, head_location.column) 
