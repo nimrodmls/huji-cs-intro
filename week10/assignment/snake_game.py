@@ -21,6 +21,11 @@ from board import Board
 from apple import Apple
 from wall import Wall
 
+class GameOverException(SnakeException):
+    """
+    """
+    pass
+
 class SnakeGame:
     """
     The primary game object for Snake
@@ -68,7 +73,7 @@ class SnakeGame:
             self._current_walls -= 1
 
         if type(source) is Snake:
-            self._set_is_over()
+            raise GameOverException
 
     def _interaction_callback(self, source: BaseGameObject, dest: BaseGameObject) -> None:
         """
@@ -88,22 +93,18 @@ class SnakeGame:
 
         # Ending the game if the snake hits a wall, or hit itself
         if (type(dest) is Snake or type(dest) is Wall) and type(source) is Snake:
-            self._set_is_over()
+            raise GameOverException
 
     def add_points(self):
         """
         """
         self._score += math.floor(math.sqrt(len(self._snake)))
 
-    def update_objects(self)-> None:
+    def update_objects(self)-> bool:
         """
         """
         try:
-            # Checking if we reached the final round, if so we end the game
-            if self._current_round == self._max_rounds:
-                self._set_is_over()
-                return
-
+            #print(self._current_round)
             # Changing the direction of the snake if we have a snake
             if self._snake is not None:
                 self._snake.change_direction(self._new_direction)
@@ -111,12 +112,15 @@ class SnakeGame:
             self._board.move_game_objects(self._interaction_callback, 
                                         self._out_of_bounds_callback)
 
+            self._add_apples_and_walls()
 
         # If any SnakeException received we end the game properly
         #   any other exception is passed on
         except SnakeException: 
             self._set_is_over()
-            return
+            return False
+
+        return True
 
     def _wall_move_callback(self):
         """
@@ -153,7 +157,6 @@ class SnakeGame:
         Finishing the current round
         Placing apples and walls if needed, and incrementing the round counter
         """
-        self._add_apples_and_walls()
         self._current_round += 1
 
     def _set_is_over(self) -> None:
@@ -166,4 +169,4 @@ class SnakeGame:
         """
         Getting the is_over flag, signaling that the game should end
         """
-        return self._is_over
+        return self._is_over or (self._current_round > self._max_rounds if self._max_rounds != -1 else False)

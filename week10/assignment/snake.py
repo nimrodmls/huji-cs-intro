@@ -33,12 +33,12 @@ class Snake(BaseDynamicGameObject):
         """
         """
         if self._to_split is not None:
+            if 1 >= len(self._coordinates[:self._to_split]):
+                raise EmptySnakeException
+                
             self._coordinates = self._coordinates[:self._to_split]
             self._to_split = None
         
-        if 1 >= len(self._coordinates):
-            raise EmptySnakeException
-
         new_coordinate = self.movement_requirements()
         self._coordinates.insert(0, new_coordinate) # Adding the new head
 
@@ -71,6 +71,8 @@ class Snake(BaseDynamicGameObject):
         """
         """
         self._to_split = self._coordinates.index(coordinate)
+        if self._to_split in [0,1]:
+            raise EmptySnakeException
 
     def _get_valid_directions(self) -> List[Direction]:
         """

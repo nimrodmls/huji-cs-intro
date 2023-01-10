@@ -3,6 +3,7 @@ import game_utils
 from snake_game import SnakeGame
 from game_display import GameDisplay
 
+from game_utils import set_random_seed
 from common import Coordinate
 from board import Board
 from snake import Snake
@@ -20,13 +21,21 @@ def _initialize_game(args: argparse.Namespace) -> SnakeGame:
     return SnakeGame(board, snake, args.apples, args.walls, args.rounds)
 
 def main_loop(gd: GameDisplay, args: argparse.Namespace) -> None:
-
+    # set_random_seed('g')
+    # args.apples = 3
+    # args.walls = 2
+    # args.rounds = -1
+    # args.debug = False
+    # args.width = 40
+    # args.height = 30
     # INIT OBJECTS
     game = _initialize_game(args)
     gd.show_score(0)
     # DRAW BOARD
     game.draw_board(gd)    
     # END OF ROUND 0
+    game.end_round()
+    gd.end_round()
     while not game.is_over():
         # CHECK KEY CLICKS
         key_clicked = gd.get_key_clicked()

@@ -36,9 +36,9 @@ class Board(object):
             if priority_color == game_object.get_object_color:
                 priority_draw.append(game_object.get_coordinates())
             else:
-                draw_coordinates(gui, game_object.get_coordinates(), game_object.get_object_color())
+                draw_coordinates(gui, self._dimensions, game_object.get_coordinates(), game_object.get_object_color())
         for coords in priority_draw:
-            draw_coordinates(gui, coords, priority_color)
+            draw_coordinates(gui, self._dimensions, coords, priority_color)
 
     def add_game_object(self, game_object: BaseGameObject) -> bool:
         """
@@ -63,6 +63,8 @@ class Board(object):
                           out_of_bounds_callback: OutOfBoundsCallback) -> bool:
         """
         """
+        interactions = []
+        out_of_bounds = []
         for game_object in self._game_objects:
             requirement = game_object.movement_requirements()
             # If the game object can move and the requirements are satisfied
@@ -71,14 +73,28 @@ class Board(object):
 
                 # If there is a game object at the destination, interact with it
                 if game_object.move() and destination_obj is not None:
-                    interaction_callback(game_object, destination_obj)
+                    #interaction_callback(game_object, destination_obj)
+                    interactions.append((game_object, destination_obj))
             
             elif requirement is not None and not self._is_in_boundries(requirement):
                 game_object.move()
 
-                out_of_bounds_callback(game_object,
-                                       self._is_off_board(
-                                             game_object.get_coordinates()))
+                out_of_bounds.append(game_object)
+                # out_of_bounds_callback(game_object,
+                #                        self._is_off_board(
+                #                              game_object.get_coordinates()))
+        for object1, object2 in interactions:
+            interaction_callback(object1, object2)
+        for object1 in out_of_bounds:
+            out_of_bounds_callback(object1, self._is_off_board(object1.get_coordinates()))
+
+    def _is_interacting(self, object1, object2):
+        """
+        """
+        for coordinate in object1.get_coordinates():
+            if coordinate in object2.get_coordinates():
+                return True
+        return False
 
     def _get_object_at_coordinate(self, coordinate: Coordinate) -> BaseGameObject:
         """

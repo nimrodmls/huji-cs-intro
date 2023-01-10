@@ -183,11 +183,12 @@ def is_in_boundries(height: int, width: int, coordinate: Coordinate) -> bool:
 
     return True
 
-def draw_coordinates(gui: GameDisplay, coordinates: List[Coordinate], color) -> None:
+def draw_coordinates(
+    gui: GameDisplay, dimensions: Coordinate, coordinates: List[Coordinate], color) -> None:
     """
     Draws a list of coordinates on a game display, with the given color.
     """
     for coordinate in coordinates:
         # Only if the coordinate is within the display board draw it
-        if is_in_boundries(gui.height, gui.width, coordinate):
+        if is_in_boundries(dimensions.row, dimensions.column, coordinate):
             gui.draw_cell(coordinate.column, coordinate.row, color)
