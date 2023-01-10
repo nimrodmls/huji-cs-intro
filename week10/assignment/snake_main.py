@@ -1,15 +1,26 @@
+#################################################################
+# FILE : snake_main.py
+# WRITERS : Nimrod M. ; Dor K.
+# EXERCISE : intro2cs1 ex10 2023
+# DESCRIPTION: Runs the Snake Game
+# STUDENTS I DISCUSSED THE EXERCISE WITH: N/A
+# WEB PAGES I USED: N/A
+# NOTES: N/A
+#################################################################
+
+# External imports
 import argparse
-import game_utils
-from snake_game import SnakeGame
 from game_display import GameDisplay
 
-from game_utils import set_random_seed
+# Internal imports
+from snake_game import SnakeGame
 from common import Coordinate
 from board import Board
 from snake import Snake
 
 def _initialize_game(args: argparse.Namespace) -> SnakeGame:
     """
+    Initializing the game with the given arguments.
     """
     board = Board(Coordinate(args.height, args.width))
     
@@ -21,30 +32,30 @@ def _initialize_game(args: argparse.Namespace) -> SnakeGame:
     return SnakeGame(board, snake, args.apples, args.walls, args.rounds)
 
 def main_loop(gd: GameDisplay, args: argparse.Namespace) -> None:
-    # set_random_seed('g')
-    # args.apples = 3
-    # args.walls = 2
-    # args.rounds = -1
-    # args.debug = False
-    # args.width = 40
-    # args.height = 30
-    # INIT OBJECTS
+    """
+    Runs the Snake Game with the given arguments and Game Display.
+    """
     game = _initialize_game(args)
     gd.show_score(0)
-    # DRAW BOARD
+
+    # ROUND 0 STARTS HERE
+    # No movements are made in the round 0
     game.draw_board(gd)    
-    # END OF ROUND 0
     game.end_round()
     gd.end_round()
+    # ROUND 0 ENDS HERE
+
+    # Begin primary game loop
     while not game.is_over():
-        # CHECK KEY CLICKS
-        key_clicked = gd.get_key_clicked()
-        game.set_snake_direction(key_clicked)
-        # UPDATE OBJECTS
+        
+        # Changing the direction of the snake if necessary
+        game.set_snake_direction(gd.get_key_clicked())
+        # Updating the objects on the game board
         game.update_objects()
-        # DRAW BOARD
+        
+        # Round finalization
+        # Drawing the board and ending the round
         game.draw_board(gd)
-        # WAIT FOR NEXT ROUND:
         game.end_round()
         gd.end_round()
 
