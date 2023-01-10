@@ -30,7 +30,7 @@ def main_loop(gd: GameDisplay, args: argparse.Namespace) -> None:
     while not game.is_over():
         # CHECK KEY CLICKS
         key_clicked = gd.get_key_clicked()
-        game.read_key(key_clicked)
+        game.set_snake_direction(key_clicked)
         # UPDATE OBJECTS
         game.update_objects()
         # DRAW BOARD

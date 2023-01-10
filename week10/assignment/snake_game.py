@@ -1,17 +1,30 @@
+#################################################################
+# FILE : snake_game.py
+# WRITERS : Nimrod M. ; Dor K.
+# EXERCISE : intro2cs1 ex10 2023
+# DESCRIPTION: Implements the primary game functionality
+# STUDENTS I DISCUSSED THE EXERCISE WITH: N/A
+# WEB PAGES I USED: N/A
+# NOTES: N/A
+#################################################################
 
+# External imports
 import math
-
 from typing import Optional
 from game_display import GameDisplay, WIDTH, HEIGHT
 from game_utils import get_random_apple_data, get_random_wall_data
 
+# Internal imports
+from common import Coordinate, BaseGameObject, SnakeException, Direction
 from snake import Snake
-from common import Coordinate, BaseGameObject, SnakeException
 from board import Board
 from apple import Apple
 from wall import Wall
 
 class SnakeGame:
+    """
+    The primary game object for Snake
+    """
 
     def __init__(
             self, 
@@ -21,11 +34,13 @@ class SnakeGame:
             max_walls: int,
             max_rounds: int) -> None:
             
-        self.__key_clicked = None
+        self._new_direction = None
         self._snake = snake
         self._board = board
+        # Apple info
         self._max_apples = max_apples
         self._current_apples = 0
+        # Wall info
         self._max_walls = max_walls
         self._current_walls = 0
         self._score = 0
@@ -33,6 +48,7 @@ class SnakeGame:
         self._current_round = 0
         self._max_rounds = max_rounds
 
+        # If we received a snake object add it to the board
         if self._snake is not None:
             self._board.add_game_object(self._snake)
 
@@ -40,8 +56,8 @@ class SnakeGame:
         #   them not to generate in the first round
         self._add_apples_and_walls()
 
-    def read_key(self, key_clicked: Optional[str])-> None:
-        self.__key_clicked = key_clicked
+    def set_snake_direction(self, direction: Optional[Direction])-> None:
+        self._new_direction = direction
     
     def _out_of_bounds_callback(self, source: BaseGameObject, off_board: bool) -> None:
         """
@@ -52,7 +68,7 @@ class SnakeGame:
             self._current_walls -= 1
 
         if type(source) is Snake:
-            self.set_is_over()
+            self._set_is_over()
 
     def _interaction_callback(self, source: BaseGameObject, dest: BaseGameObject) -> None:
         """
@@ -72,7 +88,7 @@ class SnakeGame:
 
         # Ending the game if the snake hits a wall, or hit itself
         if (type(dest) is Snake or type(dest) is Wall) and type(source) is Snake:
-            self.set_is_over()
+            self._set_is_over()
 
     def add_points(self):
         """
@@ -83,21 +99,23 @@ class SnakeGame:
         """
         """
         try:
+            # Checking if we reached the final round, if so we end the game
             if self._current_round == self._max_rounds:
-                self.set_is_over()
+                self._set_is_over()
                 return
 
+            # Changing the direction of the snake if we have a snake
             if self._snake is not None:
-                self._snake.change_direction(self.__key_clicked)
+                self._snake.change_direction(self._new_direction)
+
             self._board.move_game_objects(self._interaction_callback, 
                                         self._out_of_bounds_callback)
 
-            self._add_apples_and_walls()
 
         # If any SnakeException received we end the game properly
         #   any other exception is passed on
         except SnakeException: 
-            self.set_is_over()
+            self._set_is_over()
             return
 
     def _wall_move_callback(self):
@@ -123,15 +141,29 @@ class SnakeGame:
                 Apple(Coordinate.from_legacy_coordinate(get_random_apple_data()))):
                 self._current_apples += 1
 
-    def draw_board(self, gd: GameDisplay) -> None:
-        self._board.draw_board(gd)
-        gd.show_score(self._score)
+    def draw_board(self, gui: GameDisplay) -> None:
+        """
+        Drawing the current board on the screen and setting the score value
+        """
+        self._board.draw_board(gui)
+        gui.show_score(self._score)
 
     def end_round(self) -> None:
+        """
+        Finishing the current round
+        Placing apples and walls if needed, and incrementing the round counter
+        """
+        self._add_apples_and_walls()
         self._current_round += 1
 
-    def set_is_over(self):
+    def _set_is_over(self) -> None:
+        """
+        Setting the is_over flag, signaling that the game should end
+        """
         self._is_over = True
 
     def is_over(self) -> bool:
+        """
+        Getting the is_over flag, signaling that the game should end
+        """
         return self._is_over

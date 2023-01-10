@@ -1,5 +1,5 @@
 #################################################################
-# FILE : board.py
+# FILE : apple.py
 # WRITERS : Nimrod M. ; Dor K.
 # EXERCISE : intro2cs1 ex10 2023
 # DESCRIPTION: Implements the Apple for the Snake Game

@@ -1,5 +1,5 @@
 #################################################################
-# FILE : board.py
+# FILE : wall.py
 # WRITERS : Nimrod M. ; Dor K.
 # EXERCISE : intro2cs1 ex10 2023
 # DESCRIPTION: Implements the Wall for the Snake Game
