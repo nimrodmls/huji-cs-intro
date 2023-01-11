@@ -78,7 +78,7 @@ class SnakeGame:
         """
         self._new_direction = direction
     
-    def add_points(self):
+    def add_points(self) -> None:
         """
         Adding to the score tally.
         The points are calculated by the floor of the 
@@ -149,14 +149,14 @@ class SnakeGame:
         if (type(dest) is Snake or type(dest) is Wall) and type(source) is Snake:
             raise GameOverException
 
-    def _wall_move_callback(self):
+    def _wall_move_callback(self) -> bool:
         """
         Deals with the conditions for the wall to move.
         Currently the wall moves if and only if the round is even number.
         """
         return 0 == (self._current_round % 2)
 
-    def _add_apples_and_walls(self):
+    def _add_apples_and_walls(self) -> None:
         """
         Adds apples and walls to the wall, if any are missing.
         The coordinates for each are generated randomly, if the
