@@ -11,7 +11,7 @@
             "program": "${file}",
             "console": "integratedTerminal",
             "justMyCode": true,
-            "args": ""
+            "args": "C:\\Projects\\huji-cs-intro\\week9\\assignment\\car_config.json"
         }
     ]
 }
