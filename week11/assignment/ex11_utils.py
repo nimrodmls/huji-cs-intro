@@ -1,6 +1,7 @@
 import numpy as np
 import itertools
 from typing import List, Tuple, Iterable, Optional
+from boggle_board_randomizer import randomize_board
 
 Coordinate = Tuple[int, int]
 Board = List[List[str]]
@@ -23,6 +24,7 @@ def _is_word_in_dictionary(word: str, words: Iterable[str]) -> bool:
     """
     Yummy, efficiency
     """
+    pass
     
 
 
@@ -31,7 +33,7 @@ def is_valid_path(board: Board, path: Path, words: Iterable[str]) -> Optional[st
     """
     last_coordinate = None
     current_word = ""
-    current_narrow = None
+    current_narrow = words
     for coordinate in path:
         # Making sure the coordinates are in the neighborhood of one another
         #   if at least one coordinate in the path is not in the neighborhood,
@@ -53,16 +55,45 @@ def is_valid_path(board: Board, path: Path, words: Iterable[str]) -> Optional[st
     
     return current_word
 
+def _internal_find(current_word, letters, words):
+    """
+    """
+    for letter in letters:
+        pass
+
+def find_new(n,board,words):
+    """
+    """
+    board_letters = {(row_index, column_index): board[row_index][column_index]
+        for row_index in range(len(board)) for column_index in range(len(board[0]))}
+    return _internal_find(board_letters, board_letters, words)
+
+
 def find_length_n_paths(n: int, board: Board, words: Iterable[str]) -> List[Path]:
     """
     """
     # Flattening the board to get all the letters 
     #   in a single 1-dimensional list
-    board_letters = itertools.chain.from_iterable(board)
+    board_letters2 = itertools.chain.from_iterable(board)
+    board_letters = [(row_index, column_index)
+        for row_index in range(len(board)) for column_index in range(len(board[0]))]
     # Getting all the possible permutations of a word with the
     #   board's letters. Letters don't repeat as per the game's rules.
-    word_permutations = itertools.permutations(board_letters)
+    path_permutations = itertools.permutations(board_letters, n)
+    valid_paths = []
+    for path in path_permutations:
+        if is_valid_path(board, path, np.extract(np.char.str_len(words)==n, words)):
+            valid_paths.append(list(path))
+    return valid_paths
 
+with open("week11\\assignment\\boggle_dict.txt", "r") as my_file:
+    board = randomize_board()
+    print(board)
+    print(find_length_n_paths(3, board, my_file.readlines()))
+    # data = my_file.readlines()
+    # new_data = np.extract(np.char.str_len(data)==5, data)
+    # for i in range(40):
+    #     print(new_data[i])
 
 
 def find_length_n_words(n: int, board: Board, words: Iterable[str]) -> List[Path]:
