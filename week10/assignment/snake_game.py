@@ -127,7 +127,8 @@ class SnakeGame:
             # The wall met with a snake, split the snake
             # If the split left the snake with 0 or 1 cells,
             #   the game ends
-            dest.split(source.get_coordinates()[0])
+            if not dest.split(source.get_coordinates()[0]):
+                self._set_is_over()
 
         # Ending the game if the snake hits a wall, or hit itself
         if (type(dest) is Snake or type(dest) is Wall) and type(source) is Snake:
