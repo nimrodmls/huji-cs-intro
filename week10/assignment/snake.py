@@ -9,13 +9,7 @@
 #################################################################
 
 from typing import List
-from common import BaseDynamicGameObject, Coordinate, Direction, SnakeException
-
-class TerminatingSnakeSplit(SnakeException):
-    """
-    Exception raised upon Snake Object being split to death
-    """
-    pass
+from common import BaseDynamicGameObject, Coordinate, Direction
 
 class Snake(BaseDynamicGameObject):
     """
@@ -81,15 +75,14 @@ class Snake(BaseDynamicGameObject):
         """
         self._expansion += amount
 
-    def split(self, coordinate: Coordinate) -> None:
+    def split(self, coordinate: Coordinate) -> bool:
         """
         Ordering the Snake to split part of its body from the given
         coordinate (included) to the tail
-        Raises TerminatingSnakeSplit if the split is causing the Snake to terminate.
+        Returns True whether the split would be successful, False otherwise
         """
         self._to_split = self._coordinates.index(coordinate)
-        if self._to_split in [0,1]:
-            raise TerminatingSnakeSplit
+        return not (self._to_split in [0,1])
 
     def _get_valid_directions(self) -> List[Direction]:
         """

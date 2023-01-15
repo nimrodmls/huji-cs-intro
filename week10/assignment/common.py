@@ -163,12 +163,6 @@ class BaseDynamicGameObject(BaseGameObject):
         else: # Direction is Down
             return Coordinate(head.row-1, head.column)
 
-class SnakeException(Exception):
-    """
-    Generic exception for the Snake Package.
-    """
-    pass
-
 def is_in_boundries(height: int, width: int, coordinate: Coordinate) -> bool:
     """
     Checks if a coordinate is within the given height X width dimensions.

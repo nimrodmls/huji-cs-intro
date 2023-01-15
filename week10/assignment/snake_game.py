@@ -15,18 +15,11 @@ from game_display import GameDisplay
 from game_utils import get_random_apple_data, get_random_wall_data
 
 # Internal imports
-from common import Coordinate, BaseGameObject, SnakeException, Direction
+from common import Coordinate, BaseGameObject, Direction
 from snake import Snake
 from board import Board
 from apple import Apple
 from wall import Wall
-
-class GameOverException(SnakeException):
-    """
-    Raised mainly from inner functions of SnakeGame
-    in order to signal that the game should end.
-    """
-    pass
 
 class SnakeGame:
     """
@@ -86,26 +79,17 @@ class SnakeGame:
         """
         self._score += math.floor(math.sqrt(len(self._snake)))
 
-    def update_objects(self)-> bool:
+    def update_objects(self) -> None:
         """
         """
-        try:
-            # Changing the direction of the snake if we have a snake
-            if self._snake is not None:
-                self._snake.change_direction(self._new_direction)
+        # Changing the direction of the snake if we have a snake
+        if self._snake is not None:
+            self._snake.change_direction(self._new_direction)
 
-            self._board.move_game_objects(self._interaction_callback, 
-                                        self._out_of_bounds_callback)
+        self._board.move_game_objects(self._interaction_callback, 
+                                    self._out_of_bounds_callback)
 
-            self._add_apples_and_walls()
-
-        # If any SnakeException received we end the game properly
-        #   any other exception is passed on
-        except SnakeException: 
-            self._set_is_over()
-            return False
-
-        return True
+        self._add_apples_and_walls()
 
     def _out_of_bounds_callback(self, source: BaseGameObject, off_board: bool) -> None:
         """
@@ -119,7 +103,7 @@ class SnakeGame:
 
         if type(source) is Snake:
             # The snake met with the board boundries, we end the game
-            raise GameOverException
+            self._set_is_over()
 
     def _interaction_callback(self, source: BaseGameObject, dest: BaseGameObject) -> None:
         """
@@ -147,7 +131,7 @@ class SnakeGame:
 
         # Ending the game if the snake hits a wall, or hit itself
         if (type(dest) is Snake or type(dest) is Wall) and type(source) is Snake:
-            raise GameOverException
+            self._set_is_over()
 
     def _wall_move_callback(self) -> bool:
         """
