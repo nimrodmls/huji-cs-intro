@@ -16,9 +16,9 @@ def _is_in_neighborhood(coordinate1: Coordinate, coordinate2: Coordinate):
     """
     row_difference = abs(
         coordinate1[COORDINATE_ROW_INDEX] - coordinate2[COORDINATE_ROW_INDEX])
-    column_difference = (
+    column_difference = abs(
         coordinate1[COORDINATE_COLUMN_INDEX] - coordinate2[COORDINATE_COLUMN_INDEX])
-    return (row_difference == 1) and (column_difference == 1)
+    return (row_difference in [1, 0]) and (column_difference in [1, 0])
 
 def _is_word_in_dictionary(word: str, words: Iterable[str]) -> bool:
     """
@@ -61,21 +61,26 @@ def _internal_find(current_word, letters, words):
     for letter in letters:
         pass
 
-def find_new(letter_list, cur_word, board, words, max_len, valid_words):
+def find_new(letter_list, cur_word, board, words, max_len, valid_words, last_coord):
     """
     """
     if len(cur_word) == max_len:
-        if len(words) == 1 and words[0].strip() == cur_word:
+        #if len(words) == 1 and words[0].strip() == cur_word:
+        if cur_word in words:
             valid_words.append(cur_word)
             return
         else:
             return
 
     for index, element in enumerate(letter_list):
+        if last_coord is not None and not _is_in_neighborhood(element, last_coord):
+            continue
         new_words = np.extract(np.char.startswith(words, cur_word), words)
         if len(new_words) == 0:
             return
-        find_new(np.delete(letter_list, index), cur_word+element, board, new_words, max_len, valid_words)
+        letter = board[element[0]][element[1]]
+        find_new(np.delete(letter_list, index, 0), 
+            cur_word+letter, board, new_words, max_len, valid_words, element)
 
 def find_length_n_paths(n: int, board: Board, words: Iterable[str]) -> List[Path]:
     """
@@ -100,16 +105,19 @@ with open("week11\\assignment\\boggle_dict.txt", "r") as my_file:
     board = randomize_board()
     #print(board)
     #print(find_length_n_paths(3, board, my_file.readlines()))
-    filedata = my_file.readlines()
+    filedata = my_file.read().split()
     valwords = []
     import time
     prev = time.time()
-    find_new(np.array(list(itertools.chain.from_iterable(board))),
+    board_letters = [(row_index, column_index)
+        for row_index in range(len(board)) for column_index in range(len(board[0]))]
+    find_new(np.array(board_letters),
         "",
         board,
-        np.extract(np.char.str_len(filedata)==4, filedata),
-        3,
-        valwords)
+        np.extract(np.char.str_len(filedata)==5, filedata),
+        5,
+        valwords,
+        None)
     print(valwords)
     print(time.time() - prev)
     # data = my_file.readlines()
