@@ -83,6 +83,7 @@ class Board(object):
         out_of_bounds_callback is called.
         """
         interactions = []
+        interactions = {}
         out_of_bounds = []
 
         # Iterating on all objects and moving them
@@ -96,7 +97,8 @@ class Board(object):
                 #   add to possible interactions, it will be checked later if the
                 #   interaction is still relevant after all objects moved
                 if game_object.move() and destination_obj is not None:
-                    interactions.append((game_object, destination_obj))
+                    #interactions.append((game_object, destination_obj))
+                    interactions[(requirement.column, requirement.row)] = (game_object, destination_obj)
 
             # If the game object is moving out of bounds, let the caller know            
             elif requirement is not None and not self._is_in_boundries(requirement):
@@ -104,16 +106,32 @@ class Board(object):
                 out_of_bounds.append(game_object)
 
         # Executing interaction between the objects
-        for object1, object2 in interactions:
+        for coordinate in interactions:
             # Making sure after the movement that the objects still interact with eachother
-            if self._is_interacting(object1, object2):
-                interaction_callback(object1, object2)
+            if Coordinate.from_legacy_coordinate(coordinate) in interactions[coordinate][1].get_coordinates():
+                if interactions[coordinate][0] is interactions[coordinate][1] and self._is_hitting_itself(interactions[coordinate][0]):
+                    interaction_callback(interactions[coordinate][0], interactions[coordinate][1])
+                elif interactions[coordinate][0] is not interactions[coordinate][1]:
+                    interaction_callback(interactions[coordinate][0], interactions[coordinate][1])
 
         # Executing interaction between objects to the board boundries
         for object1 in out_of_bounds:
             out_of_bounds_callback(object1, self._is_off_board(object1.get_coordinates()))
 
-    def _is_interacting(self, object1: BaseGameObject, object2: BaseGameObject) -> bool:
+    def _is_hitting_itself(self, object1: BaseGameObject):
+        """
+        """
+        coordinates = object1.get_coordinates()
+        # If the object has no coordinates, we shouldn't check anything
+        if 0 == len(coordinates):
+            return False
+        # If the object has a coordinate twice, then it hit itself
+        if 1 != coordinates.count(coordinates[0]):
+            return True
+
+        return False
+
+    def _is_interacting(self, coordinate, object1: BaseGameObject, object2: BaseGameObject) -> bool:
         """
         Returns whether the two objects interact with each other
         (e.g. share some coordinate(s) at the given moment)
