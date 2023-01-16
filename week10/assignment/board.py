@@ -82,7 +82,6 @@ class Board(object):
         If an object interacts with the boundries of the border,
         out_of_bounds_callback is called.
         """
-        interactions = []
         interactions = {}
         out_of_bounds = []
 
@@ -106,13 +105,18 @@ class Board(object):
                 out_of_bounds.append(game_object)
 
         # Executing interaction between the objects
-        for coordinate in interactions:
+        for coordinate, objs in interactions.items():
+            src_obj = objs[0]
+            dst_obj = objs[1]
             # Making sure after the movement that the objects still interact with eachother
-            if Coordinate.from_legacy_coordinate(coordinate) in interactions[coordinate][1].get_coordinates():
-                if interactions[coordinate][0] is interactions[coordinate][1] and self._is_hitting_itself(interactions[coordinate][0]):
-                    interaction_callback(interactions[coordinate][0], interactions[coordinate][1])
-                elif interactions[coordinate][0] is not interactions[coordinate][1]:
-                    interaction_callback(interactions[coordinate][0], interactions[coordinate][1])
+            if Coordinate.from_legacy_coordinate(coordinate) in dst_obj.get_coordinates():
+                # If the destination and source objects are the same,
+                #   then we check that it actually hit itself (since it
+                #   may have just moved in and out of the cell this round)
+                # If it is not the same object, then interact normally
+                if (src_obj is dst_obj and self._is_hitting_itself(src_obj)) or \
+                        (src_obj is not dst_obj):
+                    interaction_callback(src_obj, dst_obj)
 
         # Executing interaction between objects to the board boundries
         for object1 in out_of_bounds:
@@ -120,6 +124,8 @@ class Board(object):
 
     def _is_hitting_itself(self, object1: BaseGameObject):
         """
+        Checking if an object is hitting itself
+        Receives the object which should be checked and returns True if so.
         """
         coordinates = object1.get_coordinates()
         # If the object has no coordinates, we shouldn't check anything
