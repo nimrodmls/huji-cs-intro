@@ -61,13 +61,21 @@ def _internal_find(current_word, letters, words):
     for letter in letters:
         pass
 
-def find_new(n,board,words):
+def find_new(letter_list, cur_word, board, words, max_len, valid_words):
     """
     """
-    board_letters = {(row_index, column_index): board[row_index][column_index]
-        for row_index in range(len(board)) for column_index in range(len(board[0]))}
-    return _internal_find(board_letters, board_letters, words)
+    if len(cur_word) == max_len:
+        if len(words) == 1 and words[0].strip() == cur_word:
+            valid_words.append(cur_word)
+            return
+        else:
+            return
 
+    for index, element in enumerate(letter_list):
+        new_words = np.extract(np.char.startswith(words, cur_word), words)
+        if len(new_words) == 0:
+            return
+        find_new(np.delete(letter_list, index), cur_word+element, board, new_words, max_len, valid_words)
 
 def find_length_n_paths(n: int, board: Board, words: Iterable[str]) -> List[Path]:
     """
@@ -87,9 +95,23 @@ def find_length_n_paths(n: int, board: Board, words: Iterable[str]) -> List[Path
     return valid_paths
 
 with open("week11\\assignment\\boggle_dict.txt", "r") as my_file:
+    import random
+    random.seed("i")
     board = randomize_board()
-    print(board)
-    print(find_length_n_paths(3, board, my_file.readlines()))
+    #print(board)
+    #print(find_length_n_paths(3, board, my_file.readlines()))
+    filedata = my_file.readlines()
+    valwords = []
+    import time
+    prev = time.time()
+    find_new(np.array(list(itertools.chain.from_iterable(board))),
+        "",
+        board,
+        np.extract(np.char.str_len(filedata)==4, filedata),
+        3,
+        valwords)
+    print(valwords)
+    print(time.time() - prev)
     # data = my_file.readlines()
     # new_data = np.extract(np.char.str_len(data)==5, data)
     # for i in range(40):
