@@ -22,9 +22,9 @@ def _create_words_dict(words: Iterable[str]) -> SortedWords:
         
         anagram = "".join(sorted(word))
         if anagram not in sorted_dict[len(word)]:
-            sorted_dict[len(word)][anagram] = []
+            sorted_dict[len(word)][anagram] = set()
 
-        sorted_dict[len(word)][anagram].append(word)
+        sorted_dict[len(word)][anagram].add(word)
 
     return sorted_dict
 
@@ -131,10 +131,33 @@ def path_to_word(board, path):
 with open("week11\\assignment\\boggle_dict.txt", "r") as my_file:
     sorted_dict = {}
     filedata = my_file.read().split()
+    import time
+    prev = time.time()
+    word_dict = _create_words_dict(filedata)
+    print(time.time() - prev)
+    import random
+    random.seed("c")
     board = randomize_board()
-    paths = find_length_n_paths(6, board, filedata)
-    for path in paths:
-        print(path_to_word(board, path))
+    board_coordinates = {(row_index, column_index): board[row_index][column_index]
+        for row_index in range(len(board)) for column_index in range(len(board[0]))}
+    combs = itertools.combinations(board_coordinates.values(), 8)
+    cnt = 0
+    prev = time.time()
+    for comb in combs:
+        cnt += 1
+        anagram = "".join(sorted(comb))
+        try:
+            if word_dict[len(anagram)][anagram]:
+                for perm in itertools.permutations(anagram):
+                    if "".join(perm) in word_dict[len(anagram)][anagram]:
+                        pass
+        except KeyError:
+            pass
+    print(time.time() - prev)
+    print(cnt)
+    #paths = find_length_n_paths(6, board, filedata)
+    #for path in paths:
+    #    print(path_to_word(board, path))
 
 
 def find_length_n_words(n: int, board: Board, words: Iterable[str]) -> List[Path]:
