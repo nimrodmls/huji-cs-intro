@@ -163,6 +163,23 @@ def _assemble_word(board_map, word, last_coordinate, current_path, all_paths):
             _assemble_word(board_map[board_map != instance], word[1:], instance_coord, current_path, all_paths)
             current_path.pop()
 
+def _assemble_word_2(valid_coordinates, word, last_coordinate, current_path, all_paths):
+    """
+    """
+    if len(word) == 0:
+        all_paths.append(copy.deepcopy(current_path))
+        return
+
+    letter_instances = np.extract((valid_coordinates['letter'] == word[0]), valid_coordinates)
+    if len(letter_instances) != 0:
+        for instance in letter_instances:
+            instance_coord = instance[0]
+            if last_coordinate is not None and not _is_in_neighborhood(last_coordinate, instance_coord):
+                continue
+            current_path.append(instance_coord)
+            _assemble_word_2(valid_coordinates[valid_coordinates != instance], word[1:], instance_coord, current_path, all_paths)
+            current_path.pop()
+
 with open("week11\\assignment\\boggle_dict.txt", "r") as my_file:
     sorted_dict = {}
     filedata = my_file.read().split()
@@ -191,7 +208,8 @@ with open("week11\\assignment\\boggle_dict.txt", "r") as my_file:
         try:
             if anagram in word_dict[len(anagram)]:
                 for word in word_dict[len(anagram)][anagram]:
-                     _assemble_word(board_map, word, None, [], paths)
+                    coordinate_map = np.array(list(comb), dtype=[('coordinate', tuple), ('letter', 'U1')])
+                    _assemble_word_2(coordinate_map, word, None, [], paths)
                 #_get_valid_paths(board, 6, np.asarray(list(current.keys())), word_dict, [], "", paths)
         except KeyError:
             pass
