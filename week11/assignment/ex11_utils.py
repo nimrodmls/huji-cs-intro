@@ -127,7 +127,42 @@ def path_to_word(board, path):
     for coor in path:
         word += board[coor[0]][coor[1]]
     return word
-    
+
+import copy
+
+def _get_valid_paths(board, max_len, valid_coordinates, words, current_path, current_word, paths):
+    if max_len == len(current_word):
+        try:
+            if current_word not in words[len(current_path)]["".join(sorted(current_word))]:
+                return
+            paths.append(copy.deepcopy(current_path))
+        except KeyError:
+            return
+
+    for index, element in enumerate(valid_coordinates):
+        if 0 != len(current_path) and _is_in_neighborhood(element, current_path[-1]):
+            continue
+        letter = board[element[0]][element[1]]
+        current_path.append(element)
+        _get_valid_paths(board, max_len, np.delete(valid_coordinates, index, 0), words, current_path, current_word+letter, paths)
+        current_path.pop()
+
+def _assemble_word(board_map, word, last_coordinate, current_path, all_paths):
+
+    if len(word) == 0:
+        all_paths.append(copy.deepcopy(current_path))
+        return
+
+    letter_instances = np.extract((board_map['letter'] == word[0]), board_map)
+    if len(letter_instances) != 0:
+        for instance in letter_instances:
+            instance_coord = instance[1]
+            if last_coordinate is not None and not _is_in_neighborhood(last_coordinate, instance_coord):
+                continue
+            current_path.append(instance_coord)
+            _assemble_word(board_map[board_map != instance], word[1:], instance_coord, current_path, all_paths)
+            current_path.pop()
+
 with open("week11\\assignment\\boggle_dict.txt", "r") as my_file:
     sorted_dict = {}
     filedata = my_file.read().split()
@@ -138,23 +173,34 @@ with open("week11\\assignment\\boggle_dict.txt", "r") as my_file:
     import random
     random.seed("c")
     board = randomize_board()
+    board_map = np.array([(board[row_index][column_index], (row_index, column_index)) 
+        for row_index in range(len(board)) for column_index in range(len(board[0]))], dtype=[('letter', 'U1'), ('coordinate', tuple)])
+    all_paths = []
+    #_assemble_word(board_map, "OXFI", None, [], all_paths)
+    for path in all_paths:
+        print(path_to_word(board, path))
     board_coordinates = {(row_index, column_index): board[row_index][column_index]
         for row_index in range(len(board)) for column_index in range(len(board[0]))}
-    combs = itertools.combinations(board_coordinates.values(), 8)
+    combs = itertools.combinations(board_coordinates.items(), 5)
     cnt = 0
     prev = time.time()
+    paths = []
     for comb in combs:
-        cnt += 1
-        anagram = "".join(sorted(comb))
+        current = dict(comb)
+        anagram = "".join(sorted(current.values()))
         try:
-            if word_dict[len(anagram)][anagram]:
-                for perm in itertools.permutations(anagram):
-                    if "".join(perm) in word_dict[len(anagram)][anagram]:
-                        pass
+            if anagram in word_dict[len(anagram)]:
+                for word in word_dict[len(anagram)][anagram]:
+                     _assemble_word(board_map, word, None, [], paths)
+                #_get_valid_paths(board, 6, np.asarray(list(current.keys())), word_dict, [], "", paths)
         except KeyError:
             pass
     print(time.time() - prev)
-    print(cnt)
+    for line in board:
+        print(line)
+    for path in paths:
+        print(path)
+        print(path_to_word(board, path))
     #paths = find_length_n_paths(6, board, filedata)
     #for path in paths:
     #    print(path_to_word(board, path))
