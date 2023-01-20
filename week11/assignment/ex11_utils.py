@@ -17,7 +17,7 @@ def _create_words_dict(words: Iterable[str]) -> SortedWords:
     """
     """
     sorted_dict = {}
-    for word in filedata:
+    for word in words:
         if len(word) not in sorted_dict:
             sorted_dict[len(word)] = {}
         
@@ -82,7 +82,7 @@ def _find_valid_paths(path_length, board, word_dict, condition_callback = None):
                     coordinate_map = np.array(
                         list(current_comb), dtype=[('coordinate', tuple), ('letter', 'U1')])
                     _assemble_word(coordinate_map, word, None, [], word_paths)
-                    if (condition_callback and condition_callback(word)) or (not condition_callback):
+                    if ((len(word_paths) != 0) and condition_callback and condition_callback(word, word_paths)) or (not condition_callback):
                         paths += word_paths
         except KeyError:
             pass # This anagram doesn't exist, move on to the next combination
@@ -134,30 +134,28 @@ def find_length_n_words(n: int, board: Board, words: Iterable[str]) -> List[Path
     """
     # Sorting the given words by length and anagrams
     word_dict = _create_words_dict(words)
-    return _find_valid_paths(n, board, word_dict, lambda word: len(word) == n)
+    return _find_valid_paths(n, board, word_dict, lambda word, word_paths: len(word) == n)
 
 def max_score_paths(board: Board, words: Iterable[str]) -> List[Path]:
     """
     """
-    pass
+    word_dict = _create_words_dict(words)
+    all_paths = []
+    # Iterating on the number of possible path lengths according to
+    #   the board's dimensions.
+    for current_path_len in range(len(board) * len(board[0])):
+        current_paths = []
 
+        # A special function for selecting only 1 instance of
+        #   a word instead of receiving multiple paths of the same word
+        #   by the return value of the _find_valid_paths
+        def path_condition(word, word_paths, current_paths):
+            current_paths.append(word_paths[0])
+            return True
 
-def path_to_word(board, path):
-    word = ""
-    for coor in path:
-        word += board[coor[0]][coor[1]]
-    return word
-
-
-with open("week11\\assignment\\boggle_dict.txt", "r") as my_file:
-    sorted_dict = {}
-    filedata = my_file.read().split()
-    import time
-    import random
-    random.seed("c")
-    board = randomize_board()
-    prev = time.time()
-    for path in find_length_n_words(5, board, filedata):
-        print(path)
-        print(path_to_word(board, path))
-    print(time.time() - prev)
+        # We don't care about the return value as we picked only 1 instance 
+        #   of the word already via path_condition
+        _find_valid_paths(current_path_len, board, word_dict, lambda word, word_paths: path_condition(word, word_paths, current_paths))            
+        all_paths += current_paths
+        
+    return all_paths
