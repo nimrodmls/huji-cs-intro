@@ -1,4 +1,5 @@
 import numpy as np
+import copy
 import itertools
 import os
 from typing import List, Tuple, Iterable, Optional, Dict
@@ -38,6 +39,56 @@ def _is_in_neighborhood(coordinate1: Coordinate, coordinate2: Coordinate):
         coordinate1[COORDINATE_COLUMN_INDEX] - coordinate2[COORDINATE_COLUMN_INDEX])
     return (row_difference in [1, 0]) and (column_difference in [1, 0])
 
+def _assemble_word(valid_coordinates, word, last_coordinate, current_path, all_paths):
+    """
+    """
+    if len(word) == 0:
+        all_paths.append(copy.deepcopy(current_path))
+        return
+
+    letter_instances = np.extract((valid_coordinates['letter'] == word[0]), valid_coordinates)
+    if len(letter_instances) != 0:
+        for instance in letter_instances:
+
+            instance_coord = instance[0]
+            if last_coordinate is not None and not _is_in_neighborhood(last_coordinate, instance_coord):
+                continue
+
+            current_path.append(instance_coord)
+            _assemble_word(
+                valid_coordinates[valid_coordinates != instance], word[1:], instance_coord, current_path, all_paths)
+            current_path.pop()
+
+def _find_valid_paths(path_length, board, word_dict, condition_callback = None):
+    """
+    """
+    # Laying down all the coordinates of the board with their 
+    #   respective value as a dictionary for better traversal
+    board_coordinates = {(row_index, column_index): board[row_index][column_index]
+        for row_index in range(len(board)) for column_index in range(len(board[0]))}
+    
+    # Generating all letter combinations (no repeatitions, order doesn't matter)
+    combinations = itertools.combinations(board_coordinates.items(), path_length)
+
+    paths = []
+    for current_comb in combinations:
+        current = dict(current_comb)
+        anagram = "".join(sorted(current.values()))
+
+        try:
+            if anagram in word_dict[len(anagram)]:
+                for word in word_dict[len(anagram)][anagram]:
+                    word_paths = []
+                    coordinate_map = np.array(
+                        list(current_comb), dtype=[('coordinate', tuple), ('letter', 'U1')])
+                    _assemble_word(coordinate_map, word, None, [], word_paths)
+                    if (condition_callback and condition_callback(word)) or (not condition_callback):
+                        paths += word_paths
+        except KeyError:
+            pass # This anagram doesn't exist, move on to the next combination
+
+    return paths
+
 def _is_valid_path_sorted(board: Board, path: Path, words: Iterable[str]) -> Optional[str]:
     """
     """
@@ -65,62 +116,31 @@ def _is_valid_path_sorted(board: Board, path: Path, words: Iterable[str]) -> Opt
 
     return current_word
 
-
 def is_valid_path(board: Board, path: Path, words: Iterable[str]) -> Optional[str]:
     """
     """
     words_dict = _create_words_dict(words)
     return _is_valid_path_sorted(board, path, words_dict)
 
-def find_new(letter_list, cur_word, board, words, max_len, valid_words, last_coord):
-    """
-    """
-    if len(cur_word) == max_len:
-        try:
-            if cur_word not in words[max_len]["".join(sorted(cur_word))]:
-                return
-            valid_words.append(cur_word)
-        except KeyError:
-            return
-
-    for index, element in enumerate(letter_list):
-        if last_coord is not None and not _is_in_neighborhood(element, last_coord):
-            continue
-        letter = board[element[0]][element[1]]
-        find_new(np.delete(letter_list, index, 0), 
-            cur_word+letter, board, words, max_len, valid_words, element)
-
-def _find_all_valid_paths(
-    max_len: int, board: Board, words: SortedWords, valid_coords: List[str], current_word: str, path: Path, valid_paths: Path):
-    """
-    """
-    if len(current_word) == max_len:
-        try:
-            if current_word not in words[max_len]["".join(sorted(current_word))]:
-                return
-            valid_paths.append(path)
-        except KeyError:
-            return
-
-    for index, element in enumerate(valid_coords):
-        if 0 != len(path) and _is_in_neighborhood(element, path[-1]):
-            continue
-        letter = board[element[0]][element[1]]
-        path.append(element)
-        _find_all_valid_paths( 
-            max_len, board, words, np.delete(valid_coords, index, 0), current_word + letter, path, valid_paths)
-        path.remove(element)
-
 def find_length_n_paths(n: int, board: Board, words: Iterable[str]) -> List[Path]:
     """
     """
-    board_coordinates = [(row_index, column_index)
-        for row_index in range(len(board)) for column_index in range(len(board[0]))]
-    words_dict = _create_words_dict(words)
+    # Sorting the given words by length and anagrams
+    word_dict = _create_words_dict(words)
+    return _find_valid_paths(n, board, word_dict)
 
-    paths = []
-    _find_all_valid_paths(n, board, words_dict, np.array(board_coordinates), "", [], paths)
-    return paths
+def find_length_n_words(n: int, board: Board, words: Iterable[str]) -> List[Path]:
+    """
+    """
+    # Sorting the given words by length and anagrams
+    word_dict = _create_words_dict(words)
+    return _find_valid_paths(n, board, word_dict, lambda word: len(word) == n)
+
+def max_score_paths(board: Board, words: Iterable[str]) -> List[Path]:
+    """
+    """
+    pass
+
 
 def path_to_word(board, path):
     word = ""
@@ -128,109 +148,16 @@ def path_to_word(board, path):
         word += board[coor[0]][coor[1]]
     return word
 
-import copy
-
-def _get_valid_paths(board, max_len, valid_coordinates, words, current_path, current_word, paths):
-    if max_len == len(current_word):
-        try:
-            if current_word not in words[len(current_path)]["".join(sorted(current_word))]:
-                return
-            paths.append(copy.deepcopy(current_path))
-        except KeyError:
-            return
-
-    for index, element in enumerate(valid_coordinates):
-        if 0 != len(current_path) and _is_in_neighborhood(element, current_path[-1]):
-            continue
-        letter = board[element[0]][element[1]]
-        current_path.append(element)
-        _get_valid_paths(board, max_len, np.delete(valid_coordinates, index, 0), words, current_path, current_word+letter, paths)
-        current_path.pop()
-
-def _assemble_word(board_map, word, last_coordinate, current_path, all_paths):
-
-    if len(word) == 0:
-        all_paths.append(copy.deepcopy(current_path))
-        return
-
-    letter_instances = np.extract((board_map['letter'] == word[0]), board_map)
-    if len(letter_instances) != 0:
-        for instance in letter_instances:
-            instance_coord = instance[1]
-            if last_coordinate is not None and not _is_in_neighborhood(last_coordinate, instance_coord):
-                continue
-            current_path.append(instance_coord)
-            _assemble_word(board_map[board_map != instance], word[1:], instance_coord, current_path, all_paths)
-            current_path.pop()
-
-def _assemble_word_2(valid_coordinates, word, last_coordinate, current_path, all_paths):
-    """
-    """
-    if len(word) == 0:
-        all_paths.append(copy.deepcopy(current_path))
-        return
-
-    letter_instances = np.extract((valid_coordinates['letter'] == word[0]), valid_coordinates)
-    if len(letter_instances) != 0:
-        for instance in letter_instances:
-            instance_coord = instance[0]
-            if last_coordinate is not None and not _is_in_neighborhood(last_coordinate, instance_coord):
-                continue
-            current_path.append(instance_coord)
-            _assemble_word_2(valid_coordinates[valid_coordinates != instance], word[1:], instance_coord, current_path, all_paths)
-            current_path.pop()
 
 with open("week11\\assignment\\boggle_dict.txt", "r") as my_file:
     sorted_dict = {}
     filedata = my_file.read().split()
     import time
-    prev = time.time()
-    word_dict = _create_words_dict(filedata)
-    print(time.time() - prev)
     import random
     random.seed("c")
     board = randomize_board()
-    board_map = np.array([(board[row_index][column_index], (row_index, column_index)) 
-        for row_index in range(len(board)) for column_index in range(len(board[0]))], dtype=[('letter', 'U1'), ('coordinate', tuple)])
-    all_paths = []
-    #_assemble_word(board_map, "OXFI", None, [], all_paths)
-    for path in all_paths:
-        print(path_to_word(board, path))
-    board_coordinates = {(row_index, column_index): board[row_index][column_index]
-        for row_index in range(len(board)) for column_index in range(len(board[0]))}
-    combs = itertools.combinations(board_coordinates.items(), 5)
-    cnt = 0
     prev = time.time()
-    paths = []
-    for comb in combs:
-        current = dict(comb)
-        anagram = "".join(sorted(current.values()))
-        try:
-            if anagram in word_dict[len(anagram)]:
-                for word in word_dict[len(anagram)][anagram]:
-                    coordinate_map = np.array(list(comb), dtype=[('coordinate', tuple), ('letter', 'U1')])
-                    _assemble_word_2(coordinate_map, word, None, [], paths)
-                #_get_valid_paths(board, 6, np.asarray(list(current.keys())), word_dict, [], "", paths)
-        except KeyError:
-            pass
-    print(time.time() - prev)
-    for line in board:
-        print(line)
-    for path in paths:
+    for path in find_length_n_words(5, board, filedata):
         print(path)
         print(path_to_word(board, path))
-    #paths = find_length_n_paths(6, board, filedata)
-    #for path in paths:
-    #    print(path_to_word(board, path))
-
-
-def find_length_n_words(n: int, board: Board, words: Iterable[str]) -> List[Path]:
-    """
-    """
-    pass
-
-
-def max_score_paths(board: Board, words: Iterable[str]) -> List[Path]:
-    """
-    """
-    pass
+    print(time.time() - prev)
