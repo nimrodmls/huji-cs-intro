@@ -4,16 +4,17 @@ import itertools
 import os
 from typing import List, Tuple, Iterable, Optional, Dict
 from boggle_board_randomizer import randomize_board
+from common import LegacyCoordinate, Coordinate
 
-Coordinate = Tuple[int, int]
+LegacyCoordinate = Tuple[int, int]
 Board = List[List[str]]
 Path = List[Tuple[int, int]]
-SortedWords = Dict[int, Dict[str, List]]
+WordsDictionary = Dict[int, Dict[str, List]]
 
 COORDINATE_ROW_INDEX = 0
 COORDINATE_COLUMN_INDEX = 1
 
-def _create_words_dict(words: Iterable[str]) -> SortedWords:
+def create_words_dict(words: Iterable[str]) -> WordsDictionary:
     """
     """
     sorted_dict = {}
@@ -29,16 +30,20 @@ def _create_words_dict(words: Iterable[str]) -> SortedWords:
 
     return sorted_dict
 
-def _is_in_neighborhood(coordinate1: Coordinate, coordinate2: Coordinate):
+def is_in_neighborhood(coordinate1: Coordinate, coordinate2: Coordinate) -> bool:
+    """
+    """
+    row_difference = abs(coordinate1.row - coordinate2.row)
+    column_difference = abs(coordinate1.column - coordinate2.column)
+    return (row_difference in [1, 0]) and (column_difference in [1, 0])
+
+def _is_in_neighborhood_legacy(coordinate1: LegacyCoordinate, coordinate2: LegacyCoordinate) -> bool:
     """
     Returns whether the given coordinates are in the neighborhood of one another
     """
-    row_difference = abs(
-        coordinate1[COORDINATE_ROW_INDEX] - coordinate2[COORDINATE_ROW_INDEX])
-    column_difference = abs(
-        coordinate1[COORDINATE_COLUMN_INDEX] - coordinate2[COORDINATE_COLUMN_INDEX])
-    return (row_difference in [1, 0]) and (column_difference in [1, 0])
-
+    is_in_neighborhood(Coordinate.from_legacy_coordinate(coordinate1),
+                       Coordinate.from_legacy_coordinate(coordinate2))
+    
 def _assemble_word(valid_coordinates, word, last_coordinate, current_path, all_paths):
     """
     """
@@ -51,7 +56,7 @@ def _assemble_word(valid_coordinates, word, last_coordinate, current_path, all_p
         for instance in letter_instances:
 
             instance_coord = instance[0]
-            if last_coordinate is not None and not _is_in_neighborhood(last_coordinate, instance_coord):
+            if last_coordinate is not None and not _is_in_neighborhood_legacy(last_coordinate, instance_coord):
                 continue
 
             current_path.append(instance_coord)
@@ -89,7 +94,7 @@ def _find_valid_paths(path_length, board, word_dict, condition_callback = None):
 
     return paths
 
-def _is_valid_path_sorted(board: Board, path: Path, words: Iterable[str]) -> Optional[str]:
+def is_valid_path_sorted(board: Board, path: Path, words: WordsDictionary) -> Optional[str]:
     """
     """
     last_coordinate = None
@@ -119,27 +124,27 @@ def _is_valid_path_sorted(board: Board, path: Path, words: Iterable[str]) -> Opt
 def is_valid_path(board: Board, path: Path, words: Iterable[str]) -> Optional[str]:
     """
     """
-    words_dict = _create_words_dict(words)
-    return _is_valid_path_sorted(board, path, words_dict)
+    words_dict = create_words_dict(words)
+    return is_valid_path_sorted(board, path, words_dict)
 
 def find_length_n_paths(n: int, board: Board, words: Iterable[str]) -> List[Path]:
     """
     """
     # Sorting the given words by length and anagrams
-    word_dict = _create_words_dict(words)
+    word_dict = create_words_dict(words)
     return _find_valid_paths(n, board, word_dict)
 
 def find_length_n_words(n: int, board: Board, words: Iterable[str]) -> List[Path]:
     """
     """
     # Sorting the given words by length and anagrams
-    word_dict = _create_words_dict(words)
+    word_dict = create_words_dict(words)
     return _find_valid_paths(n, board, word_dict, lambda word, word_paths: len(word) == n)
 
 def max_score_paths(board: Board, words: Iterable[str]) -> List[Path]:
     """
     """
-    word_dict = _create_words_dict(words)
+    word_dict = create_words_dict(words)
     all_paths = []
     # Iterating on the number of possible path lengths according to
     #   the board's dimensions.
