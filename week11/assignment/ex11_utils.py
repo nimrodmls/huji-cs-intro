@@ -103,7 +103,7 @@ def is_valid_path_sorted(board: Board, path: Path, words: WordsDictionary) -> Op
         # Making sure the coordinates are in the neighborhood of one another
         #   if at least one coordinate in the path is not in the neighborhood,
         #   return with failure
-        if (last_coordinate is not None) and (not _is_in_neighborhood(last_coordinate, coordinate)):
+        if (last_coordinate is not None) and (not _is_in_neighborhood_legacy(last_coordinate, coordinate)):
             return None
 
         # Narrowing the list of words by the letter on the current coordinate

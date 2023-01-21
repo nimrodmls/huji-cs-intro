@@ -8,9 +8,9 @@
 # NOTES: N/A
 #################################################################
 
-from typing import List
+from typing import List, Optional
 from common import Coordinate
-from ex11_utils import Board, WordsDictionary, is_in_neighborhood
+from ex11_utils import Board, WordsDictionary, is_valid_path_sorted, is_in_neighborhood
 
 BoardPath = List[Coordinate]
 
@@ -37,21 +37,24 @@ class BoggleGame(object):
         if last_coordinate is not None and not is_in_neighborhood(last_coordinate, coordinate):
             return False
 
-    def submit_path(self):
+        self._current_path.append(coordinate)
+        return True
+
+    def submit_path(self) -> Optional[str]:
         """
         """
-        found_word = self._path_to_word(self._current_path)
-        if found_word in self._found_words:
-            # The word has already been found, don't count it
-            return
+        found_word = is_valid_path_sorted(self._board, self._current_path, self._words_dict)
 
-        # Adding the word in the path to the found words,
-        #   and incrementing the total score
-        self._score = len(self._current_path) ** 2
-        self._found_words.append(found_word)
+        # If it word wasn't found and it exists in the dictionary, count it,
+        #   otherwise just ignore it and reset the current path
+        if (found_word is not None) and (found_word not in self._found_words):
+            self._score = len(self._current_path) ** 2
+            self._found_words.append(found_word)
 
-        # Zeroing the current path
+        # Resetting the current path
         self._current_path = []
+        
+        return found_word
 
     def get_score(self) -> int:
         """
@@ -65,4 +68,3 @@ class BoggleGame(object):
         for coordinate in path:
             word += self._board[coordinate.row][coordinate.column]
         return word
-        
