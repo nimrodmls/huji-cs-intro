@@ -19,7 +19,9 @@ from ex11_utils import Board
 LetterCallback = Callable[[Coordinate], None]
 SubmitCallback = Callable[[], None]
 TimerCallback = Callable[[], None]
-RunStateCallback = Callable[[], None]
+# Called with the Run State is changed (the middle button in the control panel)
+#   the boolean passed as parameter indicates the CURRENT state
+RunStateCallback = Callable[[bool], None]
 
 class BoggleGUICallbacks(object):
 
@@ -49,6 +51,8 @@ class BoggleGUI(object):
     TEXT_COLOR = "white"
     DEFAULT_FONT = "Agency FB"
     TIMER_DELAY = 200 # in ms
+    RUNSTATE_RESUME = "▶"
+    RUNSTATE_PAUSE = "⏸"
 
     def __init__(self, callbacks: BoggleGUICallbacks) -> None:
         """
@@ -136,19 +140,19 @@ class BoggleGUI(object):
         self._words_collection.insert(tk.END, word + "\n", "hint")
         self._words_collection.configure(state="disable")
 
+    def set_run_state(self, resume: bool) -> None:
+        """
+        """
+        if resume:
+            self._runstate_button.configure(text=self.RUNSTATE_RESUME, fg="green")
+        else:
+            self._runstate_button.configure(text=self.RUNSTATE_PAUSE, fg="red")
+
     def _set_timed_event(self) -> None:
         """
         """
         self._callbacks.timer_callback()
         self._primary_window.after(self.TIMER_DELAY, self._set_timed_event)
-
-    def _configure_run_state(self, resume) -> None:
-        """
-        """
-        if resume:
-            self._runstate_button.configure(text='▶', fg="green")
-        else:
-            self._runstate_button.configure(text='⏸', fg="red")
 
     def _create_control_panel(self, parent_frame: tk.Frame) -> None:
         """
@@ -174,17 +178,23 @@ class BoggleGUI(object):
         self._score_label["text"] = "0"
         self._score_label.grid(row=0, column=0, sticky=tk.NSEW)
 
+        def runstate_wrapper():
+            """
+            """
+            resume = self._runstate_button['text'] == self.RUNSTATE_RESUME
+            self._callbacks.runstate_callback(resume)
+
         # Setting the pause/resume button
         self._runstate_button = tk.Button(
             control_panel, 
-            text = "▶", 
+            text =self.RUNSTATE_RESUME, 
             fg = "green", 
             bg = self.BACKGROUND_COLOR_1, 
             font = font.Font(
                 family=self.DEFAULT_FONT, size=30, weight='bold'), 
             borderwidth = 0, 
             highlightthickness = 0, 
-            command=lambda: self._callbacks.runstate_callback())
+            command=lambda: runstate_wrapper())
         self._runstate_button.grid(row=0, column=1, sticky=tk.NSEW, padx=10, pady=10)
 
         # Setting the timer label, allowing access from outside
@@ -315,13 +325,3 @@ class BoggleGUI(object):
             
         self._letter_buttons[str(button_coordinate)] = (button_coordinate, button)
         return button
-
-#def demo_callback(coordinate: Coordinate):
-#    print(coordinate)
-#
-#def timer_callback():
-#    print("timer")
-#    gui.reset(randomize_board())
-#callbacks = BoggleGUICallbacks(demo_callback, None, timer_callback, None)
-#gui = BoggleGUI(callbacks)
-#gui.start()

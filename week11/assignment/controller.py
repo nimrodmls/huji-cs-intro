@@ -2,7 +2,7 @@
 # FILE : controller.py
 # WRITER : Nimrod M. ; Ruth S.
 # EXERCISE : intro2cs1 ex11 2023
-# DESCRIPTION: Game to GUI Interface & Controller
+# DESCRIPTION: Game-to-GUI Interface & Controller
 # STUDENTS I DISCUSSED THE EXERCISE WITH: N/A
 # WEB PAGES I USED: N/A
 # NOTES: N/A
@@ -38,18 +38,25 @@ class BoggleController(object):
         self._current_game = None
         self._timer = 0
 
-    def run_game(self, ) -> None:
+    def run_game(self) -> None:
+        """
+        """
+        self._gui.start()
+
+    def _start_new_round(self) -> None:
         """
         """
         self._current_board = randomize_board()
         self._current_game = BoggleGame(self._current_board, self._words_dict)
         self._gui.reset(self._current_board)
         self._timer = 0
-        self._gui.start()
 
     def _letter_callback(self, coordinate: Coordinate):
         """
         """
+        if self._current_game is None:
+            return
+            
         # Trying to move on the board, if the movement is
         #   succesful, then we disable the button until the word is submitted
         if self._current_game.move(coordinate):
@@ -68,6 +75,7 @@ class BoggleController(object):
             self._gui.set_timer(datetime.time())
             self._gui.set_letter_buttons_state(False)
             self._add_final_hints(self._current_game.get_hints())
+            self._gui.set_run_state(True)
             self._current_board = None
             self._current_game = None
         else:
@@ -85,6 +93,9 @@ class BoggleController(object):
     def _submit_callback(self):
         """
         """
+        if self._current_game is None:
+            return
+
         submitted_word = self._current_game.submit_path()
 
         if submitted_word is not None:
@@ -97,10 +108,14 @@ class BoggleController(object):
         #   whether succesful or not
         self._gui.set_letter_buttons_state(True)
 
-    def _runstate_callback(self):
+    def _runstate_callback(self, resume: bool):
         """
         """
-        pass
+        if self._current_game is None:
+            self._start_new_round()
+        else:
+            self._gui.set_run_state(not resume)
+
 
 filedata = ""
 with open("week11\\assignment\\boggle_dict.txt", "r") as my_file:
