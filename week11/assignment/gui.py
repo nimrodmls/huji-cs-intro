@@ -48,7 +48,7 @@ class BoggleGUI(object):
     SUBMIT_BUTTON_COLOR = "#DCD7C9"
     TEXT_COLOR = "white"
     DEFAULT_FONT = "Agency FB"
-    TIMER_DELAY = 50 # in ms
+    TIMER_DELAY = 200 # in ms
 
     def __init__(self, callbacks: BoggleGUICallbacks) -> None:
         """

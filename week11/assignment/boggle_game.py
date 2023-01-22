@@ -10,7 +10,7 @@
 
 from typing import List, Optional
 from common import Coordinate
-from ex11_utils import Board, WordsDictionary, is_valid_path_sorted, is_in_neighborhood, max_score_paths_sorted
+from ex11_utils import Board, Path, WordsDictionary, is_valid_path_sorted, is_in_neighborhood, max_score_paths_sorted
 
 BoardPath = List[Coordinate]
 
@@ -74,17 +74,24 @@ class BoggleGame(object):
         """
         hints = []
         for path in max_score_paths_sorted(self._board, self._words_dict):
-            word = self.path_to_word(self._board, path)
+            word = self._path_to_word(self._path_from_legacy_path(path))
             if (word not in self._found_words) and (word not in hints):
                 hints.append(word)
         return hints
 
     @staticmethod
-    def path_to_word(board: Board, path: BoardPath) -> str:
+    def _path_from_legacy_path(legacy_path: Path) -> BoardPath:
+        """
+        """
+        new_path = []
+        for coordinate in legacy_path:
+            new_path.append(Coordinate.from_legacy_coordinate(coordinate))
+        return new_path
+
+    def _path_to_word(self, path: BoardPath) -> str:
         """
         """
         word = ""
         for coordinate in path:
-            new_coordinate = Coordinate.from_legacy_coordinate(coordinate)
-            word += board[new_coordinate.row][new_coordinate.column]
+            word += self._board[coordinate.row][coordinate.column]
         return word
