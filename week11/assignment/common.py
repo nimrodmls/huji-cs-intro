@@ -12,19 +12,6 @@ from typing import Tuple
 
 LegacyCoordinate = Tuple[int, int]
 
-class BoardDirection(object):
-    """
-    """
-
-    DIRECTION_NORTH = "North"
-    DIRECTION_SOUTH = "South"
-    DIRECTION_EAST = "East"
-    DIRECTION_WEST = "West"
-    DIRECTION_NE = "NorthEast"
-    DIRECTION_NW = "NorthWest"
-    DIRECTION_SE = "SouthEast"
-    DIRECTION_SW = "SouthWest"
-
 class Coordinate(object):
     """
     Represents a coordinate in a Two-Dimensional Coordinate System
@@ -39,7 +26,7 @@ class Coordinate(object):
         self.column = column
 
     @staticmethod
-    def from_legacy_coordinate(legacy_coordinate: Tuple[int, int]) -> LegacyCoordinate:
+    def from_legacy_coordinate(legacy_coordinate: LegacyCoordinate):
         """
         Creating a Coordinate from a legacy (Y, X) Tuple Coordinate
         """

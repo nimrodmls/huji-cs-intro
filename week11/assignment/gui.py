@@ -8,28 +8,31 @@
 # NOTES: N/A
 #################################################################
 
-from typing import Callable
+import datetime
+from typing import Callable, Dict
 import tkinter as tk
-from tkinter import font, scrolledtext
-from pathlib import Path
+from tkinter import font
 from boggle_board_randomizer import randomize_board
 from common import Coordinate
 from ex11_utils import Board
 
-LetterClickCallback = Callable[[Coordinate], None]
+LetterCallback = Callable[[Coordinate], None]
+SubmitCallback = Callable[[], None]
+TimerCallback = Callable[[], None]
+RunStateCallback = Callable[[], None]
 
 class BoggleGUICallbacks(object):
 
     def __init__(
         self, 
-        letter_click_callback: LetterClickCallback,
-        submit_click_callback,
-        timer_callback,
-        runstate_callback) -> None:
+        letter_callback: LetterCallback,
+        submit_callback: SubmitCallback,
+        timer_callback: TimerCallback,
+        runstate_callback: RunStateCallback) -> None:
         """
         """
-        self.letter_click_callback = letter_click_callback
-        self.submit_click_callback = submit_click_callback
+        self.letter_callback = letter_callback
+        self.submit_callback = submit_callback
         self.timer_callback = timer_callback
         self.runstate_callback = runstate_callback
 
@@ -40,6 +43,7 @@ class BoggleGUI(object):
     BACKGROUND_COLOR_2 = "#3F4E4F"
     COLLECTION_COLOR = "#3F4E4F"
     LETTER_BUTTON_COLOR = "#A27B5C"
+    DISABLED_LETTER_COLOR = "#4C0027"
     SUBMIT_BUTTON_COLOR = "#DCD7C9"
     TEXT_COLOR = "white"
     DEFAULT_FONT = "Agency FB"
@@ -56,26 +60,45 @@ class BoggleGUI(object):
         self._create_control_panel(self._primary_window)
         self._create_current_word_label(self._primary_window)
 
-        self._letter_buttons = {}
+        self._letter_buttons: Dict[str, (Coordinate, tk.Button)] = {}
         self._create_lower_pane(self._primary_window, board)
-
-    def _loop_score(self):
-        self._configure_run_state(self._runstate)
-        self.set_score(int(self._score_label['text']) + 10)
-        self._primary_window.after(2000, self._loop_score)
-        self._runstate = not self._runstate
 
     def start(self):
         """
         """
-        self._runstate = True
-        self._loop_score()
+        self._set_timed_event()
         self._primary_window.mainloop()
+
+    def reset(self, board: Board):
+        """
+        """
+        # Resetting buttons
+        for button in self._letter_buttons:
+            coordinate: Coordinate = self._letter_buttons[button][0]
+            button: tk.Button = self._letter_buttons[button][1]
+            button.configure(
+                background=self.LETTER_BUTTON_COLOR,
+                state='normal',
+                text=board[coordinate.row][coordinate.column])
+
+        # Resetting timer & score
+        self.set_score(0)
+        self.set_timer(datetime.time())
+
+        # Resetting words collection
+        self._words_collection.configure(state="normal")
+        self._words_collection.delete("1.0", tk.END)
+        self._words_collection.configure(state="disable")
 
     def set_score(self, score: int) -> None:
         """
         """
         self._score_label['text'] = str(score)
+        
+    def set_timer(self, time: datetime.time) -> None:
+        """
+        """
+        self._timer_label['text'] = time.strftime("%M:%S")
 
     def set_current_word(self, current_word: str) -> None:
         """
@@ -85,6 +108,8 @@ class BoggleGUI(object):
     def disable_letter_button(self, button_coordinate: Coordinate):
         """
         """
+        button: tk.Button = self._letter_buttons[str(button_coordinate)][1]
+        button.configure(background=self.DISABLED_LETTER_COLOR, state='disable')
     
     def add_to_collection(self, word: str) -> None:
         """
@@ -93,6 +118,12 @@ class BoggleGUI(object):
         self._words_collection.configure(state="normal")
         self._words_collection.insert(tk.END, word + "\n")
         self._words_collection.configure(state="disable")
+
+    def _set_timed_event(self) -> None:
+        """
+        """
+        self._callbacks.timer_callback()
+        self._primary_window.after(1000, self._set_timed_event)
 
     def _configure_run_state(self, resume) -> None:
         """
@@ -133,11 +164,18 @@ class BoggleGUI(object):
             fg = "green", 
             bg = self.BACKGROUND_COLOR_1, 
             font = font.Font(
-                family=self.DEFAULT_FONT, size=30, weight='bold'), borderwidth=0, highlightthickness=0, command=lambda: print("button_1 clicked"))
+                family=self.DEFAULT_FONT, size=30, weight='bold'), 
+            borderwidth = 0, 
+            highlightthickness = 0, 
+            command=lambda: self._callbacks.runstate_callback())
         self._runstate_button.grid(row=0, column=1, sticky=tk.NSEW, padx=10, pady=10)
 
         # Setting the timer label, allowing access from outside
-        self._timer_label = tk.Label(control_panel, fg=self.TEXT_COLOR, bg=self.BACKGROUND_COLOR_1, font=tk.font.Font(family='Agency FB', size=20, weight='bold'))
+        self._timer_label = tk.Label(
+            control_panel, 
+            fg=self.TEXT_COLOR, 
+            bg=self.BACKGROUND_COLOR_1, 
+            font=tk.font.Font(family=self.DEFAULT_FONT, size=20, weight='bold'))
         self._timer_label.grid(row=0, column=2, sticky=tk.NSEW)
 
     def _create_current_word_label(self, parent_window: tk.Frame) -> None:
@@ -166,7 +204,6 @@ class BoggleGUI(object):
 
         # The left frame is for the buttons table and the submit button
         # Creating all the buttons on the GUI
-        self._letter_buttons = {}
         left_frame = tk.Frame(lower_pane, bg=self.BACKGROUND_COLOR_2)
         left_frame.grid(row=0, column=0, sticky=tk.NSEW)
 
@@ -183,7 +220,7 @@ class BoggleGUI(object):
             font=tk.font.Font(family='Agency FB', size=30, weight='bold'),
             borderwidth=0,
             highlightthickness=0,
-            command=lambda: print("SUBMIT"))
+            command=lambda: self._callbacks.submit_callback)
         submit_button.grid(
             row=1, 
             sticky=tk.NSEW, 
@@ -215,15 +252,15 @@ class BoggleGUI(object):
         #   it should be set to 'normal' whenever editing is necessary
         self._words_collection = tk.Text(
             parent_window,
-            xscrollcommand=words_scrollbar_x,
-            yscrollcommand=words_scrollbar_y, 
-            wrap=tk.NONE, 
-            state="disable",
-            bg=self.COLLECTION_COLOR,
-            fg="white",
-            bd=0,
-            height=1,
-            width=25)
+            xscrollcommand = words_scrollbar_x,
+            yscrollcommand = words_scrollbar_y, 
+            wrap = tk.NONE, 
+            state = "disable",
+            bg = self.COLLECTION_COLOR,
+            fg=  "white",
+            bd = 0,
+            height = 1,
+            width = 25)
         self._words_collection.pack(side=tk.LEFT, fill=tk.BOTH)
 
     def _create_letter_table(self, parent_frame: tk.Frame, board: Board) -> None:
@@ -252,7 +289,7 @@ class BoggleGUI(object):
             font = font.Font(family=self.DEFAULT_FONT, size=30, weight='bold'),
             borderwidth = 0,
             highlightthickness = 0,
-            command = lambda: self._callbacks.letter_click_callback(button_coordinate))
+            command = lambda: self._callbacks.letter_callback(button_coordinate))
         button.grid(
             row = row, 
             column = column, 
@@ -260,11 +297,15 @@ class BoggleGUI(object):
             padx = 10, 
             pady = 10)
             
-        self._letter_buttons[str(button_coordinate)] = (button_coordinate, button)    
+        self._letter_buttons[str(button_coordinate)] = (button_coordinate, button)
         return button
 
 def demo_callback(coordinate: Coordinate):
     print(coordinate)
-callbacks = BoggleGUICallbacks(demo_callback, None, None, None)
+
+def timer_callback():
+    print("timer")
+    gui.reset(randomize_board())
+callbacks = BoggleGUICallbacks(demo_callback, None, timer_callback, None)
 gui = BoggleGUI(randomize_board(), callbacks)
 gui.start()
