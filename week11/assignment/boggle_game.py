@@ -10,7 +10,7 @@
 
 from typing import List, Optional
 from common import Coordinate
-from ex11_utils import Board, WordsDictionary, is_valid_path_sorted, is_in_neighborhood
+from ex11_utils import Board, WordsDictionary, is_valid_path_sorted, is_in_neighborhood, max_score_paths_sorted
 
 BoardPath = List[Coordinate]
 
@@ -48,8 +48,11 @@ class BoggleGame(object):
         # If it word wasn't found and it exists in the dictionary, count it,
         #   otherwise just ignore it and reset the current path
         if (found_word is not None) and (found_word not in self._found_words):
-            self._score = len(self._current_path) ** 2
+            self._score += len(self._current_path) ** 2
             self._found_words.append(found_word)
+        elif found_word in self._found_words:
+            # Since the word was already found we should show it as invalid
+            found_word = None
 
         # Resetting the current path
         self._current_path = []
@@ -61,10 +64,27 @@ class BoggleGame(object):
         """
         return self._score
 
-    def _path_to_word(self, path: BoardPath) -> str:
+    def get_current_word(self) -> str:
+        """
+        """
+        return self._path_to_word(self._current_path)
+
+    def get_hints(self) -> List[str]:
+        """
+        """
+        hints = []
+        for path in max_score_paths_sorted(self._board, self._words_dict):
+            word = self.path_to_word(self._board, path)
+            if (word not in self._found_words) and (word not in hints):
+                hints.append(word)
+        return hints
+
+    @staticmethod
+    def path_to_word(board: Board, path: BoardPath) -> str:
         """
         """
         word = ""
         for coordinate in path:
-            word += self._board[coordinate.row][coordinate.column]
+            new_coordinate = Coordinate.from_legacy_coordinate(coordinate)
+            word += board[new_coordinate.row][new_coordinate.column]
         return word

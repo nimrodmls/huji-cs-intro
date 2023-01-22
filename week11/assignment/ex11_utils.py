@@ -41,8 +41,8 @@ def _is_in_neighborhood_legacy(coordinate1: LegacyCoordinate, coordinate2: Legac
     """
     Returns whether the given coordinates are in the neighborhood of one another
     """
-    is_in_neighborhood(Coordinate.from_legacy_coordinate(coordinate1),
-                       Coordinate.from_legacy_coordinate(coordinate2))
+    return is_in_neighborhood(Coordinate.from_legacy_coordinate(coordinate1),
+                              Coordinate.from_legacy_coordinate(coordinate2))
     
 def _assemble_word(valid_coordinates, word, last_coordinate, current_path, all_paths):
     """
@@ -94,7 +94,7 @@ def _find_valid_paths(path_length, board, word_dict, condition_callback = None):
 
     return paths
 
-def is_valid_path_sorted(board: Board, path: Path, words: WordsDictionary) -> Optional[str]:
+def is_valid_path_sorted(board: Board, path: List[Coordinate], words: WordsDictionary) -> Optional[str]:
     """
     """
     last_coordinate = None
@@ -103,11 +103,11 @@ def is_valid_path_sorted(board: Board, path: Path, words: WordsDictionary) -> Op
         # Making sure the coordinates are in the neighborhood of one another
         #   if at least one coordinate in the path is not in the neighborhood,
         #   return with failure
-        if (last_coordinate is not None) and (not _is_in_neighborhood_legacy(last_coordinate, coordinate)):
+        if (last_coordinate is not None) and (not is_in_neighborhood(last_coordinate, coordinate)):
             return None
 
         # Narrowing the list of words by the letter on the current coordinate
-        current_word += board[coordinate[COORDINATE_ROW_INDEX]][coordinate[COORDINATE_COLUMN_INDEX]]
+        current_word += board[coordinate.row][coordinate.column]
 
         # Updating the last coordinate we handled, so it can be checked in the
         #   next coordinate 
@@ -125,6 +125,9 @@ def is_valid_path(board: Board, path: Path, words: Iterable[str]) -> Optional[st
     """
     """
     words_dict = create_words_dict(words)
+    new_path = []
+    for coordinate in path:
+        new_path.append(Coordinate.from_legacy_coordinate(coordinate))
     return is_valid_path_sorted(board, path, words_dict)
 
 def find_length_n_paths(n: int, board: Board, words: Iterable[str]) -> List[Path]:
@@ -141,10 +144,9 @@ def find_length_n_words(n: int, board: Board, words: Iterable[str]) -> List[Path
     word_dict = create_words_dict(words)
     return _find_valid_paths(n, board, word_dict, lambda word, word_paths: len(word) == n)
 
-def max_score_paths(board: Board, words: Iterable[str]) -> List[Path]:
+def max_score_paths_sorted(board: Board, words: WordsDictionary) -> List[Path]:
     """
     """
-    word_dict = create_words_dict(words)
     all_paths = []
     # Iterating on the number of possible path lengths according to
     #   the board's dimensions.
@@ -160,7 +162,13 @@ def max_score_paths(board: Board, words: Iterable[str]) -> List[Path]:
 
         # We don't care about the return value as we picked only 1 instance 
         #   of the word already via path_condition
-        _find_valid_paths(current_path_len, board, word_dict, lambda word, word_paths: path_condition(word, word_paths, current_paths))            
+        _find_valid_paths(current_path_len, board, words, lambda word, word_paths: path_condition(word, word_paths, current_paths))            
         all_paths += current_paths
         
     return all_paths
+
+def max_score_paths(board: Board, words: Iterable[str]) -> List[Path]:
+    """
+    """
+    word_dict = create_words_dict(words)
+    return max_score_paths_sorted(board, word_dict)

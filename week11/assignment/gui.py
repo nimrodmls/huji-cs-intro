@@ -42,13 +42,15 @@ class BoggleGUI(object):
     BACKGROUND_COLOR_1 = "#2C3639"
     BACKGROUND_COLOR_2 = "#3F4E4F"
     COLLECTION_COLOR = "#3F4E4F"
+    COLLECTION_HINT_COLOR = "#AF4E4F"
     LETTER_BUTTON_COLOR = "#A27B5C"
     DISABLED_LETTER_COLOR = "#4C0027"
     SUBMIT_BUTTON_COLOR = "#DCD7C9"
     TEXT_COLOR = "white"
     DEFAULT_FONT = "Agency FB"
+    TIMER_DELAY = 50 # in ms
 
-    def __init__(self, board: Board, callbacks: BoggleGUICallbacks) -> None:
+    def __init__(self, callbacks: BoggleGUICallbacks) -> None:
         """
         """
         self._callbacks = callbacks
@@ -61,7 +63,9 @@ class BoggleGUI(object):
         self._create_current_word_label(self._primary_window)
 
         self._letter_buttons: Dict[str, (Coordinate, tk.Button)] = {}
-        self._create_lower_pane(self._primary_window, board)
+        self._create_lower_pane(self._primary_window)
+
+        self._words_collection.tag_configure("hint", background=self.COLLECTION_HINT_COLOR)
 
     def start(self):
         """
@@ -69,17 +73,11 @@ class BoggleGUI(object):
         self._set_timed_event()
         self._primary_window.mainloop()
 
-    def reset(self, board: Board):
+    def reset(self, board: Board) -> None:
         """
         """
         # Resetting buttons
-        for button in self._letter_buttons:
-            coordinate: Coordinate = self._letter_buttons[button][0]
-            button: tk.Button = self._letter_buttons[button][1]
-            button.configure(
-                background=self.LETTER_BUTTON_COLOR,
-                state='normal',
-                text=board[coordinate.row][coordinate.column])
+        self.set_letter_buttons_state(True, board)
 
         # Resetting timer & score
         self.set_score(0)
@@ -105,11 +103,23 @@ class BoggleGUI(object):
         """
         self._current_word_label['text'] = current_word
 
-    def disable_letter_button(self, button_coordinate: Coordinate):
+    def disable_letter_button(self, button_coordinate: Coordinate) -> None:
         """
         """
         button: tk.Button = self._letter_buttons[str(button_coordinate)][1]
         button.configure(background=self.DISABLED_LETTER_COLOR, state='disable')
+
+    def set_letter_buttons_state(self, enable: bool, board: Board=None) -> None:
+        """
+        """
+        for button in self._letter_buttons:
+            coordinate: Coordinate = self._letter_buttons[button][0]
+            button: tk.Button = self._letter_buttons[button][1]
+            new_text = button['text'] if board is None else board[coordinate.row][coordinate.column]
+            button.configure(
+                background = self.LETTER_BUTTON_COLOR,
+                state = 'normal' if enable else 'disable',
+                text = new_text)
     
     def add_to_collection(self, word: str) -> None:
         """
@@ -119,11 +129,18 @@ class BoggleGUI(object):
         self._words_collection.insert(tk.END, word + "\n")
         self._words_collection.configure(state="disable")
 
+    def add_collection_hint(self, word: str) -> None:
+        """
+        """
+        self._words_collection.configure(state="normal")
+        self._words_collection.insert(tk.END, word + "\n", "hint")
+        self._words_collection.configure(state="disable")
+
     def _set_timed_event(self) -> None:
         """
         """
         self._callbacks.timer_callback()
-        self._primary_window.after(1000, self._set_timed_event)
+        self._primary_window.after(self.TIMER_DELAY, self._set_timed_event)
 
     def _configure_run_state(self, resume) -> None:
         """
@@ -186,7 +203,7 @@ class BoggleGUI(object):
         self._current_word_label = tk.Label(label_frame, fg="white", bg=self.BACKGROUND_COLOR_1, font=tk.font.Font(family='Agency FB', size=25, weight='bold'))
         self._current_word_label.pack(side=tk.TOP, fill=tk.BOTH)
 
-    def _create_lower_pane(self, parent_window: tk.Frame, board: Board) -> None:
+    def _create_lower_pane(self, parent_window: tk.Frame) -> None:
         """
         """
         # Initializing the lower pane to have 2 columns,
@@ -209,7 +226,7 @@ class BoggleGUI(object):
 
         button_table = tk.Frame(left_frame, bg=self.BACKGROUND_COLOR_2)
         button_table.grid(row=0, column=0, sticky=tk.NSEW)
-        self._create_letter_table(button_table, board)
+        self._create_letter_table(button_table, dimension=4)
 
         # Creating the submit button
         submit_button = tk.Button(
@@ -220,7 +237,7 @@ class BoggleGUI(object):
             font=tk.font.Font(family='Agency FB', size=30, weight='bold'),
             borderwidth=0,
             highlightthickness=0,
-            command=lambda: self._callbacks.submit_callback)
+            command=lambda: self._callbacks.submit_callback())
         submit_button.grid(
             row=1, 
             sticky=tk.NSEW, 
@@ -263,27 +280,26 @@ class BoggleGUI(object):
             width = 25)
         self._words_collection.pack(side=tk.LEFT, fill=tk.BOTH)
 
-    def _create_letter_table(self, parent_frame: tk.Frame, board: Board) -> None:
+    def _create_letter_table(self, parent_frame: tk.Frame, dimension: int) -> None:
         """
         """
-        # We rely on the fact that the board is squared
-        for row_index in range(len(board)):
+        # We rely on the fact that the board is squared 
+        #   (hence the dimension is X by X)
+        for row_index in range(dimension):
             parent_frame.rowconfigure(row_index, minsize=100)
-            for column_index in range(len(board)):
+            for column_index in range(dimension):
                 parent_frame.columnconfigure(column_index, minsize=100)
                 self._create_letter_button(
                     parent_frame,
-                    board[row_index][column_index],
                     row_index,
                     column_index)
     
-    def _create_letter_button(self, parent: tk.Frame, text: str, row: int, column: int) -> None:
+    def _create_letter_button(self, parent: tk.Frame, row: int, column: int) -> None:
         """
         """
         button_coordinate = Coordinate(row, column)
         button = tk.Button(
             parent,
-            text = text,
             bg = self.LETTER_BUTTON_COLOR,
             fg = self.TEXT_COLOR,
             font = font.Font(family=self.DEFAULT_FONT, size=30, weight='bold'),
@@ -300,12 +316,12 @@ class BoggleGUI(object):
         self._letter_buttons[str(button_coordinate)] = (button_coordinate, button)
         return button
 
-def demo_callback(coordinate: Coordinate):
-    print(coordinate)
-
-def timer_callback():
-    print("timer")
-    gui.reset(randomize_board())
-callbacks = BoggleGUICallbacks(demo_callback, None, timer_callback, None)
-gui = BoggleGUI(randomize_board(), callbacks)
-gui.start()
+#def demo_callback(coordinate: Coordinate):
+#    print(coordinate)
+#
+#def timer_callback():
+#    print("timer")
+#    gui.reset(randomize_board())
+#callbacks = BoggleGUICallbacks(demo_callback, None, timer_callback, None)
+#gui = BoggleGUI(callbacks)
+#gui.start()
