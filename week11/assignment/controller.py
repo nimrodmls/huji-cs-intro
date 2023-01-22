@@ -32,11 +32,13 @@ class BoggleController(object):
         self._gui = BoggleGUI(callbacks)
         self._round_time = round_time_seconds
         self._words_dict = words_dict
+
         # Should be updated once a game starts, and overriden when
         #   a new game begins
         self._current_board = None
         self._current_game = None
         self._timer = 0
+        self._runstate = False
 
     def run_game(self) -> None:
         """
@@ -50,13 +52,14 @@ class BoggleController(object):
         self._current_game = BoggleGame(self._current_board, self._words_dict)
         self._gui.reset(self._current_board)
         self._timer = 0
+        self._runstate = True
 
     def _letter_callback(self, coordinate: Coordinate):
         """
         """
         if self._current_game is None:
             return
-            
+
         # Trying to move on the board, if the movement is
         #   succesful, then we disable the button until the word is submitted
         if self._current_game.move(coordinate):
@@ -66,14 +69,14 @@ class BoggleController(object):
     def _timer_callback(self):
         """
         """
-        if self._current_game is None:
+        if (self._current_game is None) or (not self._runstate):
             return
 
         time_left = self._round_time - self._timer
             
         if 0 >= time_left:
             self._gui.set_timer(datetime.time())
-            self._gui.set_letter_buttons_state(False)
+            self._gui.set_letter_buttons_state(False, hide=False)
             self._add_final_hints(self._current_game.get_hints())
             self._gui.set_run_state(True)
             self._current_board = None
@@ -106,16 +109,17 @@ class BoggleController(object):
 
         # Re-enabling all the buttons upon submission,
         #   whether succesful or not
-        self._gui.set_letter_buttons_state(True)
+        self._gui.set_letter_buttons_state(True, hide=False)
 
-    def _runstate_callback(self, resume: bool):
+    def _runstate_callback(self, resume) -> None:
         """
         """
         if self._current_game is None:
             self._start_new_round()
         else:
-            self._gui.set_run_state(not resume)
-
+            self._runstate = not self._runstate
+            self._gui.set_letter_buttons_state(self._runstate, hide=not self._runstate, board=self._current_board)
+            self._gui.set_run_state(self._runstate)
 
 filedata = ""
 with open("week11\\assignment\\boggle_dict.txt", "r") as my_file:

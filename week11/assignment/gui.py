@@ -81,7 +81,7 @@ class BoggleGUI(object):
         """
         """
         # Resetting buttons
-        self.set_letter_buttons_state(True, board)
+        self.set_letter_buttons_state(True, hide=False, board=board)
 
         # Resetting timer & score
         self.set_score(0)
@@ -113,7 +113,7 @@ class BoggleGUI(object):
         button: tk.Button = self._letter_buttons[str(button_coordinate)][1]
         button.configure(background=self.DISABLED_LETTER_COLOR, state='disable')
 
-    def set_letter_buttons_state(self, enable: bool, board: Board=None) -> None:
+    def set_letter_buttons_state(self, enable: bool, hide: bool, board: Board=None) -> None:
         """
         """
         for button in self._letter_buttons:
@@ -123,7 +123,7 @@ class BoggleGUI(object):
             button.configure(
                 background = self.LETTER_BUTTON_COLOR,
                 state = 'normal' if enable else 'disable',
-                text = new_text)
+                text = "" if hide else new_text)
     
     def add_to_collection(self, word: str) -> None:
         """
