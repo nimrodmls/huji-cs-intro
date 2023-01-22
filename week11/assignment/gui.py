@@ -29,112 +29,133 @@ class BoggleGUI(object):
     LETTER_BUTTON_COLOR = "#A27B5C"
     SUBMIT_BUTTON_COLOR = "#DCD7C9"
     TEXT_COLOR = "white"
+    DEFAULT_FONT = "Agency FB"
 
-    def __init__(self, assets_path) -> None:
+    def __init__(self) -> None:
         """
         """
         self._primary_window = tk.Tk()
         self._primary_window.title("Boggle Game")
+        self._primary_window.resizable(False, False)
 
-        self._control_panel = tk.Frame(self._primary_window, bg=self.BACKGROUND_COLOR_1)
-        self._control_panel.pack(side=tk.TOP, fill=tk.BOTH)
+        self._create_control_panel(self._primary_window)
+        self._create_current_word_label(self._primary_window)
+        self._create_lower_pane(self._primary_window)
 
-        self._control_panel.columnconfigure(0, weight=2, minsize=200)
-        self._score_label = tk.Label(self._control_panel, fg=self.TEXT_COLOR, bg=self.BACKGROUND_COLOR_1, font=tk.font.Font(family='Agency FB', size=20, weight='bold'))
+    def _loop_score(self):
+        self._configure_run_state(self._runstate)
+        self.set_score(int(self._score_label['text']) + 10)
+        self._primary_window.after(2000, self._loop_score)
+        self._runstate = not self._runstate
+
+    def start(self):
+        """
+        """
+        self._runstate = True
+        self._loop_score()
+        self._primary_window.mainloop()
+
+    def set_score(self, score: int) -> None:
+        """
+        """
+        self._score_label['text'] = str(score)
+
+    def set_current_word(self, current_word: str) -> None:
+        """
+        """
+        self._current_word_label['text'] = current_word
+    
+    def add_to_collection(self, word: str) -> None:
+        """
+        """
+        # Enabling edit before inserting, disabling it afterwards
+        self._words_collection.configure(state="normal")
+        self._words_collection.insert(tk.END, word + "\n")
+        self._words_collection.configure(state="disable")
+
+    def _configure_run_state(self, resume) -> None:
+        """
+        """
+        if resume:
+            self._runstate_button.configure(text='▶', fg="green")
+        else:
+            self._runstate_button.configure(text='⏸', fg="red")
+
+    def _create_control_panel(self, parent_frame: tk.Frame) -> None:
+        """
+        """
+        control_panel = tk.Frame(parent_frame, bg=self.BACKGROUND_COLOR_1)
+        control_panel.pack(side=tk.TOP, fill=tk.BOTH)
+
+        # Configurting the sizes of each element on the control panel
+        # The leftmost element is the score, the middle is the pause/resume button
+        #   and the rightmost element is the timer.
+        control_panel.columnconfigure(0, weight=2, minsize=200)
+        control_panel.columnconfigure(1, weight=1, minsize=100)
+        control_panel.columnconfigure(2, weight=2, minsize=200)
+
+        # Setting the score label, allowing access from outside
+        self._score_label = tk.Label(
+            control_panel, 
+            fg = self.TEXT_COLOR, 
+            bg = self.BACKGROUND_COLOR_1,
+            font = font.Font(
+                family=self.DEFAULT_FONT, size=20, weight='bold')
+        )
         self._score_label["text"] = "0"
         self._score_label.grid(row=0, column=0, sticky=tk.NSEW)
 
-        self._control_panel.columnconfigure(1, weight=1, minsize=50)
-        button = tk.Button(self._control_panel, text="▶", fg="green", bg = self.BACKGROUND_COLOR_1, font=tk.font.Font(family='Agency FB', size=30, weight='bold'), borderwidth=0, highlightthickness=0, command=lambda: print("button_1 clicked"))
-        button.grid(row=0, column=1, sticky=tk.NSEW, padx=10, pady=10)
+        # Setting the pause/resume button
+        self._runstate_button = tk.Button(
+            control_panel, 
+            text = "▶", 
+            fg = "green", 
+            bg = self.BACKGROUND_COLOR_1, 
+            font = font.Font(
+                family=self.DEFAULT_FONT, size=30, weight='bold'), borderwidth=0, highlightthickness=0, command=lambda: print("button_1 clicked"))
+        self._runstate_button.grid(row=0, column=1, sticky=tk.NSEW, padx=10, pady=10)
 
-        self._control_panel.columnconfigure(2, weight=2, minsize=200)
-        lbl2 = tk.Label(self._control_panel, fg=self.TEXT_COLOR, bg=self.BACKGROUND_COLOR_1, font=tk.font.Font(family='Agency FB', size=20, weight='bold'))
-        lbl2["text"] = "TIME"
-        lbl2.grid(row=0, column=2, sticky=tk.NSEW)
+        # Setting the timer label, allowing access from outside
+        self._timer_label = tk.Label(control_panel, fg=self.TEXT_COLOR, bg=self.BACKGROUND_COLOR_1, font=tk.font.Font(family='Agency FB', size=20, weight='bold'))
+        self._timer_label.grid(row=0, column=2, sticky=tk.NSEW)
 
-        self._upper_frame = tk.Frame(self._primary_window, bg=self.BACKGROUND_COLOR_1)
-        self._upper_frame.pack(side=tk.TOP, fill=tk.BOTH)
-        self._lbl = tk.Label(self._upper_frame, fg="white", bg=self.BACKGROUND_COLOR_1, font=tk.font.Font(family='Agency FB', size=25, weight='bold'))
-        self._lbl["text"] = "WORD DISPLAY PLACEHOLDER"
-        self._lbl.pack(side=tk.TOP, fill=tk.BOTH)
+    def _create_current_word_label(self, parent_window: tk.Frame) -> None:
+        """
+        """
+        label_frame = tk.Frame(self._primary_window, bg=self.BACKGROUND_COLOR_1)
+        label_frame.pack(side=tk.TOP, fill=tk.BOTH)
+        self._current_word_label = tk.Label(label_frame, fg="white", bg=self.BACKGROUND_COLOR_1, font=tk.font.Font(family='Agency FB', size=25, weight='bold'))
+        self._current_word_label.pack(side=tk.TOP, fill=tk.BOTH)
 
-        self._lower_frame = tk.Frame(self._primary_window, bg=self.BACKGROUND_COLOR_2)
-        self._lower_frame.pack(side=tk.TOP, fill=tk.BOTH)
-        self._lower_frame.columnconfigure(0, weight=4)
-        self._lower_frame.columnconfigure(1, weight=1, minsize=200)
+    def _create_lower_pane(self, parent_window: tk.Frame) -> None:
+        """
+        """
+        # Initializing the lower pane to have 2 columns,
+        #   one for the letter buttons table, the other for the word collection
+        lower_pane = tk.Frame(self._primary_window, bg=self.BACKGROUND_COLOR_2)
+        lower_pane.pack(side=tk.TOP, fill=tk.BOTH)
+        lower_pane.columnconfigure(0, weight=4)
+        lower_pane.columnconfigure(1, weight=1, minsize=200)
 
-        self._right_frame = tk.Frame(
-            self._lower_frame, bg=self.BACKGROUND_COLOR_2, bd=0)#, highlightbackground="#212020", highlightthickness=2)
-        self._right_frame.grid(row=0, column=1, sticky=tk.NSEW)
-        #self._right_frame.pack(side=tk.RIGHT, fill=tk.BOTH)
-        #self._right_frame.columnconfigure(0, weight=1, minsize=200)
-        collection_label = tk.Label(
-            self._right_frame,
-            text="COLLECTION",
-            fg="white",
-            bg=self.BACKGROUND_COLOR_2,
-            font=tk.font.Font(family='Agency FB', size=20))
-        collection_label.pack(side=tk.TOP, fill=tk.BOTH)
-        #collection_label.grid(column=0, row=0)
-        
-        # words_frame = tk.Frame(
-        #     self._right_frame, bg="#ABCDEF", bd=0, highlightbackground="#212020", highlightthickness=2)
-        # words_frame.pack(side=tk.TOP, fill=tk.BOTH)
-        # self._words_collection_2 = scrolledtext.ScrolledText(
-        #     self._right_frame, height=30, width=40
-        # )
-        # self._words_collection_2.pack(side=tk.TOP, fill=tk.Y)
-        #self._words_collection_2.grid(column=0, row=1)
-        
+        # The right frame is for the word collection
+        right_frame = tk.Frame(
+            lower_pane, bg=self.BACKGROUND_COLOR_2, bd=0)
+        right_frame.grid(row=0, column=1, sticky=tk.NSEW)
+        self._create_word_collection(right_frame)
 
-        self._words_scrollbar_x = tk.Scrollbar(self._right_frame, orient=tk.HORIZONTAL)
-        self._words_scrollbar_x.pack(side=tk.BOTTOM, fill=tk.X)
-
-        self._words_scrollbar_y = tk.Scrollbar(self._right_frame, orient=tk.VERTICAL)
-        self._words_scrollbar_y.pack(side=tk.RIGHT, fill=tk.Y)
-        
-        self._words_collection = tk.Text(self._right_frame,
-        xscrollcommand=self._words_scrollbar_x,
-        yscrollcommand=self._words_scrollbar_y, wrap=tk.NONE, state="disable",
-        bg=self.COLLECTION_COLOR,
-        fg="white",
-        bd=0,
-        height=1,
-        width=25)
-        self._words_collection.pack(side=tk.LEFT, fill=tk.BOTH)
-
-
-        for i in range(20):
-            self._words_collection.configure(state="normal")
-            self._words_collection.insert(tk.END, "blabla" + str(i) + "\n")
-            self._words_collection.configure(state="disable")
-        # word_labels = []
-        # self._words_frame.columnconfigure(0, weight=1, minsize=200)
-        # self._words_frame.rowconfigure(0, weight=1)
-        # current_label = tk.Label(self._words_frame)
-        # current_label["text"] = "COLLECTION"
-        # current_label.grid(row=0, column=0, sticky=tk.NSEW)
-        # for i in range(1, 10):
-        #     self._words_frame.rowconfigure(i, weight=1)
-            
-        #     current_label = tk.Label(self._words_frame)
-        #     current_label["text"] = "tst{i}"
-        #     current_label.grid(row=i, column=0, sticky=tk.NSEW)
-
+        # The left frame is for the buttons table and the submit button
         # Creating all the buttons on the GUI
         self._letter_buttons = {}
-        self._left_frame = tk.Frame(self._lower_frame, bg=self.BACKGROUND_COLOR_2)
-        #self._left_frame.rowconfigure(1, minsize=100)
-        self._left_frame.grid(row=0, column=0, sticky=tk.NSEW)
+        left_frame = tk.Frame(lower_pane, bg=self.BACKGROUND_COLOR_2)
+        left_frame.grid(row=0, column=0, sticky=tk.NSEW)
 
-        self._button_frame = tk.Frame(self._left_frame, bg=self.BACKGROUND_COLOR_2)
-        self._button_frame.grid(row=0, column=0, sticky=tk.NSEW)
-        #self._button_frame.pack(side=tk.LEFT, fill=tk.BOTH)
-        self._create_letter_table(self._button_frame, randomize_board())
+        button_table = tk.Frame(left_frame, bg=self.BACKGROUND_COLOR_2)
+        button_table.grid(row=0, column=0, sticky=tk.NSEW)
+        self._create_letter_table(button_table, randomize_board())
 
+        # Creating the submit button
         submit_button = tk.Button(
-            self._left_frame,
+            left_frame,
             text="SUBMIT",
             bg = self.SUBMIT_BUTTON_COLOR,
             fg=self.TEXT_COLOR,
@@ -148,22 +169,41 @@ class BoggleGUI(object):
             padx=10, 
             pady=10)
 
-        self._primary_window.resizable(False, False)
+    def _create_word_collection(self, parent_window: tk.Frame) -> None:
+        """
+        """
+        # Setting the label for the collection, it is constant so we don't
+        #   have any use for it later
+        collection_label = tk.Label(
+            parent_window,
+            text = "COLLECTION",
+            fg = "white",
+            bg = self.BACKGROUND_COLOR_2,
+            font = font.Font(family=self.DEFAULT_FONT, size=20))
+        collection_label.pack(side=tk.TOP, fill=tk.BOTH)
 
-    def _loop_score(self):
-        self.set_score(int(self._score_label['text']) + 10)
-        self._primary_window.after(2000, self._loop_score)
+        # Setting the scrollbars (horizontal and vertical)
+        words_scrollbar_x = tk.Scrollbar(parent_window, orient=tk.HORIZONTAL)
+        words_scrollbar_x.pack(side=tk.BOTTOM, fill=tk.X)
 
-    def start(self):
-        """
-        """
-        self._loop_score()
-        self._primary_window.mainloop()
-
-    def set_score(self, score: int):
-        """
-        """
-        self._score_label['text'] = str(score)
+        words_scrollbar_y = tk.Scrollbar(parent_window, orient=tk.VERTICAL)
+        words_scrollbar_y.pack(side=tk.RIGHT, fill=tk.Y)
+        
+        # Creating the text box for the words collection, it is set to disabled
+        #   starting state in order to prevent editing from the user,
+        #   it should be set to 'normal' whenever editing is necessary
+        self._words_collection = tk.Text(
+            parent_window,
+            xscrollcommand=words_scrollbar_x,
+            yscrollcommand=words_scrollbar_y, 
+            wrap=tk.NONE, 
+            state="disable",
+            bg=self.COLLECTION_COLOR,
+            fg="white",
+            bd=0,
+            height=1,
+            width=25)
+        self._words_collection.pack(side=tk.LEFT, fill=tk.BOTH)
 
     def _create_letter_table(self, parent_frame: tk.Frame, board) -> None:
         """
@@ -206,5 +246,5 @@ class BoggleGUI(object):
         img = tk.PhotoImage(file=self._assets_path / name)
         return img
 
-gui = BoggleGUI("build\\assets\\frame0")
+gui = BoggleGUI()
 gui.start()
