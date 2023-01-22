@@ -50,7 +50,7 @@ class BoggleGUI(object):
     SUBMIT_BUTTON_COLOR = "#DCD7C9"
     TEXT_COLOR = "white"
     DEFAULT_FONT = "Agency FB"
-    TIMER_DELAY = 200 # in ms
+    TIMER_DELAY = 1000 # in ms
     RUNSTATE_RESUME = "▶"
     RUNSTATE_PAUSE = "⏸"
 
@@ -154,6 +154,10 @@ class BoggleGUI(object):
         self._callbacks.timer_callback()
         self._primary_window.after(self.TIMER_DELAY, self._set_timed_event)
 
+    ##############################
+    # GUI Initialization Methods #
+    ##############################
+
     def _create_control_panel(self, parent_frame: tk.Frame) -> None:
         """
         """
@@ -210,7 +214,7 @@ class BoggleGUI(object):
         """
         label_frame = tk.Frame(self._primary_window, bg=self.BACKGROUND_COLOR_1)
         label_frame.pack(side=tk.TOP, fill=tk.BOTH)
-        self._current_word_label = tk.Label(label_frame, fg="white", bg=self.BACKGROUND_COLOR_1, font=tk.font.Font(family='Agency FB', size=25, weight='bold'))
+        self._current_word_label = tk.Label(label_frame, fg="white", bg=self.BACKGROUND_COLOR_1, font=font.Font(family=self.DEFAULT_FONT, size=25, weight='bold'))
         self._current_word_label.pack(side=tk.TOP, fill=tk.BOTH)
 
     def _create_lower_pane(self, parent_window: tk.Frame) -> None:
@@ -264,7 +268,7 @@ class BoggleGUI(object):
             text = "COLLECTION",
             fg = "white",
             bg = self.BACKGROUND_COLOR_2,
-            font = font.Font(family=self.DEFAULT_FONT, size=20))
+            font = font.Font(family=self.DEFAULT_FONT, size=20, weight="bold", underline=True))
         collection_label.pack(side=tk.TOP, fill=tk.BOTH)
 
         # Setting the scrollbars (horizontal and vertical)
@@ -287,7 +291,8 @@ class BoggleGUI(object):
             fg=  "white",
             bd = 0,
             height = 1,
-            width = 25)
+            width = 20,
+            font=font.Font(family=self.DEFAULT_FONT, size=20))
         self._words_collection.pack(side=tk.LEFT, fill=tk.BOTH)
 
     def _create_letter_table(self, parent_frame: tk.Frame, dimension: int) -> None:
