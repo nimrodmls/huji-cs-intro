@@ -11,6 +11,8 @@
 import tkinter as tk
 from tkinter import font
 from pathlib import Path
+from boggle_board_randomizer import randomize_board
+from common import Coordinate
 
 OUTPUT_PATH = Path(__file__).parent
 ASSETS_PATH = OUTPUT_PATH / Path(r"C:\Projects\huji-cs-intro\week11\assignment\build\assets\frame0")
@@ -39,6 +41,8 @@ class BoggleGUI(object):
         lbl1["text"] = "SCORE"
         lbl1.grid(row=0, column=0, sticky=tk.NSEW)
         self._control_panel.columnconfigure(1, weight=1, minsize=50)
+        button = tk.Button(self._control_panel, text="▶", fg="green", bg = "#212020", font=tk.font.Font(family='Agency FB', size=30, weight='bold'), borderwidth=0, highlightthickness=0, command=lambda: print("button_1 clicked"))
+        button.grid(row=0, column=1, sticky=tk.NSEW, padx=10, pady=10)
         self._control_panel.columnconfigure(2, weight=2, minsize=200)
         lbl2 = tk.Label(self._control_panel, bg="#212020", font=tk.font.Font(family='Agency FB', size=20, weight='bold'))
         lbl2["text"] = "TIME"
@@ -51,86 +55,35 @@ class BoggleGUI(object):
         self._lbl = tk.Label(self._upper_frame, bg="#212020", font=tk.font.Font(family='Agency FB', size=25, weight='bold'))
         self._lbl["text"] = "WORD DISPLAY PLACEHOLDER"
         self._lbl.pack(side=tk.TOP, fill=tk.BOTH)
-        self._button_frame = tk.Frame(
-            self._primary_window, bg = "#A12020")
-        self._button_frame.pack(side=tk.TOP, fill=tk.BOTH)
-        
-        for i in range(4):
-            self._button_frame.columnconfigure(i, minsize=100)
-            self._button_frame.rowconfigure(i, minsize=100)
-        button = tk.Button(self._button_frame, text="AA", bg = "#212020", font=tk.font.Font(family='Agency FB', size=36, weight='bold'), borderwidth=0, highlightthickness=0, command=lambda: print("button_1 clicked"))
-        button.grid(row=0, column=0, sticky=tk.NSEW, padx=10, pady=10)
-        button2 = tk.Button(self._button_frame, text="BA", bg = "#212020", font=tk.font.Font(family='Agency FB', size=36, weight='bold'), borderwidth=0, highlightthickness=0, command=lambda: print("button_2 clicked"))
-        button2.grid(row=1, column=1, sticky=tk.NSEW, padx=10, pady=10)
 
-        # self._upper_frame = tk.Frame(
-        #     self._primary_window,
-        #     bg = "#212020",
-        #     bd = 0,
-        #     highlightthickness = 0,
-        #     relief = "ridge")
-        # self._upper_frame.grid()
+        self._lower_frame = tk.Frame(
+            self._primary_window, bg="#212020"
+        )
+        self._lower_frame.pack(side=tk.TOP, fill=tk.BOTH)
 
+        self._words_frame = tk.Frame(
+            self._lower_frame, bg="#212020", bd=0, highlightbackground="#212020", highlightthickness=2
+        )
+        self._words_frame.pack(side=tk.RIGHT, fill=tk.BOTH)
 
-        # self._lower_frame = tk.Frame(
-        #     self._primary_window,
-        #     height = 700,
-        #     width = 900,
-        #     bg = "#212020",
-        #     bd = 0,
-        #     highlightthickness = 0,
-        #     relief = "ridge"
-        # )
-        # self._lower_frame.pack(side=tk.TOP, fill=tk.BOTH)
-        # self._button_frame = tk.Frame(
-        #     self._lower_frame,
-        #     height = 500,
-        #     width = 600,
-        #     bg = "#A0F0F3",
-        #     bd = 0,
-        #     highlightthickness = 0,
-        #     relief = "ridge"
-        # )
-        # self._button_frame.pack(side=tk.LEFT, fill=tk.BOTH)
-        # self._button_frame.columnconfigure(0, weight=1)
-        # self._other = tk.Frame(self._button_frame, height=100, width=100, bg="#B0F0F3")
-        # self._other.grid(row=0, column=0, sticky=tk.NSEW)
-        # for i in range(4):
-        #     self._button_frame.columnconfigure(i, weight=1)
-        #     self._button_frame.rowconfigure(i, weight=1)
-
-        # button = tk.Button(self._button_frame, text="aa", bg="#212020", borderwidth=0, highlightthickness=0, command=lambda: print("button_1 clicked"))
-        # button.grid(row=0, column=0, sticky=tk.NSEW, padx=10, pady=10)
-        # button2 = tk.Button(self._button_frame, text="ba", bg="#212020", borderwidth=0, highlightthickness=0, command=lambda: print("button_2 clicked"))
-        # button2.grid(row=0, column=1, sticky=tk.NSEW, padx=10, pady=10)
-        #button.pack(side=tk.LEFT)
-
-        # self._primary_canvas = tk.Canvas(
-        #     self._primary_window,
-        #     bg = "#212020",
-        #     height = 200,
-        #     width = 900,
-        #     bd = 0,
-        #     highlightthickness = 0,
-        #     relief = "ridge")
-
-        # self._primary_canvas.place(x=0, y=0)
-        # self._primary_canvas.create_rectangle(
-        #     0,
-        #     190,
-        #     900,
-        #     800,
-        #     fill="#F0F0F3",
-        #     outline="")
+        word_labels = []
+        self._words_frame.columnconfigure(0, weight=1, minsize=200)
+        self._words_frame.rowconfigure(0, weight=1)
+        current_label = tk.Label(self._words_frame)
+        current_label["text"] = "COLLECTION"
+        current_label.grid(row=0, column=0, sticky=tk.NSEW)
+        for i in range(1, 10):
+            self._words_frame.rowconfigure(i, weight=1)
             
+            current_label = tk.Label(self._words_frame)
+            current_label["text"] = "tst{i}"
+            current_label.grid(row=i, column=0, sticky=tk.NSEW)
 
-        # self._primary_canvas.create_rectangle(
-        #     630.0,
-        #     250.0,
-        #     880.0,
-        #     750.0,
-        #     fill="#D9D9D9",
-        #     outline="")
+        self._button_frame = tk.Frame(
+            self._lower_frame, bg = "white")
+        self._button_frame.pack(side=tk.LEFT, fill=tk.BOTH)
+        self._letter_buttons = {}
+        self._create_letter_table(self._button_frame, randomize_board())
 
         self._primary_window.resizable(False, False)
 
@@ -140,25 +93,41 @@ class BoggleGUI(object):
         """
         self._primary_window.mainloop()
 
-    def _add_letter_button(self, letter: str) -> None:
+    def _create_letter_table(self, parent_frame: tk.Frame, board) -> None:
         """
         """
-        button = tk.Button(master=self._primary_window,
-            image=self._get_asset_file("button.png"),
+        # We rely on the fact that the board is squared
+        for row_index in range(len(board)):
+            parent_frame.rowconfigure(row_index, minsize=100)
+            for column_index in range(len(board)):
+                parent_frame.columnconfigure(column_index, minsize=100)
+                button = self._create_letter_button(
+                    parent_frame,
+                    board[row_index][column_index],
+                    row_index,
+                    column_index)
+                self._letter_buttons[str(Coordinate(row_index, column_index))] = button
+    
+    def _create_letter_button(self, parent, text, row, column) -> tk.Button:
+        """
+        """
+        button = tk.Button(
+            parent,
+            text=text,
+            bg = "grey",
+            fg="#212020",
+            font=tk.font.Font(family='Agency FB', size=35, weight='bold'),
             borderwidth=0,
             highlightthickness=0,
-            command=lambda: print("button_1 clicked"),
-            relief="flat"
-        )
-        button.place(
-            x=50.0,
-            y=250.0,
-            width=115.0,
-            height=110.0
-        )
-
+            command=lambda: print(text))
+        button.grid(
+            row=row, 
+            column=column, 
+            sticky=tk.NSEW, 
+            padx=10, 
+            pady=10)
         return button
-    
+
     def _get_asset_file(self, name: str) -> tk.PhotoImage:
         """
         """
