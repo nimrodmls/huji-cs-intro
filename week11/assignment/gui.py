@@ -301,7 +301,7 @@ class BoggleGUI(object):
             text="SUBMIT",
             bg = self.SUBMIT_BUTTON_COLOR,
             fg=self.TEXT_COLOR,
-            font=tk.font.Font(family='Agency FB', size=30, weight='bold'),
+            font=font.Font(family=self.DEFAULT_FONT, size=30, weight='bold'),
             borderwidth=0,
             highlightthickness=0,
             command=lambda: self._callbacks.submit_callback())

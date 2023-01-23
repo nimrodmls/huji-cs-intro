@@ -2,7 +2,7 @@
 # FILE : common.py
 # WRITER : Nimrod M. ; Ruth S.
 # EXERCISE : intro2cs1 ex11 2023
-# DESCRIPTION: Interface for the Boggle Game
+# DESCRIPTION: Common functionality for the game
 # STUDENTS I DISCUSSED THE EXERCISE WITH: N/A
 # WEB PAGES I USED: N/A
 # NOTES: N/A
