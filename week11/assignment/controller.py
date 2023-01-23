@@ -42,6 +42,7 @@ class BoggleController(object):
         self._runstate = False
         self._difficulty = BoggleGUICallbacks.MENU_EVENT_DIFFICULTY_NORMAL
         self._score_penalty = 0
+        self._failed_submits = 0
 
     def run_game(self) -> None:
         """
@@ -56,6 +57,7 @@ class BoggleController(object):
         self._gui.reset(self._current_board)
         self._timer = 0
         self._score_penalty = 0
+        self._failed_submits = 0
 
     def _menu_callback(self, menu_event: str) -> None:
         """
@@ -118,14 +120,24 @@ class BoggleController(object):
 
         if submitted_word is not None:
             self._gui.add_to_collection(submitted_word)
-        elif self._is_hard_difficulty():
-            # The submitted word is either wrong or already submitted,
-            #   we should add penalty if it's hard difficulty
-            self._score_penalty += 5
-            self._timer += 5
+            self._failed_submits = 0
+        else:
+            if self._is_hard_difficulty():
+                # The submitted word is either wrong or already submitted,
+                #   we should add penalty if it's hard difficulty
+                self._score_penalty += 5
+                self._timer += 5
+            self._failed_submits += 1
 
         self._gui.set_score(self._current_game.get_score() - self._score_penalty)
-        self._gui.set_current_word("")
+
+        # Easteregg prompts
+        if self._failed_submits >= 2 and self._failed_submits <= 4:
+            self._gui.set_current_word("¯\_(ツ)_/¯", color="orange")
+        elif self._failed_submits > 4:
+            self._gui.set_current_word("(╯°□°）╯︵ ┻━┻", color="red")
+        else:
+            self._gui.set_current_word("")
 
         # Re-enabling all the buttons upon submission,
         #   whether succesful or not
@@ -156,3 +168,4 @@ class BoggleController(object):
         """
         """
         return (BoggleGUICallbacks.MENU_EVENT_DIFFICULTY_HARD == self._difficulty)
+        

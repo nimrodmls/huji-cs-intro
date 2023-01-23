@@ -50,13 +50,13 @@ class BoggleGUICallbacks(object):
 class BoggleGUI(object):
     """
     """
-    BACKGROUND_COLOR_1 = "#2C3639"
-    BACKGROUND_COLOR_2 = "#3F4E4F"
-    COLLECTION_COLOR = "#3F4E4F"
+    BACKGROUND_COLOR_1 = "#03001C"
+    BACKGROUND_COLOR_2 = "#301E67"
+    COLLECTION_COLOR = "#301E67"
     COLLECTION_HINT_COLOR = "#AF4E4F"
-    LETTER_BUTTON_COLOR = "#A27B5C"
+    LETTER_BUTTON_COLOR = "#5B8FB9"
     DISABLED_LETTER_COLOR = "#4C0027"
-    SUBMIT_BUTTON_COLOR = "#DCD7C9"
+    SUBMIT_BUTTON_COLOR = "#150050"
     TEXT_COLOR = "white"
     DEFAULT_FONT = "Agency FB"
     TIMER_DELAY = 1000 # in ms
@@ -91,6 +91,8 @@ class BoggleGUI(object):
         self._menu_window = tk.Toplevel(
             self._primary_window, 
             background=self.BACKGROUND_COLOR_1)
+        self._menu_window.title("Boggle Menu")
+        self._menu_window.resizable(False, False)
         reset_button = tk.Button(
             self._menu_window, 
             text="RESET", 
@@ -171,10 +173,11 @@ class BoggleGUI(object):
         """
         self._timer_label['text'] = time.strftime("%M:%S")
 
-    def set_current_word(self, current_word: str) -> None:
+    def set_current_word(self, current_word: str, color: str = "white") -> None:
         """
         """
         self._current_word_label['text'] = current_word
+        self._current_word_label['fg'] = color
 
     def disable_letter_button(self, button_coordinate: Coordinate) -> None:
         """
@@ -222,7 +225,7 @@ class BoggleGUI(object):
         """
         self._callbacks.timer_callback()
         self._primary_window.after(self.TIMER_DELAY, self._set_timed_event)
-
+    
     ##############################
     # GUI Initialization Methods #
     ##############################
@@ -335,7 +338,7 @@ class BoggleGUI(object):
         #   have any use for it later
         collection_label = tk.Label(
             parent_window,
-            text = "COLLECTION",
+            text = "C O L L E C T I ON",
             fg = "white",
             bg = self.BACKGROUND_COLOR_2,
             font = font.Font(family=self.DEFAULT_FONT, size=20, weight="bold", underline=True))
