@@ -22,21 +22,30 @@ TimerCallback = Callable[[], None]
 # Called with the Run State is changed (the middle button in the control panel)
 #   the boolean passed as parameter indicates the CURRENT state
 RunStateCallback = Callable[[bool], None]
+MenuCallback = Callable[[str], None]
 
 class BoggleGUICallbacks(object):
+    """
+    """
+
+    MENU_EVENT_RESET = "Reset"
+    MENU_EVENT_DIFFICULTY_HARD = "HardDif"
+    MENU_EVENT_DIFFICULTY_NORMAL = "NormalDif"
 
     def __init__(
         self, 
         letter_callback: LetterCallback,
         submit_callback: SubmitCallback,
         timer_callback: TimerCallback,
-        runstate_callback: RunStateCallback) -> None:
+        runstate_callback: RunStateCallback,
+        menu_callback: MenuCallback) -> None:
         """
         """
         self.letter_callback = letter_callback
         self.submit_callback = submit_callback
         self.timer_callback = timer_callback
         self.runstate_callback = runstate_callback
+        self.menu_callback = menu_callback
 
 class BoggleGUI(object):
     """
@@ -71,18 +80,48 @@ class BoggleGUI(object):
 
         self._words_collection.tag_configure("hint", background=self.COLLECTION_HINT_COLOR)
 
+        self._menu_window = None
+
     def create_pause_menu(self):
         """
         """
+        if self._menu_window is not None:
+            self.destroy_pause_menu()
+
         self._menu_window = tk.Toplevel(self._primary_window)
-        tk.Button(self._menu_window, text="Blabla1", height=5, width=20).pack(side=tk.TOP, fill=tk.BOTH, padx=10, pady=10)
-        tk.Button(self._menu_window, text="Blabla2", height=5, width=20).pack(side=tk.TOP, fill=tk.BOTH, padx=10, pady=10)
-        tk.Button(self._menu_window, text="Blabla3", height=5, width=20).pack(side=tk.TOP, fill=tk.BOTH, padx=10, pady=10)
-    
+        reset_button = tk.Button(
+            self._menu_window, 
+            text="RESET", 
+            height=5, 
+            width=20,
+            command=lambda: self._callbacks.menu_callback(
+                BoggleGUICallbacks.MENU_EVENT_RESET))
+        hard_button = tk.Button(
+            self._menu_window, 
+            text="HARD DIFFICULTY", 
+            height=5, 
+            width=20,
+            command=lambda: self._callbacks.menu_callback(
+                BoggleGUICallbacks.MENU_EVENT_DIFFICULTY_HARD))
+        normal_button = tk.Button(
+            self._menu_window, 
+            text="NORMAL DIFFICULTY", 
+            height=5, 
+            width=20,
+            command=lambda: self._callbacks.menu_callback(
+                BoggleGUICallbacks.MENU_EVENT_DIFFICULTY_NORMAL))
+        reset_button.pack(side=tk.TOP, fill=tk.BOTH, padx=10, pady=10)
+        normal_button.pack(side=tk.TOP, fill=tk.BOTH, padx=10, pady=10)
+        hard_button.pack(side=tk.TOP, fill=tk.BOTH, padx=10, pady=10)
+
     def destroy_pause_menu(self):
         """
         """
+        if self._menu_window is None:
+            return
+
         self._menu_window.destroy()
+        self._menu_window = None
 
     def start(self):
         """

@@ -28,7 +28,8 @@ class BoggleController(object):
             self._letter_callback,
             self._submit_callback,
             self._timer_callback,
-            self._runstate_callback)
+            self._runstate_callback,
+            self._menu_callback)
         self._gui = BoggleGUI(callbacks)
         self._round_time = round_time_seconds
         self._words_dict = words_dict
@@ -52,6 +53,12 @@ class BoggleController(object):
         self._current_game = BoggleGame(self._current_board, self._words_dict)
         self._gui.reset(self._current_board)
         self._timer = 0
+
+    def _menu_callback(self, menu_event: str) -> None:
+        """
+        """
+        if BoggleGUICallbacks.MENU_EVENT_RESET == menu_event:
+            self._runstate = True
 
     def _letter_callback(self, coordinate: Coordinate):
         """
@@ -109,6 +116,13 @@ class BoggleController(object):
         # Re-enabling all the buttons upon submission,
         #   whether succesful or not
         self._gui.set_letter_buttons_state(True, hide=False)
+    
+    def _set_run_state(self, new_state: bool) -> None:
+        """
+        """
+        self._runstate = new_state
+        self._gui.set_letter_buttons_state(new_state, hide=not new_state, board=self._current_board)
+        self._gui.set_run_state(new_state)
 
     def _runstate_callback(self, resume) -> None:
         """
@@ -123,7 +137,7 @@ class BoggleController(object):
         if not self._runstate:
             self._gui.create_pause_menu()
 
-        self._gui.set_run_state(self._runstate)
+        self._gui.set_run_state(not self._runstate)
 
 filedata = ""
 with open("week11\\assignment\\boggle_dict.txt", "r") as my_file:
