@@ -58,7 +58,8 @@ class BoggleController(object):
         """
         """
         if BoggleGUICallbacks.MENU_EVENT_RESET == menu_event:
-            self._runstate = True
+            self._start_new_round()
+            self._set_run_state(True)
 
     def _letter_callback(self, coordinate: Coordinate):
         """
@@ -122,7 +123,13 @@ class BoggleController(object):
         """
         self._runstate = new_state
         self._gui.set_letter_buttons_state(new_state, hide=not new_state, board=self._current_board)
-        self._gui.set_run_state(new_state)
+        self._gui.set_run_state(not new_state)
+        
+        # The game is running, runstate is True, so destroy the pause menu
+        if self._runstate:
+            self._gui.destroy_pause_menu()
+        else: # The game is paused, create the pause menu
+            self._gui.create_pause_menu()
 
     def _runstate_callback(self, resume) -> None:
         """
@@ -130,14 +137,7 @@ class BoggleController(object):
         if self._current_game is None:
             self._start_new_round()
 
-        self._runstate = not self._runstate
-        self._gui.set_letter_buttons_state(self._runstate, hide=not self._runstate, board=self._current_board)
-        if self._runstate:
-            self._gui.destroy_pause_menu()
-        if not self._runstate:
-            self._gui.create_pause_menu()
-
-        self._gui.set_run_state(not self._runstate)
+        self._set_run_state(not self._runstate)
 
 filedata = ""
 with open("week11\\assignment\\boggle_dict.txt", "r") as my_file:
