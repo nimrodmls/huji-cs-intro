@@ -88,12 +88,19 @@ class BoggleGUI(object):
         if self._menu_window is not None:
             self.destroy_pause_menu()
 
-        self._menu_window = tk.Toplevel(self._primary_window)
+        self._menu_window = tk.Toplevel(
+            self._primary_window, 
+            background=self.BACKGROUND_COLOR_1)
         reset_button = tk.Button(
             self._menu_window, 
             text="RESET", 
             height=5, 
             width=20,
+            bg = self.LETTER_BUTTON_COLOR,
+            fg = self.TEXT_COLOR,
+            font = font.Font(family=self.DEFAULT_FONT, size=12, weight='bold'),
+            borderwidth = 0,
+            highlightthickness = 0,
             command=lambda: self._callbacks.menu_callback(
                 BoggleGUICallbacks.MENU_EVENT_RESET))
         hard_button = tk.Button(
@@ -101,6 +108,11 @@ class BoggleGUI(object):
             text="HARD DIFFICULTY", 
             height=5, 
             width=20,
+            bg = self.LETTER_BUTTON_COLOR,
+            fg = self.TEXT_COLOR,
+            font = font.Font(family=self.DEFAULT_FONT, size=12, weight='bold'),
+            borderwidth = 0,
+            highlightthickness = 0,
             command=lambda: self._callbacks.menu_callback(
                 BoggleGUICallbacks.MENU_EVENT_DIFFICULTY_HARD))
         normal_button = tk.Button(
@@ -108,6 +120,11 @@ class BoggleGUI(object):
             text="NORMAL DIFFICULTY", 
             height=5, 
             width=20,
+            bg = self.LETTER_BUTTON_COLOR,
+            fg = self.TEXT_COLOR,
+            font = font.Font(family=self.DEFAULT_FONT, size=12, weight='bold'),
+            borderwidth = 0,
+            highlightthickness = 0,
             command=lambda: self._callbacks.menu_callback(
                 BoggleGUICallbacks.MENU_EVENT_DIFFICULTY_NORMAL))
         reset_button.pack(side=tk.TOP, fill=tk.BOTH, padx=10, pady=10)
