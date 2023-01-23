@@ -71,6 +71,19 @@ class BoggleGUI(object):
 
         self._words_collection.tag_configure("hint", background=self.COLLECTION_HINT_COLOR)
 
+    def create_pause_menu(self):
+        """
+        """
+        self._menu_window = tk.Toplevel(self._primary_window)
+        tk.Button(self._menu_window, text="Blabla1", height=5, width=20).pack(side=tk.TOP, fill=tk.BOTH, padx=10, pady=10)
+        tk.Button(self._menu_window, text="Blabla2", height=5, width=20).pack(side=tk.TOP, fill=tk.BOTH, padx=10, pady=10)
+        tk.Button(self._menu_window, text="Blabla3", height=5, width=20).pack(side=tk.TOP, fill=tk.BOTH, padx=10, pady=10)
+    
+    def destroy_pause_menu(self):
+        """
+        """
+        self._menu_window.destroy()
+
     def start(self):
         """
         """
@@ -204,9 +217,10 @@ class BoggleGUI(object):
         # Setting the timer label, allowing access from outside
         self._timer_label = tk.Label(
             control_panel, 
-            fg=self.TEXT_COLOR, 
-            bg=self.BACKGROUND_COLOR_1, 
-            font=tk.font.Font(family=self.DEFAULT_FONT, size=20, weight='bold'))
+            fg = self.TEXT_COLOR, 
+            bg = self.BACKGROUND_COLOR_1, 
+            text = "00:00",
+            font = tk.font.Font(family=self.DEFAULT_FONT, size=20, weight='bold'))
         self._timer_label.grid(row=0, column=2, sticky=tk.NSEW)
 
     def _create_current_word_label(self, parent_window: tk.Frame) -> None:

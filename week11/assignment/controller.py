@@ -52,7 +52,6 @@ class BoggleController(object):
         self._current_game = BoggleGame(self._current_board, self._words_dict)
         self._gui.reset(self._current_board)
         self._timer = 0
-        self._runstate = True
 
     def _letter_callback(self, coordinate: Coordinate):
         """
@@ -116,10 +115,15 @@ class BoggleController(object):
         """
         if self._current_game is None:
             self._start_new_round()
-        else:
-            self._runstate = not self._runstate
-            self._gui.set_letter_buttons_state(self._runstate, hide=not self._runstate, board=self._current_board)
-            self._gui.set_run_state(self._runstate)
+
+        self._runstate = not self._runstate
+        self._gui.set_letter_buttons_state(self._runstate, hide=not self._runstate, board=self._current_board)
+        if self._runstate:
+            self._gui.destroy_pause_menu()
+        if not self._runstate:
+            self._gui.create_pause_menu()
+
+        self._gui.set_run_state(self._runstate)
 
 filedata = ""
 with open("week11\\assignment\\boggle_dict.txt", "r") as my_file:
