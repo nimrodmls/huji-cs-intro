@@ -40,6 +40,8 @@ class BoggleController(object):
         self._current_game = None
         self._timer = 0
         self._runstate = False
+        self._difficulty = BoggleGUICallbacks.MENU_EVENT_DIFFICULTY_NORMAL
+        self._score_penalty = 0
 
     def run_game(self) -> None:
         """
@@ -53,13 +55,19 @@ class BoggleController(object):
         self._current_game = BoggleGame(self._current_board, self._words_dict)
         self._gui.reset(self._current_board)
         self._timer = 0
+        self._score_penalty = 0
 
     def _menu_callback(self, menu_event: str) -> None:
         """
         """
+        # Game resetting handling
         if BoggleGUICallbacks.MENU_EVENT_RESET == menu_event:
             self._start_new_round()
             self._set_run_state(True)
+        # Difficulty handling
+        elif (BoggleGUICallbacks.MENU_EVENT_DIFFICULTY_NORMAL == menu_event) or \
+             (BoggleGUICallbacks.MENU_EVENT_DIFFICULTY_HARD == menu_event):
+            self._difficulty = menu_event
 
     def _letter_callback(self, coordinate: Coordinate):
         """
@@ -110,8 +118,13 @@ class BoggleController(object):
 
         if submitted_word is not None:
             self._gui.add_to_collection(submitted_word)
+        elif self._is_hard_difficulty():
+            # The submitted word is either wrong or already submitted,
+            #   we should add penalty if it's hard difficulty
+            self._score_penalty += 5
+            self._timer += 5
 
-        self._gui.set_score(self._current_game.get_score())
+        self._gui.set_score(self._current_game.get_score() - self._score_penalty)
         self._gui.set_current_word("")
 
         # Re-enabling all the buttons upon submission,
@@ -139,9 +152,7 @@ class BoggleController(object):
 
         self._set_run_state(not self._runstate)
 
-filedata = ""
-with open("week11\\assignment\\boggle_dict.txt", "r") as my_file:
-    filedata = my_file.read().split()
-wordsdict = create_words_dict(filedata)
-controller = BoggleController(wordsdict)
-controller.run_game()
+    def _is_hard_difficulty(self):
+        """
+        """
+        return (BoggleGUICallbacks.MENU_EVENT_DIFFICULTY_HARD == self._difficulty)
