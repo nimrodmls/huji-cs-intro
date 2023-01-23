@@ -54,7 +54,7 @@ def _assemble_word(valid_coordinates, word: str, last_coordinate, current_path, 
     letter_instances = np.extract((np.char.startswith(valid_coordinates['letter'], word[0])), valid_coordinates)
     if len(letter_instances) != 0:
         for instance in letter_instances:
-            if not word.startswith(letter_instances['letter'][0]):
+            if not word.startswith(instance['letter']):
                 continue
             
             instance_coord = instance['coordinate']
