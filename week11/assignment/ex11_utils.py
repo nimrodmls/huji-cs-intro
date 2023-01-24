@@ -185,7 +185,8 @@ def _find_valid_paths(path_length: int,
                     #   each letter can be accessed by coordinate or letter.
                     # Constant: We allow max of 100 letters for each coordinate.
                     coordinate_map = np.array(
-                        list(current_comb), dtype=[('coordinate', tuple), ('letter', 'U100')])
+                        list(current_comb), 
+                        dtype=[('coordinate', tuple), ('letter', 'U100')])
                     _assemble_word(coordinate_map, word, None, [], word_paths)
                     # If either of the two conditions are true, 
                     #   add the paths to the rest of valid paths
@@ -283,7 +284,13 @@ def find_length_n_words(n: int, board: Board, words: Iterable[str]) -> List[Path
     """
     # Sorting the given words by length and anagrams
     word_dict = create_words_dict(words)
-    return _find_valid_paths(n, board, word_dict, lambda word, word_paths: len(word) == n)
+    paths = []
+    for current_path_len in range(n + 1):
+        paths += _find_valid_paths(current_path_len, 
+                                   board, 
+                                   word_dict, 
+                                   lambda word, word_paths: len(word) == n)
+    return paths
 
 def max_score_paths_sorted(board: Board, words_dict: WordsDictionary) -> List[Path]:
     """
@@ -311,7 +318,7 @@ def max_score_paths_sorted(board: Board, words_dict: WordsDictionary) -> List[Pa
         #   of the word already via path_condition
         _find_valid_paths(current_path_len, board, words_dict, lambda word, word_paths: path_condition(word, word_paths, words))            
         
-    return words.values()
+    return list(words.values())
 
 def max_score_paths(board: Board, words: Iterable[str]) -> List[Path]:
     """
