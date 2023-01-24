@@ -12,18 +12,27 @@ import datetime
 from typing import Callable, Dict
 import tkinter as tk
 from tkinter import font
-from boggle_board_randomizer import randomize_board
+
 from common import Coordinate
 from ex11_utils import Board
 
+# Called upon letter button pressed - receives one parameter: the coordinate
+#   of the button on the board.
 LetterCallback = Callable[[Coordinate], None]
+# Called upon word submission.
 SubmitCallback = Callable[[], None]
+# Called upon timer event triggering.
 TimerCallback = Callable[[], None]
+# Called upon pressing of the runstate button (pause/resume)
 RunStateCallback = Callable[[], None]
+# Called upon pressing of a button within the menu.
+#   Receives single parameter - the button which was pressed (see constants
+#   in BoggleGUICallbacks)
 MenuCallback = Callable[[str], None]
 
 class BoggleGUICallbacks(object):
     """
+    Callbacks specification and interface for Boggle GUI
     """
 
     MENU_EVENT_RESET = "Reset"
@@ -38,6 +47,8 @@ class BoggleGUICallbacks(object):
         runstate_callback: RunStateCallback,
         menu_callback: MenuCallback) -> None:
         """
+        Initializes all the callbacks.
+        It shouldn't be assumed a callback is not required.
         """
         self.letter_callback = letter_callback
         self.submit_callback = submit_callback
@@ -47,7 +58,10 @@ class BoggleGUICallbacks(object):
 
 class BoggleGUI(object):
     """
+    Responsible for the GUI component of the Boggle Game
     """
+    
+    # Color constants
     BACKGROUND_COLOR_1 = "#03001C"
     BACKGROUND_COLOR_2 = "#301E67"
     COLLECTION_COLOR = "#301E67"
@@ -56,13 +70,19 @@ class BoggleGUI(object):
     DISABLED_LETTER_COLOR = "#4C0027"
     SUBMIT_BUTTON_COLOR = "#150050"
     TEXT_COLOR = "white"
+
+    # Font and text constants
     DEFAULT_FONT = "Agency FB"
-    TIMER_DELAY = 1000 # in ms
     RUNSTATE_RESUME = "▶"
     RUNSTATE_PAUSE = "⏸"
+    
+    # Timer event triggering delay in milliseconds
+    TIMER_DELAY = 50
 
     def __init__(self, callbacks: BoggleGUICallbacks) -> None:
         """
+        Initializes the GUI with the given callbacks.
+        The GUI is not created on the screen until the main loop is started.
         """
         self._callbacks = callbacks
 
@@ -82,15 +102,22 @@ class BoggleGUI(object):
 
     def create_pause_menu(self):
         """
+        Spawns the pause menu on the screen.
+        All user interaction with the menu is controlled by the menu_callback.
         """
         if self._menu_window is not None:
+            # Destroying the active menu, if there is such, before spawning
+            #   new one.
             self.destroy_pause_menu()
-
+        
+        # Creating the subwindow
         self._menu_window = tk.Toplevel(
             self._primary_window, 
             background=self.BACKGROUND_COLOR_1)
         self._menu_window.title("Boggle Menu")
         self._menu_window.resizable(False, False)
+
+        # Reset button
         reset_button = tk.Button(
             self._menu_window, 
             text="RESET", 
@@ -103,6 +130,8 @@ class BoggleGUI(object):
             highlightthickness = 0,
             command=lambda: self._callbacks.menu_callback(
                 BoggleGUICallbacks.MENU_EVENT_RESET))
+        
+        # Hard difficulty button
         hard_button = tk.Button(
             self._menu_window, 
             text="HARD DIFFICULTY", 
@@ -115,6 +144,8 @@ class BoggleGUI(object):
             highlightthickness = 0,
             command=lambda: self._callbacks.menu_callback(
                 BoggleGUICallbacks.MENU_EVENT_DIFFICULTY_HARD))
+            
+        # Normal difficulty button
         normal_button = tk.Button(
             self._menu_window, 
             text="NORMAL DIFFICULTY", 
@@ -127,14 +158,18 @@ class BoggleGUI(object):
             highlightthickness = 0,
             command=lambda: self._callbacks.menu_callback(
                 BoggleGUICallbacks.MENU_EVENT_DIFFICULTY_NORMAL))
+        
+        # Spawning buttons
         reset_button.pack(side=tk.TOP, fill=tk.BOTH, padx=10, pady=10)
         normal_button.pack(side=tk.TOP, fill=tk.BOTH, padx=10, pady=10)
         hard_button.pack(side=tk.TOP, fill=tk.BOTH, padx=10, pady=10)
 
     def destroy_pause_menu(self):
         """
+        Destorying the pause menu, if it is spawned.
         """
         if self._menu_window is None:
+            # It isn't spawned, just ignore the call.
             return
 
         self._menu_window.destroy()
@@ -142,12 +177,16 @@ class BoggleGUI(object):
 
     def start(self):
         """
+        Starting the primary loop of the GUI.
+        From this point on, all interaction of other parts of the program
+        are done via the callbacks given in initialization.
         """
         self._set_timed_event()
         self._primary_window.mainloop()
 
     def reset(self, board: Board) -> None:
         """
+        Resetting the state of the game on the GUI.
         """
         # Resetting buttons
         self.set_letter_buttons_state(True, hide=False, board=board)
@@ -163,28 +202,37 @@ class BoggleGUI(object):
 
     def set_score(self, score: int) -> None:
         """
+        Setting the score visible to the user.
         """
         self._score_label['text'] = str(score)
         
     def set_timer(self, time: datetime.time) -> None:
         """
+        Setting the timer value visible to the user.
         """
         self._timer_label['text'] = time.strftime("%M:%S")
 
     def set_current_word(self, current_word: str, color: str = "white") -> None:
         """
+        Setting the word currently appearing to the user.
         """
         self._current_word_label['text'] = current_word
         self._current_word_label['fg'] = color
 
     def disable_letter_button(self, button_coordinate: Coordinate) -> None:
         """
+        Disabling a SINGLE letter button from being pressed again.
         """
         button: tk.Button = self._letter_buttons[str(button_coordinate)][1]
         button.configure(background=self.DISABLED_LETTER_COLOR, state='disable')
 
     def set_letter_buttons_state(self, enable: bool, hide: bool, board: Board=None) -> None:
         """
+        Setting the state of all the letter buttons.
+
+        :param enable: Enables or disables ALL the letter buttons.
+        :param hide: Hides or reveals the letters on the buttons.
+        :param board: The board from which to extract letter info.
         """
         for button in self._letter_buttons:
             coordinate: Coordinate = self._letter_buttons[button][0]
@@ -197,6 +245,7 @@ class BoggleGUI(object):
     
     def add_to_collection(self, word: str) -> None:
         """
+        Adding a given word to the collection of words.
         """
         # Enabling edit before inserting, disabling it afterwards
         self._words_collection.configure(state="normal")
@@ -205,6 +254,8 @@ class BoggleGUI(object):
 
     def add_collection_hint(self, word: str) -> None:
         """
+        Adding a given word to the collection of words as a hint
+        (painted specially)
         """
         self._words_collection.configure(state="normal")
         self._words_collection.insert(tk.END, word + "\n", "hint")
@@ -212,6 +263,9 @@ class BoggleGUI(object):
 
     def set_run_state(self, resume: bool) -> None:
         """
+        Setting the visible runstate to the user.
+        
+        :param resume: Whether the resume button appears or the pause.
         """
         if resume:
             self._runstate_button.configure(text=self.RUNSTATE_RESUME, fg="green")
@@ -220,6 +274,8 @@ class BoggleGUI(object):
 
     def _set_timed_event(self) -> None:
         """
+        Setting and resetting the timed event for the given timer delay
+        (set in a constant)
         """
         self._callbacks.timer_callback()
         self._primary_window.after(self.TIMER_DELAY, self._set_timed_event)
@@ -230,6 +286,7 @@ class BoggleGUI(object):
 
     def _create_control_panel(self, parent_frame: tk.Frame) -> None:
         """
+        Creating the top control panel (with time, score and pause/resume button)
         """
         control_panel = tk.Frame(parent_frame, bg=self.BACKGROUND_COLOR_1)
         control_panel.pack(side=tk.TOP, fill=tk.BOTH)
@@ -276,14 +333,18 @@ class BoggleGUI(object):
 
     def _create_current_word_label(self, parent_window: tk.Frame) -> None:
         """
+        Creating the current word label, which displays the current word
+        to the user.
         """
-        label_frame = tk.Frame(self._primary_window, bg=self.BACKGROUND_COLOR_1)
+        label_frame = tk.Frame(parent_window, bg=self.BACKGROUND_COLOR_1)
         label_frame.pack(side=tk.TOP, fill=tk.BOTH)
         self._current_word_label = tk.Label(label_frame, fg="white", bg=self.BACKGROUND_COLOR_1, font=font.Font(family=self.DEFAULT_FONT, size=25, weight='bold'))
         self._current_word_label.pack(side=tk.TOP, fill=tk.BOTH)
 
     def _create_lower_pane(self, parent_window: tk.Frame) -> None:
         """
+        Creating the lower pane, which houses the letter button table,
+        submit button and words collection.
         """
         # Initializing the lower pane to have 2 columns,
         #   one for the letter buttons table, the other for the word collection
@@ -325,6 +386,7 @@ class BoggleGUI(object):
 
     def _create_word_collection(self, parent_window: tk.Frame) -> None:
         """
+        Creating the words collection display to the side of the letter table.
         """
         # Setting the label for the collection, it is constant so we don't
         #   have any use for it later
@@ -362,6 +424,7 @@ class BoggleGUI(object):
 
     def _create_letter_table(self, parent_frame: tk.Frame, dimension: int) -> None:
         """
+        Creating the letter table.
         """
         # We rely on the fact that the board is squared 
         #   (hence the dimension is X by X)
@@ -376,6 +439,7 @@ class BoggleGUI(object):
     
     def _create_letter_button(self, parent: tk.Frame, row: int, column: int) -> None:
         """
+        Creating a single button for the letter table, in the given coordinates.
         """
         button_coordinate = Coordinate(row, column)
         button = tk.Button(
