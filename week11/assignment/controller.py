@@ -156,13 +156,14 @@ class BoggleController(object):
         else: # The game is paused, create the pause menu
             self._gui.create_pause_menu()
 
-    def _runstate_callback(self, resume) -> None:
+    def _runstate_callback(self) -> None:
         """
         """
         if self._current_game is None:
             self._start_new_round()
-
-        self._set_run_state(not self._runstate)
+            self._set_run_state(True)
+        else:
+            self._set_run_state(not self._runstate)
 
     def _is_hard_difficulty(self):
         """

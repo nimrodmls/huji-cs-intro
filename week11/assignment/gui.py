@@ -19,9 +19,7 @@ from ex11_utils import Board
 LetterCallback = Callable[[Coordinate], None]
 SubmitCallback = Callable[[], None]
 TimerCallback = Callable[[], None]
-# Called with the Run State is changed (the middle button in the control panel)
-#   the boolean passed as parameter indicates the CURRENT state
-RunStateCallback = Callable[[bool], None]
+RunStateCallback = Callable[[], None]
 MenuCallback = Callable[[str], None]
 
 class BoggleGUICallbacks(object):
@@ -254,12 +252,6 @@ class BoggleGUI(object):
         self._score_label["text"] = "0"
         self._score_label.grid(row=0, column=0, sticky=tk.NSEW)
 
-        def runstate_wrapper():
-            """
-            """
-            resume = self._runstate_button['text'] == self.RUNSTATE_RESUME
-            self._callbacks.runstate_callback(resume)
-
         # Setting the pause/resume button
         self._runstate_button = tk.Button(
             control_panel, 
@@ -270,7 +262,7 @@ class BoggleGUI(object):
                 family=self.DEFAULT_FONT, size=30, weight='bold'), 
             borderwidth = 0, 
             highlightthickness = 0, 
-            command=lambda: runstate_wrapper())
+            command=lambda: self._callbacks.runstate_callback())
         self._runstate_button.grid(row=0, column=1, sticky=tk.NSEW, padx=10, pady=10)
 
         # Setting the timer label, allowing access from outside
