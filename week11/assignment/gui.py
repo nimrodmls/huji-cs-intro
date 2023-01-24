@@ -60,7 +60,7 @@ class BoggleGUI(object):
     """
     Responsible for the GUI component of the Boggle Game
     """
-    
+
     # Color constants
     BACKGROUND_COLOR_1 = "#03001C"
     BACKGROUND_COLOR_2 = "#301E67"
@@ -77,7 +77,7 @@ class BoggleGUI(object):
     RUNSTATE_PAUSE = "⏸"
     
     # Timer event triggering delay in milliseconds
-    TIMER_DELAY = 50
+    TIMER_DELAY = 1000
 
     def __init__(self, callbacks: BoggleGUICallbacks) -> None:
         """

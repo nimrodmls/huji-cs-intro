@@ -10,7 +10,7 @@
 
 import datetime
 from typing import List
-from ex11_utils import create_words_dict, max_score_paths_sorted
+
 from boggle_board_randomizer import randomize_board
 from gui import BoggleGUI, BoggleGUICallbacks
 from boggle_game import BoggleGame
@@ -19,10 +19,14 @@ from ex11_utils import WordsDictionary
 
 class BoggleController(object):
     """
+    Interfacing between the GUI and the Boggle Game
     """
 
     def __init__(self, words_dict: WordsDictionary, round_time_seconds=180) -> None:
         """
+        Initializing the controller.
+        Each round of Boggle will be with the given words dictionary, with
+        the board being generated randomly.
         """
         callbacks = BoggleGUICallbacks(
             self._letter_callback,
@@ -46,11 +50,13 @@ class BoggleController(object):
 
     def run_game(self) -> None:
         """
+        Starting the operation of the game
         """
         self._gui.start()
 
     def _start_new_round(self) -> None:
         """
+        Starting a new game round, without closing the GUI
         """
         self._current_board = randomize_board()
         self._current_game = BoggleGame(self._current_board, self._words_dict)
@@ -61,6 +67,9 @@ class BoggleController(object):
 
     def _menu_callback(self, menu_event: str) -> None:
         """
+        Called upon clicking of a button on the GUI's Pause Menu.
+        
+        :param menu_event: The event which risen the callback.
         """
         # Game resetting handling
         if BoggleGUICallbacks.MENU_EVENT_RESET == menu_event:
@@ -73,6 +82,8 @@ class BoggleController(object):
 
     def _letter_callback(self, coordinate: Coordinate):
         """
+        Called upon clicking of a letter button.
+        Attempting to move the game object to the selected coordinate
         """
         if self._current_game is None:
             return
@@ -85,12 +96,17 @@ class BoggleController(object):
     
     def _timer_callback(self):
         """
+        Called upon timed event of the GUI.
+        Used for handling the round timer.
         """
+        # Making sure we have a game running
         if (self._current_game is None) or (not self._runstate):
             return
 
+        # Calculating the remaining time
         time_left = self._round_time - self._timer
             
+        # If no remaining time is left, end the round
         if 0 >= time_left:
             self._gui.set_timer(datetime.time())
             self._gui.set_letter_buttons_state(False, hide=False)
@@ -99,6 +115,7 @@ class BoggleController(object):
             self._current_board = None
             self._current_game = None
         else:
+            # Otherwise update the clock
             self._gui.set_timer(
                 datetime.time(minute=time_left // 60, second=time_left % 60))
         
@@ -106,12 +123,18 @@ class BoggleController(object):
 
     def _add_final_hints(self, hints: List[str]) -> None:
         """
+        When the game finishes, we add all the possible words which
+        can be assembled from the current board to the collection.
+        Those are marked in a unique way to those found.
         """
         for hint in hints:
             self._gui.add_collection_hint(hint)
 
     def _submit_callback(self):
         """
+        Called upon pressing the submit button on the GUI.
+        This callback submits the word to the game and updates the score
+        and collection accordingly.
         """
         if self._current_game is None:
             return
@@ -145,6 +168,9 @@ class BoggleController(object):
     
     def _set_run_state(self, new_state: bool) -> None:
         """
+        Setting the running state of the game to paused or resumed.
+        When the game is paused, a menu appears, when resumed the menu will
+        be destroyed.
         """
         self._runstate = new_state
         self._gui.set_letter_buttons_state(new_state, hide=not new_state, board=self._current_board)
@@ -158,6 +184,8 @@ class BoggleController(object):
 
     def _runstate_callback(self) -> None:
         """
+        Called upon pressing of the running state button, and
+        moving the game to resumed or paused state.
         """
         if self._current_game is None:
             self._start_new_round()
@@ -167,6 +195,7 @@ class BoggleController(object):
 
     def _is_hard_difficulty(self):
         """
+        Checking if the current difficulty level set is hard.
         """
         return (BoggleGUICallbacks.MENU_EVENT_DIFFICULTY_HARD == self._difficulty)
         

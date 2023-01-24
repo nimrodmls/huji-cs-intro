@@ -16,10 +16,13 @@ BoardPath = List[Coordinate]
 
 class BoggleGame(object):
     """
+    Represents a single game of Boggle.
     """
 
     def __init__(self, board: Board, words: WordsDictionary) -> None:
         """
+        Initializes a game with the given board and words dictionary
+        representing all the valid words for assembly.
         """
         self._board: Board = board
         self._words_dict: WordsDictionary = words
@@ -29,6 +32,9 @@ class BoggleGame(object):
 
     def move(self, coordinate: Coordinate) -> bool:
         """
+        Moving to the specified coordinate.
+        Movement is legal only if the last coordinate moved to is in the
+        neighborhood of the new coordinate (it's in distance of 1 at most)
         """
         last_coordinate = self._current_path[-1] if 0 != len(self._current_path) else None
 
@@ -42,8 +48,12 @@ class BoggleGame(object):
 
     def submit_path(self) -> Optional[str]:
         """
+        Attempting to submit the path as a word
+        If the word doesn't exist in the dictionary, None is returned.
         """
-        found_word = is_valid_path_sorted(self._board, self._current_path, self._words_dict)
+        found_word = is_valid_path_sorted(self._board, 
+                                          self._current_path, 
+                                          self._words_dict)
 
         # If it word wasn't found and it exists in the dictionary, count it,
         #   otherwise just ignore it and reset the current path
@@ -61,16 +71,19 @@ class BoggleGame(object):
 
     def get_score(self) -> int:
         """
+        Returning the current score.
         """
         return self._score
 
     def get_current_word(self) -> str:
         """
+        Returning the current word created by the path.
         """
         return self._path_to_word(self._current_path)
 
     def get_hints(self) -> List[str]:
         """
+        Returning all the words which can be assembled with the given board.
         """
         hints = []
         for path in max_score_paths_sorted(self._board, self._words_dict):
@@ -82,6 +95,7 @@ class BoggleGame(object):
     @staticmethod
     def _path_from_legacy_path(legacy_path: Path) -> BoardPath:
         """
+        Converting a path of legacy coordinates to path of Coordinate objects.
         """
         new_path = []
         for coordinate in legacy_path:
@@ -90,6 +104,7 @@ class BoggleGame(object):
 
     def _path_to_word(self, path: BoardPath) -> str:
         """
+        Converting a path to its relevant word.
         """
         word = ""
         for coordinate in path:
