@@ -15,6 +15,10 @@ from controller import BoggleController
 
 def start_game(word_dict_path: str) -> None:
     """
+    Starting the game, with GUI.
+
+    :param word_dict_path: Path on filesystem for the
+        words dictionary to work by (e.g. acceptable words)
     """
     # Reading the file and removing all whitespaces etc.
     filedata = ""

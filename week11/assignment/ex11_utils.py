@@ -9,10 +9,50 @@
 # NOTES: N/A
 #################################################################
 
+#################################################################
+# > Search Algorithm:
+#   The logic behind the search for valid words, paths and the
+#   maximal score paths is based on the same implementation.
+#   This implementation is separated to 3 different components:
+#       1) Sorting and structuring
+#       2) Anagram-path combination iteration
+#       3) Word assembly from path combinations
+# 1) Sorting and structuring
+#   This component, primarily implemented in create_words_dict
+#   is taking a not-necessarily sorted list of words and sorts
+#   it in a unique way for the search to work efficiently later.
+#   The output of this component is a dictionary, with length
+#   (int) as a key and another dictionary as value - The length
+#   is the length of the words stored within the value
+#   dictionary. The value dictionary has anagram as keys and
+#   the words (a set) which can be created by 
+#   anagram as value. Anagram is the letters which comprise a
+#   particular word, sorted alphabetically. For instance,
+#   the words 'cat' and 'act' have the same anagram - 'act'.
+# 2) Anagram-path combination iteration
+#   Now that we have this new structure from (1), we now
+#   assemble path combinations on a given board, that is
+#   when requested a path of particular length, we create all
+#   the possible combinations of paths (whether legal or not)
+#   on the board, with combinations being distinct, with no
+#   repititions and unordered. This allows us to assemble
+#   anagrams from each path, and if this anagram exists in the
+#   dictionary from (1) we move on to the next step.
+# 3) Word assembly from path combinations
+#   In this stage we take all the words associated with the
+#   anagram of the current path, and try to assemble them
+#   with the letters of the current path. In this stage we
+#   deny any paths which are illegal.
+#   This stage imitates assembling words from permutations
+#   (which are distinct, ordered, with no reptitions) but
+#   it's more efficient since we try the words which appear in
+#   the dictionary, and not the words which don't.
+#################################################################
+
 import numpy as np
 import copy
 import itertools
-from typing import List, Tuple, Iterable, Optional, Dict, Callable
+from typing import List, Tuple, Iterable, Optional, Dict, Callable, Set
 
 from common import LegacyCoordinate, Coordinate
 
@@ -23,7 +63,7 @@ Path = List[Tuple[int, int]]
 #   with the anagrams themselves being anagram-to-words
 #   mapping, with words being all the words built from the
 #   anagram
-WordsDictionary = Dict[int, Dict[str, List]]
+WordsDictionary = Dict[int, Dict[str, Set]]
 # Condition callback for _find_valid_paths, receives the relevant word (str)
 #   and the paths associated with it (List[Path]). Callback should return
 #   boolean specifying whether the word is valid.
@@ -35,6 +75,8 @@ COORDINATE_COLUMN_INDEX = 1
 
 def create_words_dict(words: Iterable[str]) -> WordsDictionary:
     """
+    Creates a sorted words dictionary according to the specification
+    further documented in the top of the file.
     """
     sorted_dict = {}
     for word in words:
@@ -51,6 +93,7 @@ def create_words_dict(words: Iterable[str]) -> WordsDictionary:
 
 def is_in_neighborhood(coordinate1: Coordinate, coordinate2: Coordinate) -> bool:
     """
+    Returns whether the given coordinates are in the neighborhood of one another.
     """
     row_difference = abs(coordinate1.row - coordinate2.row)
     column_difference = abs(coordinate1.column - coordinate2.column)
@@ -58,13 +101,25 @@ def is_in_neighborhood(coordinate1: Coordinate, coordinate2: Coordinate) -> bool
 
 def _is_in_neighborhood_legacy(coordinate1: LegacyCoordinate, coordinate2: LegacyCoordinate) -> bool:
     """
-    Returns whether the given coordinates are in the neighborhood of one another
+    Returns whether the given coordinates are in the neighborhood of one another.
     """
     return is_in_neighborhood(Coordinate.from_legacy_coordinate(coordinate1),
                               Coordinate.from_legacy_coordinate(coordinate2))
 
-def _assemble_word(valid_coordinates, word: str, last_coordinate, current_path, all_paths):
+def _assemble_word(valid_coordinates: np.array, 
+                   word: str, 
+                   last_coordinate: LegacyCoordinate, 
+                   current_path: Path, 
+                   all_paths: List[Path]) -> None:
     """
+    Attempting to assemble the given word from the given coordinates.
+    Each coordinate stores the actual X-Y coordinates and the letter
+    associated with it.
+
+    :param last_coordinate: Should be None when first called.
+    :param current_path: Should be empty list when first called.
+    :param all_paths: Upon completion, all paths will be stored in this
+                      list, so it should be a persistent list.
     """
     if len(word) == 0:
         all_paths.append(copy.deepcopy(current_path))
@@ -94,8 +149,16 @@ def _assemble_word(valid_coordinates, word: str, last_coordinate, current_path, 
 def _find_valid_paths(path_length: int, 
                       board: Board, 
                       word_dict: WordsDictionary, 
-                      condition_callback: ConditionCallback = None) -> List[Path]:
+                      condition_callback: Optional[ConditionCallback] = None) -> List[Path]:
     """
+    Finding all the valid paths of path_length on the given board.
+    This is a helper function.
+
+    :param condition_callback: Optionally control over which words and paths
+                               are allowed into the final result.
+                               If not given, all legal words and paths are
+                               inserted. Specification for the callback is
+                               documented at ConditionCallback.
     """
     # Laying down all the coordinates of the board with their 
     #   respective value as a dictionary for better traversal
@@ -142,6 +205,11 @@ def _find_valid_paths(path_length: int,
 
 def is_valid_path_sorted(board: Board, path: List[Coordinate], words: WordsDictionary) -> Optional[str]:
     """
+    Validating a given path.
+    A path is invalid if:
+        1) Any of the cells are not neighboring
+        2) The word created by the path doesn't appear in the dictionary
+    The order of the 'path' argument is essential.
     """
     last_coordinate = None
     current_word = ""
@@ -175,6 +243,13 @@ def is_valid_path_sorted(board: Board, path: List[Coordinate], words: WordsDicti
 
 def is_valid_path(board: Board, path: Path, words: Iterable[str]) -> Optional[str]:
     """
+    Validating a given path.
+    A path is invalid if:
+        1) Any of the cells are not neighboring
+        2) The word created by the path doesn't appear in the dictionary
+    The order of the 'path' argument is essential.
+    Unlike is_valid_path_sorted, this function receives a non-sorted
+    dictionary 'words'.
     """
     words_dict = create_words_dict(words)
     new_path = []
@@ -184,6 +259,13 @@ def is_valid_path(board: Board, path: Path, words: Iterable[str]) -> Optional[st
 
 def find_length_n_paths(n: int, board: Board, words: Iterable[str]) -> List[Path]:
     """
+    Finding all the possible paths of length n on 
+    a given board for the given words.
+    Paths do not repeat, while words can repeat (different paths to same word)
+    Documentation for searching algorithm appears in the top of the file.
+
+    :param n: The exact length of the path. 
+              Words CAN be longer, depending on the board.
     """
     # Sorting the given words by length and anagrams
     word_dict = create_words_dict(words)
@@ -191,6 +273,13 @@ def find_length_n_paths(n: int, board: Board, words: Iterable[str]) -> List[Path
 
 def find_length_n_words(n: int, board: Board, words: Iterable[str]) -> List[Path]:
     """
+    Finding all the possible paths which point to words to words of length n
+    on a given board for the given words.
+    The length of the paths is not constant, and can differ.
+    Paths do not repeat, while words can repeat (different paths to same word)
+
+    :param n: The exact length of the word.
+              Paths can be longer, or shorter, depending on the board.
     """
     # Sorting the given words by length and anagrams
     word_dict = create_words_dict(words)
@@ -198,6 +287,12 @@ def find_length_n_words(n: int, board: Board, words: Iterable[str]) -> List[Path
 
 def max_score_paths_sorted(board: Board, words_dict: WordsDictionary) -> List[Path]:
     """
+    Finding all the paths on the board which lead to a maximal score,
+    with the score depending on the length of each path, granting
+    greater score for greater paths.
+    Paths and words can appear only once.
+    There is no control over the length of the paths or the words.
+    This function receives a sorted dictionary of words.
     """
     words = {}
 
@@ -220,6 +315,13 @@ def max_score_paths_sorted(board: Board, words_dict: WordsDictionary) -> List[Pa
 
 def max_score_paths(board: Board, words: Iterable[str]) -> List[Path]:
     """
+    Finding all the paths on the board which lead to a maximal score,
+    with the score depending on the length of each path, granting
+    greater score for greater paths.
+    Paths and words can appear only once.
+    There is no control over the length of the paths or the words.
+    This function differs from max_score_paths_sorted by receiving
+    a non-sorted words dictonary.
     """
     word_dict = create_words_dict(words)
     return max_score_paths_sorted(board, word_dict)
