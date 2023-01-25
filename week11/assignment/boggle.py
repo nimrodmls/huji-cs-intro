@@ -34,3 +34,5 @@ if __name__ == "__main__":
     # Expecting a single command-line argument - Path to the words dict
     if 2 == len(sys.argv):
         start_game(sys.argv[1])
+    else:
+        start_game("boggle_dict.txt")
